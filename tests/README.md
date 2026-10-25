@@ -165,18 +165,26 @@ before `--all` or anything live.
 | `unslop-zh-not-chinese` | An English README about Chinese-language data takes `unslop`, not `lab-unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
 | `unslop-chinese-kimi-original` | A Chinese request produces an original Chinese final text without an English draft or process notes |
 | `unslop-chinese-kimi-source` | An English request composes Chinese from source facts without adding facts or exposing process notes |
-| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate |
+| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate; a future mixed-document caveat may still name that candidate |
 | `unslop-chinese-kimi-translate` | Strict technical translation preserves facts and established terms while repairing a specific English-shaped construction |
 | `unslop-chinese-kimi-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
+| `unslop-chinese-kimi-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
+| `unslop-chinese-kimi-polish-keep` | Already-natural Traditional Chinese stays on one exact line without rewriting, script conversion or process notes |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 
-Assertions are loose key-phrase greps, because evals are non-deterministic. Most
-cases carry a second, negative assertion — the thing the answer must *not* say —
-and a case can carry a second positive one, ALSO, for a thing on another line.
-`tests/lint.sh` tests those regexes for free against the synthetic transcripts in
-`fixtures/eval/`, reading them from `eval.sh --dump` so it checks the assertions
-that actually run. Some cases still have no fixtures; lint names them each run.
+Assertions are key-phrase greps, with exact anchored matches where a case requires
+byte preservation. Most cases carry a second, negative assertion — the thing the
+answer must *not* say — and a case can carry a second positive one, ALSO, for a
+thing on another line. `tests/lint.sh` tests those regexes for free against the
+synthetic transcripts in `fixtures/eval/`, reading them from `eval.sh --dump` so it
+checks the assertions that actually run. Some cases still have no fixtures; lint
+names them each run.
+
+The polish cases reject an unchanged faulty line, a rewritten natural line and
+changes to protected meaning. Keyword and exact-match assertions do not prove
+naturalness, so transcript review and the frozen with-skill and without-skill
+comparison remain separate acceptance steps.
 
 A failure means "read the transcript in the temp directory", not necessarily "the
 skill is broken".
