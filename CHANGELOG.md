@@ -5,6 +5,24 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.15 — 2026-10-25
+
+The Kimi Chinese candidate now polishes Chinese with fewer unnecessary edits.
+
+### Added
+
+- **Low-edit Chinese polishing in `lab-unslop-chinese-kimi`.** It changes only actual
+  faults inside the authorized scope and returns already-natural text unchanged. It
+  preserves the author's voice, facts, judgments, actors, conditions, scope, negation,
+  modality, degree, quotations and terms. Simplified and Traditional Chinese, regional
+  wording and register follow the source and project. Examples cover technical, chat,
+  marketing and literary contexts without banning sentence forms.
+- **Two polishing eval cases** cover a fault that needs a safe repair and natural
+  Traditional Chinese that needs no change. Synthetic passing and failing transcripts
+  reject unchanged faulty text, rewritten natural text, changed protected meaning and
+  leaked review notes. Transcript review and a frozen manual comparison check Chinese
+  quality separately from keyword assertions.
+
 ## 2026.10.14 — 2026-10-25
 
 The Kimi Chinese candidate now handles strict technical translation and mixed documents.
