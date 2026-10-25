@@ -1,0 +1,1 @@
+Scan the barcode, compare it with the request form, and contact the submitter about any mismatch.

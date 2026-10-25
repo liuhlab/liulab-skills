@@ -163,6 +163,9 @@ before `--all` or anything live.
 | `hq-pause-merge` | Under `/hq-mode`, "close the issue" never merges a pull request nobody reviewed, and never closes the issue while its fix is unmerged |
 | `unslop-zh-rewrite` | An English passage asked for in Chinese comes back written, not translated: none of the markers a literal rendering would leave |
 | `unslop-zh-not-chinese` | An English README about Chinese-language data takes `unslop`, not `lab-unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
+| `unslop-chinese-kimi-original` | A Chinese request produces an original Chinese final text without an English draft or process notes |
+| `unslop-chinese-kimi-source` | An English request composes Chinese from source facts without adding facts or exposing process notes |
+| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 
