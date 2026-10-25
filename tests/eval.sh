@@ -25,6 +25,7 @@
 #                   prototype-language|diagnosing-bugs-slow-loop|
 #                   hq-pause-sbatch|hq-pause-merge|unslop-chinese-kimi-original|
 #                   unslop-chinese-kimi-source|unslop-chinese-kimi-not-chinese|
+#                   unslop-chinese-kimi-translate|unslop-chinese-kimi-mixed|
 #                   unslop-zh-rewrite|unslop-zh-not-chinese|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
@@ -41,7 +42,7 @@ set -u
 # tokens from the wrong directory is worse than one that never starts.
 cd "$(dirname "$0")/.." || exit 1
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-chinese-kimi-original unslop-chinese-kimi-source unslop-chinese-kimi-not-chinese unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-chinese-kimi-original unslop-chinese-kimi-source unslop-chinese-kimi-not-chinese unslop-chinese-kimi-translate unslop-chinese-kimi-mixed unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -380,13 +381,30 @@ launch_eval unslop-chinese-kimi-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-
   "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
   --permission-mode plan
 
-# 20. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
+# 20. Strict technical translation: preserve facts and terms without carrying over
+#     English syntax. The DENY entries name only this scenario's bad renderings.
+DENY='电路断裂器|配置被验证[^。]{0,30}熔断器被启用|完全(避免|消除)[^。]{0,12}(过期|陈旧|旧数据)'
+ALSO='200[[:space:]]*(ms|毫秒)'
+launch_eval unslop-chinese-kimi-translate '幂等' \
+  "Translate this technical documentation into natural Simplified Chinese. This is strict translation, not source-based writing: preserve every detail, condition, degree qualifier, document structure and technical term. Split or merge sentences and reorder information only where Chinese needs it, without changing the logic. Do not add, omit, summarize or explain. Reply with only the translation and change no files. Source: 'The configuration is validated before the circuit breaker is enabled. After three consecutive failures, the client waits 200 ms before retrying a read. It never automatically retries a write because the operation may not be idempotent. This safeguard can reduce duplicate requests, but it does not eliminate stale reads.'"
+
+# 21. Mixed content: repair only the authorized Chinese sentence. Exact strings
+#     carry the protected-content check; DENY names only the source's calques.
+DENY='关于重试行为|对读取请求进行重试'
+ALSO="Keep the existing order\. QUOTE: 'do not downgrade'"
+launch_eval unslop-chinese-kimi-mixed "API_TOKEN=<token> \./bin/client --config config/prod\.yaml --url 'https://example\.test/v2/items\?id=\{id\}' --client-version v2\.4\.0" \
+  "Polish only the Chinese words after EDIT for natural technical Chinese. Keep every other character and the document structure unchanged, including all English, the command, path, URL, version, placeholders and quotes. Within EDIT, change only the Chinese wording and keep v2.4.0 and 3 unchanged. Do not add spaces between Chinese and English or convert simplified and traditional characters. Return only the complete document and change no files. Document:
+EDIT: 关于重试行为，v2.4.0的客户端在3次失败之后对读取请求进行重试，但是写入不会被自动重试。
+RUN: API_TOKEN=<token> ./bin/client --config config/prod.yaml --url 'https://example.test/v2/items?id={id}' --client-version v2.4.0
+NOTE: Keep the existing order. QUOTE: 'do not downgrade'"
+
+# 22. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
 if $LIVE; then
   launch_eval live-sbatch '[0-9]{5,}' \
     "Using the lab-hpc skill: ssh to the arc cluster and submit a minimal smoke-test Slurm job (payload just 'hostname', 5-minute time limit) to a no-cost partition suitable for smoke tests. You have my explicit approval to submit this job — no need to ask again. Report the job id and its state, then ensure nothing is left behind: scancel it if it is still pending or running. Do not touch any other jobs." \
     --allowedTools "Bash(ssh:*)"
 
-  # 21. Live Edison: one real standard literature call, one credit, and the answer
+  # 23. Live Edison: one real standard literature call, one credit, and the answer
   #     has to come back cited. The assertion looks for citation furniture the
   #     platform emits and the prompt does not contain — page spans, a DOI, an
   #     "et al", a reference list — so a confident summary with no sources fails.
