@@ -5,9 +5,13 @@ search:
 
 # Chinese length caps are counted in lint, not in vale
 
-A Chinese agent-facing file is capped in CJK codepoints by a check in `tests/lint.sh`: 1000
-for a `SKILL.md`, 2000 for a page under `references/`. A file counts as Chinese when its CJK
-codepoints outnumber its ASCII letters. `.vale.ini` and `styles/Lab/` are untouched, and
+Two file classes are capped in CJK codepoints by a check in `tests/lint.sh`: a `SKILL.md`
+body at 1000, a page under `skills/*/references/` at 2000. A file counts as Chinese when its
+CJK codepoints outnumber its ASCII letters, and a `SKILL.md`'s frontmatter is left out of the
+count because a description has its own 1536-character budget. Every other agent-facing class
+(`docs/agents/`, `skills/*/playbooks/`, `*.lab.md`, `.claude/commands/`, `docs/adr/`) has no
+Chinese cap: vale's word caps are what govern them, and those never fire on Chinese. Add a
+glob here when the first Chinese page lands in one of them. `.vale.ini` and `styles/Lab/` are untouched, and
 `[tool.liulab.agent-docs]` keeps its existing section pairing, so conformance rule 3 still
 holds.
 
@@ -34,7 +38,8 @@ same broken units. So the choice was a second counter or a cap that silently doe
 - The Chinese check reads every `SKILL.md` and reference page on each run. It is standard
   library and runs in well under a second, so the gate's cost does not change.
 
-## What this does not reverse
+## What this reverses
 
-The word caps in `docs/agents/writing.md` stand for every English file, and still apply to a
-Chinese one, where they never fire. ADR 0002's split between facts and recipes is untouched.
+Nothing. The word caps in `docs/agents/writing.md` stand for every English file, and still
+apply to a Chinese one, where they never fire. ADR 0002's split between facts and recipes is
+untouched.

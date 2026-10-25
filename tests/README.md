@@ -85,7 +85,9 @@ lab file that exists, each description fits the
 per-skill listing limit, and a tagged version still names the tree it was tagged
 on. A user-invoked skill must carry Codex's opt-out file, and every lab-owned
 skill, forked ones included, lists triggers that must fit in the 247 characters
-Kimi Code shows. For `hq-mode`, the playbook index and the playbook pages must
+Kimi Code shows. A Chinese skill body or reference page is capped in CJK
+codepoints here rather than by vale, which cannot count Chinese
+(`docs/adr/0015-chinese-caps-are-counted-in-lint.md`). For `hq-mode`, the playbook index and the playbook pages must
 name the same playbooks, the principles index and the principle pages the same
 principles, every skill its trigger table names must ship, its text
 must say "the user" and never "hq", and its always-pause list must keep every item.

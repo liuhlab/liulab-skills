@@ -46,6 +46,13 @@ Current skills:
   and "going to bed", keeps it from submitting Slurm work, spending Edison
   credits or merging an unreviewed pull request without your yes.
 
+- **`lab-unslop-zh`** — the last pass over Chinese writing. An agent asked for
+  Chinese tends to translate word by word and keep the English shape; this makes
+  it read the passage, work out the meaning, and write it as a Chinese writer
+  would. It carries a list of things it must *not* change, so your long
+  sentences, your way of addressing the reader and your facts all survive the
+  edit. It loads only when what you are making is Chinese.
+
 Skills taken from other projects keep their own names. These come from
 [mattpocock/skills](https://github.com/mattpocock/skills). Most are
 unchanged. A few carry a lab edit, which only adds what science work needs,

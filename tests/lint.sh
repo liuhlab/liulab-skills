@@ -1164,15 +1164,10 @@ mode_run user skills/hq-mode
 mode_run pause skills/hq-mode/references/working-style.md
 
 echo "== Chinese length caps =="
-# vale's `words` counter cannot measure Chinese and cannot be made to. It treats a run of
-# characters between two full-width commas as one word, so, measured on this repo's own
-# configuration: 420 Chinese characters count as 40 words, 1260 as 120, 4200 as 400. A Chinese
-# SKILL.md would therefore pass the 600-word cap at roughly 6000 characters, about ten times
-# the English budget, and the ratio moves with punctuation density rather than with length.
-#
-# So the Chinese caps are counted here, in CJK codepoints, and `.vale.ini` is left exactly as
-# it was: its English caps still apply to every file and simply never fire on a Chinese one.
-# See docs/adr/0015-chinese-caps-are-counted-in-lint.md.
+# vale's `words` counter cannot measure Chinese, so the Chinese caps are counted here, in CJK
+# codepoints, and `.vale.ini` is left exactly as it was. The measurement behind that, and the
+# cost of a second counter, are in docs/adr/0015-chinese-caps-are-counted-in-lint.md. Do not
+# restate them here.
 #
 # A file counts as Chinese when its CJK codepoints outnumber its ASCII letters, so a page that
 # merely quotes a Chinese term keeps the English cap and is not touched here.
@@ -1191,6 +1186,10 @@ LATIN = re.compile(r"[A-Za-z]")
 for pattern, cap in CAPS:
     for p in sorted(root.glob(pattern)):
         text = p.read_text(encoding="utf-8")
+        # The body only. A description is capped at 1536 characters by the skills section
+        # above, so counting the frontmatter here would spend one budget twice.
+        if text.startswith("---"):
+            text = text.split("\n---", 1)[-1]
         n, latin = len(CJK.findall(text)), len(LATIN.findall(text))
         if n <= latin:
             continue
@@ -1203,7 +1202,7 @@ EOF
 }
 zh=$(mktemp -d "${TMPDIR:-/tmp}/lab-zh-fixtures.XXXXXX")
 trap 'rm -rf "$zh"' EXIT
-fx_zh() { # <case> <path-under-skill> <hanzi> <latin-words>
+fx_zh() { # <case> <path-under-skill> <hanzi-in-body> <latin-words>; title adds 2 more
   mkdir -p "$(dirname "$zh/$1/lab-fixture/$2")"
   python3 -c 'import sys; p,h,w=sys.argv[1],int(sys.argv[2]),int(sys.argv[3]);
 open(p,"w",encoding="utf-8").write("# 标题\n\n"+"常态"*(h//2)+"\n\n"+"word "*w)' \

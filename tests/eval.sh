@@ -336,10 +336,17 @@ launch_eval hq-pause-merge "land it|always-pause|merg[^.]{0,80}${HQ_YES}|${HQ_YE
 #     Chinese; the DENY is the real discriminator, and it holds the markers a sentence-by-
 #     sentence rendering of THIS passage produces: the 当…时 opener, 进行/作出 + noun, the
 #     topic shell 对于…来说, 这意味着 and …之一. The source sentences are built to invite
-#     exactly those, so a literal translation trips at least one. None of the asserted
-#     Chinese appears in the prompt, which is English throughout, so the agent wrote it.
-#     The negation filter drops English lines holding "not"; the Chinese output has none.
-DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|这意味着|原因之一|之一的"
+#     exactly those, so a literal translation trips at least one, the 的-chain included:
+#     three 的 inside one clause with no punctuation between them, as in 用户的输入的验证的
+#     结果. None of the asserted Chinese appears in the prompt, which is English throughout,
+#     so the agent wrote it. The negation filter drops English lines holding "not"; the
+#     Chinese output has none.
+#
+#     The expect does NOT require the 中文（English）gloss form that issue #131 asked for.
+#     Forcing it would mean either a prompt that names the gloss (the prompt would then be
+#     producing the assertion) or failing a correct answer whose terms all have settled
+#     Chinese names and need no gloss. The DENY carries the discrimination instead.
+DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|这意味着|原因之一|之一的|的[^。，！？、]{1,6}的[^。，！？、]{1,6}的"
 launch_eval unslop-zh-rewrite '解析器|校验|验证|数据库' \
   "Rewrite this passage as Chinese documentation for our lab wiki. Put the Chinese in your reply and change no files. Source: 'When the configuration file is absent, the loader raises an error. Validation of the user's input is performed by the parser before the record is written to the database. This means that an unvalidated field is one of the most common causes of a failed import.'" \
   --permission-mode plan

@@ -18,8 +18,12 @@ measurable.
   English source alike. Behind it are three reference pages digesting 余光中's essays on
   欧化中文: `ouhua-diagnosis.md` finds the fault by word class, `ouhua-repair.md` holds the
   rewrites and the test for when to leave a borrowing alone, and `ouhua-self-check.md` counts
-  the 虚字 that give a translation away. It carries a table of features that are **not** a
-  reason to edit, because over-editing is the failure this pass guards against.
+  the 虚字 that give a translation away. A fourth page, `ai-tells.md`, covers the other half:
+  the set phrases, dashes and lead-in colons that mark machine writing rather than
+  translation. Every rule carries a **保留** case, a sentence with the same surface pattern
+  that must not be touched, so the rules cannot collapse into a word blacklist. The skill
+  also carries a table of features that are **not** a reason to edit, because over-editing is
+  the failure this pass guards against.
 - **Chinese length caps**, counted in `tests/lint.sh`: 1000 characters for a Chinese
   `SKILL.md`, 2000 for a Chinese page under `references/`. Vale's word counter reads a run of
   Chinese between two full-width commas as one word, so it passes a Chinese page at about ten
