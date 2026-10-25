@@ -1,0 +1,2 @@
+Since the corpus is Chinese, I would reach for lab-unslop-zh as the final pass over the
+README, and run technical-writing before it.

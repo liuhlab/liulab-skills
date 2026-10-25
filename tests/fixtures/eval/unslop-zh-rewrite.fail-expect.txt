@@ -1,0 +1,5 @@
+Here is the rewritten passage. I have not changed any files.
+
+If the configuration file is missing, the loader reports an error. The parser checks the
+user's input before the record reaches storage. A field that was never checked is the most
+common reason an import fails.

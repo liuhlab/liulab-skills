@@ -5,6 +5,34 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.12 — 2026-10-25
+
+A Chinese prose pass, `lab-unslop-zh`, and the length cap that makes a Chinese page
+measurable.
+
+### Added
+
+- **`lab-unslop-zh`**, the last pass over Chinese prose. It replaces `unslop` when the
+  deliverable is Chinese and stays out of the way otherwise. Its one instruction is to write
+  Chinese from meaning rather than translate it, which covers writing, editing and rewriting
+  English source alike. Behind it are three reference pages digesting 余光中's essays on
+  欧化中文: `ouhua-diagnosis.md` finds the fault by word class, `ouhua-repair.md` holds the
+  rewrites and the test for when to leave a borrowing alone, and `ouhua-self-check.md` counts
+  the 虚字 that give a translation away. It carries a table of features that are **not** a
+  reason to edit, because over-editing is the failure this pass guards against.
+- **Chinese length caps**, counted in `tests/lint.sh`: 1000 characters for a Chinese
+  `SKILL.md`, 2000 for a Chinese page under `references/`. Vale's word counter reads a run of
+  Chinese between two full-width commas as one word, so it passes a Chinese page at about ten
+  times the English budget. `.vale.ini` is unchanged
+  (`docs/adr/0015-chinese-caps-are-counted-in-lint.md`).
+- **Two eval cases.** `unslop-zh-rewrite` checks an English passage comes back written rather
+  than translated; `unslop-zh-not-chinese` checks the skill does not fire on an English
+  deliverable that merely mentions Chinese.
+
+### Changed
+
+- **`hq-mode` routes Chinese prose** to `lab-unslop-zh` and everything else to `unslop`.
+
 ## 2026.10.11 — 2026-10-13
 
 The guide an agent reads on every turn in this repo is now a short page of pointers. The

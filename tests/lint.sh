@@ -892,6 +892,7 @@ bro: restate, last message, plain, jargon
 ketchup: ketchup, catch, last message, action item, summary
 technical-writing: technical, docs, README, RFC, protocol, PR description, commit message
 unslop: AI tells, writing
+lab-unslop-zh: 中文, 翻译腔, AI 味, 英译中, Chinese, translationese
 '
 fx_fill() { printf '%*s' "$1" '' | tr ' ' w; } # <n>: one filler word, n characters long
 fx_skill early lab-fixture "Slurm $(fx_fill 300)"
@@ -1161,6 +1162,73 @@ mode_run index skills/hq-mode/references/principles.md skills/hq-mode/references
 mode_run skills skills/hq-mode/SKILL.md skills Triggers
 mode_run user skills/hq-mode
 mode_run pause skills/hq-mode/references/working-style.md
+
+echo "== Chinese length caps =="
+# vale's `words` counter cannot measure Chinese and cannot be made to. It treats a run of
+# characters between two full-width commas as one word, so, measured on this repo's own
+# configuration: 420 Chinese characters count as 40 words, 1260 as 120, 4200 as 400. A Chinese
+# SKILL.md would therefore pass the 600-word cap at roughly 6000 characters, about ten times
+# the English budget, and the ratio moves with punctuation density rather than with length.
+#
+# So the Chinese caps are counted here, in CJK codepoints, and `.vale.ini` is left exactly as
+# it was: its English caps still apply to every file and simply never fire on a Chinese one.
+# See docs/adr/0015-chinese-caps-are-counted-in-lint.md.
+#
+# A file counts as Chinese when its CJK codepoints outnumber its ASCII letters, so a page that
+# merely quotes a Chinese term keeps the English cap and is not touched here.
+zh_check() { # <skills-dir>: prints ok/FAIL lines, one per Chinese file
+  python3 - "$1" <<'EOF'
+import pathlib
+import re
+import sys
+
+root = pathlib.Path(sys.argv[1])
+# Same split as .vale.ini sections 2 and 3: a body is an interface, its pages hold the detail.
+CAPS = (("*/SKILL.md", 1000), ("*/references/**/*.md", 2000))
+CJK = re.compile(r"[㐀-䶿一-鿿豈-﫿]")
+LATIN = re.compile(r"[A-Za-z]")
+
+for pattern, cap in CAPS:
+    for p in sorted(root.glob(pattern)):
+        text = p.read_text(encoding="utf-8")
+        n, latin = len(CJK.findall(text)), len(LATIN.findall(text))
+        if n <= latin:
+            continue
+        if n > cap:
+            print(f"FAIL\t{p.as_posix()} is {n} Chinese characters; the cap is {cap}."
+                  " Cut it, or move detail into references/")
+        else:
+            print(f"ok\t{p.as_posix()} is {n}/{cap} Chinese characters")
+EOF
+}
+zh=$(mktemp -d "${TMPDIR:-/tmp}/lab-zh-fixtures.XXXXXX")
+trap 'rm -rf "$zh"' EXIT
+fx_zh() { # <case> <path-under-skill> <hanzi> <latin-words>
+  mkdir -p "$(dirname "$zh/$1/lab-fixture/$2")"
+  python3 -c 'import sys; p,h,w=sys.argv[1],int(sys.argv[2]),int(sys.argv[3]);
+open(p,"w",encoding="utf-8").write("# 标题\n\n"+"常态"*(h//2)+"\n\n"+"word "*w)' \
+    "$zh/$1/lab-fixture/$2" "$3" "$4"
+}
+zh_probe() { # <label> <trips|clears> <case>
+  local out got
+  out=$(zh_check "$zh/$3" | grep '^FAIL')
+  if [ -n "$out" ]; then got=trips; else got=clears; fi
+  if [ "$got" = "$2" ]; then ok "probe: $1 $2 the check"
+  else err "probe: $1 — wanted '$2', got '$got': $out"; fi
+}
+fx_zh body-over SKILL.md 1200 0
+fx_zh body-under SKILL.md 900 0
+fx_zh ref-over references/page.md 2500 0
+fx_zh ref-under references/page.md 1900 0
+fx_zh english SKILL.md 40 4000
+zh_probe "a Chinese skill body over 1000 characters"  trips  body-over
+zh_probe "a Chinese skill body under 1000 characters" clears body-under
+zh_probe "a Chinese reference page over 2000"         trips  ref-over
+zh_probe "a Chinese reference page under 2000"        clears ref-under
+zh_probe "an English page quoting a few Chinese terms" clears english
+agent_report "$(zh_check skills)"
+rm -rf "$zh"
+trap - EXIT
 
 echo "== release =="
 # The version has to identify the content. This plugin's source is the repo ROOT, so

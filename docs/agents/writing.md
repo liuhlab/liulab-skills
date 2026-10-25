@@ -40,6 +40,13 @@ file-level count measures how big the domain is, not how well the entries are wr
 cap set for twenty terms fires again at twenty-five. The per-entry cap is the unit that
 matches how the file grows, and it is the only one.
 
+**A Chinese file is capped in characters, not words, and `tests/lint.sh` counts it.** Vale's
+`words` counter reads a run of characters between two full-width commas as one word, so a
+Chinese page passes the word caps at roughly ten times the English budget. A file whose CJK
+codepoints outnumber its ASCII letters takes 1000 characters for a `SKILL.md` and 2000 for a
+page under `references/`. Nothing in `.vale.ini` changes; its caps just never fire there. See
+`docs/adr/0015-chinese-caps-are-counted-in-lint.md`.
+
 **Measure with the gate, not with `wc`.** `wc -w` counts table pipes, link targets and
 shell flags as words; vale does not, and vale is what enforces the cap. The gap scales with
 markup — from about 10% on plain prose to 65% on a page that is mostly a table — so `wc`
