@@ -23,8 +23,9 @@
 #                  (trigger|explicit|reject|containers|jupyter-ircbc|reuse-job|
 #                   edison-refuse|edison-molecules|edison-kosmos|edison-recover|
 #                   prototype-language|diagnosing-bugs-slow-loop|
-#                   hq-pause-sbatch|hq-pause-merge|unslop-zh-rewrite|
-#                   unslop-zh-not-chinese|live-sbatch|live-edison)
+#                   hq-pause-sbatch|hq-pause-merge|unslop-chinese-kimi-original|
+#                   unslop-chinese-kimi-source|unslop-chinese-kimi-not-chinese|
+#                   unslop-zh-rewrite|unslop-zh-not-chinese|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
 #                  cases as well: a tiny hostname job submitted and cleaned up on
@@ -40,7 +41,7 @@ set -u
 # tokens from the wrong directory is worse than one that never starts.
 cd "$(dirname "$0")/.." || exit 1
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-chinese-kimi-original unslop-chinese-kimi-source unslop-chinese-kimi-not-chinese unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -361,13 +362,31 @@ launch_eval unslop-zh-not-chinese 'unslop' \
   "/hq-mode I'm writing the README, in English, for a corpus of Chinese-language clinical notes, and I'll translate the README into Chinese later. Which skill is the last pass over the English README, and why? Plan only, write nothing." \
   --permission-mode plan
 
-# 17. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
+# 17. Chinese original: the final text is direct Chinese prose, with no draft or process notes.
+DENY="英文草稿|English draft|内部纲要|写作纲要|检查清单|自检结果|评分"
+ALSO='4[[:space:]]*°[[:space:]]*C|4℃|记录本'
+launch_eval unslop-chinese-kimi-original '登记|编号' \
+  "请为实验室公众号写一段中文原创说明，只回复成稿，不改文件。事实如下：样本到达后，工作人员先登记编号，再放入 4°C 冰箱；当天无法处理时，必须在记录本写明原因。读者是刚入组的学生，语气要清楚、正式，不要增添事实。"
+
+# 18. English request, Chinese source-based composition: use only the supplied facts.
+DENY="英文草稿|English draft|内部纲要|写作纲要|检查清单|自检结果|评分|离心|冷冻|37[[:space:]]*°"
+ALSO='核对|比对|联系'
+launch_eval unslop-chinese-kimi-source '条码|条形码' \
+  "Write a Chinese instruction for new lab members using only the notes below. Keep the actions in their original order. Reply with only the final Chinese text and change no files. Notes: 'The intake desk scans each sample barcode. A second person compares it with the request form. If they differ, the desk holds the sample and contacts the submitter.'"
+
+# 19. Target language, not the data's language, selects the English prose pass.
+DENY='lab-unslop-chinese-kimi|unslop-chinese-kimi'
+launch_eval unslop-chinese-kimi-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-9_-]|$)' \
+  "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
+  --permission-mode plan
+
+# 20. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
 if $LIVE; then
   launch_eval live-sbatch '[0-9]{5,}' \
     "Using the lab-hpc skill: ssh to the arc cluster and submit a minimal smoke-test Slurm job (payload just 'hostname', 5-minute time limit) to a no-cost partition suitable for smoke tests. You have my explicit approval to submit this job — no need to ask again. Report the job id and its state, then ensure nothing is left behind: scancel it if it is still pending or running. Do not touch any other jobs." \
     --allowedTools "Bash(ssh:*)"
 
-  # 18. Live Edison: one real standard literature call, one credit, and the answer
+  # 21. Live Edison: one real standard literature call, one credit, and the answer
   #     has to come back cited. The assertion looks for citation furniture the
   #     platform emits and the prompt does not contain — page spans, a DOI, an
   #     "et al", a reference list — so a confident summary with no sources fails.

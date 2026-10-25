@@ -5,6 +5,23 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.13 — 2026-10-25
+
+A Kimi candidate for natural Chinese originals and source-based Chinese composition.
+
+### Added
+
+- **`lab-unslop-chinese-kimi`** loads automatically for Chinese deliverables and can
+  also be called by name. It writes directly in Chinese, defaults to simplified Chinese,
+  follows specified regional and project conventions, and keeps source facts and
+  structure unless the task allows changes.
+- **A natural Chinese reference** covers collocations, subject-predicate relations,
+  reference, measure words, aspect markers, sentence structures and rhythm. Each rule
+  has conditions, examples and exceptions.
+- **Three eval cases** cover a Chinese original, an English request for Chinese
+  composition from source material, and an English deliverable that must not select the
+  candidate. Synthetic passing and failing transcripts run in the existing static gate.
+
 ## 2026.10.12 — 2026-10-25
 
 A Chinese prose pass, `lab-unslop-zh`, and the length cap that makes a Chinese page

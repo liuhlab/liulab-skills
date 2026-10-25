@@ -47,6 +47,7 @@ nav:
       - lab-edison: skills/lab-edison.md
       - lab-setup: skills/lab-setup.md
       - hq-mode: skills/hq-mode.md
+      - lab-unslop-chinese-kimi: skills/lab-unslop-chinese-kimi.md
       - lab-unslop-zh: skills/lab-unslop-zh.md
   - Developers:
       - Repo layout: developers/index.md
