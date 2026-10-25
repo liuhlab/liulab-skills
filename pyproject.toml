@@ -85,6 +85,13 @@ pyright = "==1.1.411"
 # anyone editing a rule.
 vale = "3.19.0.*"
 markdownlint-cli2 = "*"
+# Node is a dependency of this environment, not of the machine. `markdownlint-cli2` ships as
+# an ES module and `pyright` runs on node too, so both pick up whatever `node` the PATH hands
+# them — on a machine whose system node predates ESM, all three of markdownlint, typecheck
+# and the side-page test die at load with ERR_REQUIRE_ESM, and the gate reports a repo
+# problem that is really a laptop problem. Pinned to a major so the solve cannot drift back
+# under the ESM line.
+nodejs = "22.*"
 # The one gate that reads this repo's actual executable surface. Everything that runs here
 # is bash — the three test suites, the gate runner and the skill's config check — so
 # without this the linters above would all be checking an empty set.

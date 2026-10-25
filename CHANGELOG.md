@@ -37,6 +37,16 @@ measurable.
 
 - **`hq-mode` routes Chinese prose** to `lab-unslop-zh` and everything else to `unslop`.
 
+### Fixed
+
+- **Node belongs to the environment, not the machine.** `markdownlint-cli2` is an ES module
+  and `pyright` runs on node too, so both took whatever `node` the PATH offered. On a machine
+  whose system node predates ES modules, markdownlint, typecheck and the side-page test all
+  died at load with `ERR_REQUIRE_ESM`, and the gate reported a repo problem that was really a
+  laptop problem. `nodejs` is now a pixi dependency. The same move fixes the four
+  `tests/lint.sh` edison-preflight steps, which were failing because the system `python3` was
+  older than `str.removesuffix`.
+
 ## 2026.10.11 — 2026-10-13
 
 The guide an agent reads on every turn in this repo is now a short page of pointers. The
