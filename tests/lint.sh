@@ -1315,6 +1315,14 @@ echo "== eval assertions =="
 # Every fixture here is synthetic; several are regressions from a run that was correct and
 # was reported as failed.
 fixdir=tests/fixtures/eval
+eaf=$(mktemp -d "${TMPDIR:-/tmp}/lab-eval-answer.XXXXXX")
+trap 'rm -rf "$eaf"' EXIT
+skill_assertion() { # <spec> <transcript>: a bare name is required; !name is forbidden
+  local spec="$1" transcript="$2" forbidden=false invoked
+  if [ "${spec#!}" != "$spec" ]; then forbidden=true; spec="${spec#!}"; fi
+  if python3 tests/eval_stream.py skill "$transcript" "$spec"; then invoked=true; else invoked=false; fi
+  if $forbidden; then ! $invoked; else $invoked; fi
+}
 dump=$(bash tests/eval.sh --dump 2>/dev/null)
 if [ -z "$dump" ]; then
   err "tests/eval.sh --dump printed nothing, so no assertion could be checked"
@@ -1323,9 +1331,11 @@ else
   uncovered=""
   # Heredoc, not a pipe: a piped `while` runs in a subshell, where `err` would set `fail`
   # on a copy of it and every failure below would vanish at the closing `done`.
-  while IFS="$(printf '\037')" read -r cname cexp cdeny calso; do
+  while IFS="$(printf '\037')" read -r cname cexp cdeny calso cextra csensitive cskill; do
     [ -n "$cname" ] || continue
     hasfx=0
+    grep_assert=(grep -qiE)
+    [ "$csensitive" = true ] && grep_assert=(grep -qE)
     # Every fixture the case has, each tested on its own. A suffix may carry a label,
     # `<case>.fail-deny-close.txt`, so one rule can hold two transcripts that it must each
     # catch: one fixture holding both would pass with only half of the regex working.
@@ -1333,28 +1343,46 @@ else
       [ -f "$fixture" ] || continue
       hasfx=1
       kind=${fixture##*/}; kind=${kind#"$cname".}; kind=${kind%.txt}
+      text="$eaf/answer.txt"
+      if python3 tests/eval_stream.py answer "$fixture" >"$text"; then :; else text="$fixture"; fi
       case "$kind" in
         pass | pass-?*)
-          if grep -qiE "$cexp" "$fixture"; then ok "$cname: $kind fixture matches expect"
+          if "${grep_assert[@]}" "$cexp" "$text"; then ok "$cname: $kind fixture matches expect"
           else err "$cname: $kind fixture does not match its expect regex"; fi
           if [ -n "$cdeny" ]; then
-            if grep -qiE "$cdeny" "$fixture"; then err "$cname: $kind fixture trips its DENY"
+            if "${grep_assert[@]}" "$cdeny" "$text"; then err "$cname: $kind fixture trips its DENY"
             else ok "$cname: $kind fixture clears its DENY"; fi
           fi
           if [ -n "$calso" ]; then
-            if grep -qiE "$calso" "$fixture"; then ok "$cname: $kind fixture matches its ALSO"
+            if "${grep_assert[@]}" "$calso" "$text"; then ok "$cname: $kind fixture matches its ALSO"
             else err "$cname: $kind fixture does not match its ALSO regex"; fi
+          fi
+          if [ -n "$cextra" ]; then
+            if "${grep_assert[@]}" "$cextra" "$text"; then ok "$cname: $kind fixture matches its EXTRA"
+            else err "$cname: $kind fixture does not match its EXTRA regex"; fi
+          fi
+          if [ -n "$cskill" ]; then
+            if skill_assertion "$cskill" "$fixture"; then ok "$cname: $kind fixture satisfies SKILL"
+            else err "$cname: $kind fixture violates its SKILL assertion"; fi
           fi ;;
         fail-also | fail-also-?*)
           if [ -z "$calso" ]; then err "$cname: has a $kind fixture but no ALSO assertion"
-          elif grep -qiE "$calso" "$fixture"; then err "$cname: $kind fixture wrongly matches its ALSO"
+          elif "${grep_assert[@]}" "$calso" "$text"; then err "$cname: $kind fixture wrongly matches its ALSO"
           else ok "$cname: $kind fixture correctly misses its ALSO"; fi ;;
+        fail-extra | fail-extra-?*)
+          if [ -z "$cextra" ]; then err "$cname: has a $kind fixture but no EXTRA assertion"
+          elif "${grep_assert[@]}" "$cextra" "$text"; then err "$cname: $kind fixture wrongly matches its EXTRA"
+          else ok "$cname: $kind fixture correctly misses its EXTRA"; fi ;;
+        fail-skill | fail-skill-?*)
+          if [ -z "$cskill" ]; then err "$cname: has a $kind fixture but no SKILL assertion"
+          elif skill_assertion "$cskill" "$fixture"; then err "$cname: $kind fixture wrongly satisfies SKILL"
+          else ok "$cname: $kind fixture correctly violates SKILL"; fi ;;
         fail-expect | fail-expect-?*)
-          if grep -qiE "$cexp" "$fixture"; then err "$cname: $kind fixture wrongly matches expect"
+          if "${grep_assert[@]}" "$cexp" "$text"; then err "$cname: $kind fixture wrongly matches expect"
           else ok "$cname: $kind fixture correctly misses expect"; fi ;;
         fail-deny | fail-deny-?*)
           if [ -z "$cdeny" ]; then err "$cname: has a $kind fixture but no DENY assertion"
-          elif grep -qiE "$cdeny" "$fixture"; then ok "$cname: $kind fixture trips its DENY"
+          elif "${grep_assert[@]}" "$cdeny" "$text"; then ok "$cname: $kind fixture trips its DENY"
           else err "$cname: $kind fixture does not trip its DENY"; fi ;;
         # A misspelt suffix would otherwise be a fixture that nothing reads.
         *) err "$cname: $fixture has no fixture suffix lint knows (see $fixdir/README.md)" ;;
@@ -1367,6 +1395,8 @@ EOF
   ok "fixtures cover $covered eval case(s)"
   [ -n "$uncovered" ] && echo "  note: no fixtures yet for:$uncovered"
 fi
+rm -rf "$eaf"
+trap - EXIT
 
 echo "== eval case lists =="
 # Three places name the eval cases: the usage comment, the "no cases matched" line and

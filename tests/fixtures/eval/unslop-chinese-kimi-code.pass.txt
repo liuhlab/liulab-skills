@@ -1,0 +1,1 @@
+{"type":"result","subtype":"success","result":"def get_user_id(record):\n    return record.get('user_id', '')"}

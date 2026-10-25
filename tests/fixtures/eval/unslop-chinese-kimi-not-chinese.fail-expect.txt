@@ -1,1 +1,1 @@
-No writing skill is needed for this task.
+{"type":"result","subtype":"success","result":"No writing skill is needed for this task."}

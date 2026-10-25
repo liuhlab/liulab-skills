@@ -1,1 +1,1 @@
-Use unslop for the final prose pass because the deliverable is English.
+{"type":"result","subtype":"success","result":"Use unslop for the final prose pass because the deliverable is English."}

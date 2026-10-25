@@ -1,2 +1,1 @@
-Use `lab:unslop` for the final prose pass because this deliverable stays English.
-If a later revision adds a bilingual section, `lab:lab-unslop-chinese-kimi` should handle only its Chinese sentences.
+{"type":"result","subtype":"success","result":"Use `unslop` for the final prose pass because this deliverable stays English.\nIf a later revision adds a bilingual section, `lab-unslop-chinese-kimi` should handle only its Chinese sentences."}
