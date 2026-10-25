@@ -23,6 +23,12 @@ The Kimi Chinese candidate now polishes Chinese with fewer unnecessary edits.
   leaked review notes. Transcript review and a frozen manual comparison check Chinese
   quality separately from keyword assertions.
 
+### Fixed
+
+- **The English-deliverable eval accepts a valid mixed-document caveat.** It no longer
+  fails a correct answer that names the Chinese candidate only for a future bilingual
+  section. It still rejects choosing that candidate for English prose.
+
 ## 2026.10.14 — 2026-10-25
 
 The Kimi Chinese candidate now handles strict technical translation and mixed documents.

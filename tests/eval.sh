@@ -377,7 +377,9 @@ launch_eval unslop-chinese-kimi-source '条码|条形码' \
   "Write a Chinese instruction for new lab members using only the notes below. Keep the actions in their original order. Reply with only the final Chinese text and change no files. Notes: 'The intake desk scans each sample barcode. A second person compares it with the request form. If they differ, the desk holds the sample and contacts the submitter.'"
 
 # 19. Target language, not the data's language, selects the English prose pass.
-DENY='lab-unslop-chinese-kimi|unslop-chinese-kimi'
+#     DENY catches choosing the candidate, not naming it in a correct explanation
+#     or a conditional exception for a future mixed document.
+DENY='(use|choose|select|invoke|run|load)[^.]{0,80}(lab-)?unslop-chinese-kimi'
 launch_eval unslop-chinese-kimi-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-9_-]|$)' \
   "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
   --permission-mode plan

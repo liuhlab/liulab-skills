@@ -165,7 +165,7 @@ before `--all` or anything live.
 | `unslop-zh-not-chinese` | An English README about Chinese-language data takes `unslop`, not `lab-unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
 | `unslop-chinese-kimi-original` | A Chinese request produces an original Chinese final text without an English draft or process notes |
 | `unslop-chinese-kimi-source` | An English request composes Chinese from source facts without adding facts or exposing process notes |
-| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate |
+| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate; a future mixed-document caveat may still name that candidate |
 | `unslop-chinese-kimi-translate` | Strict technical translation preserves facts and established terms while repairing a specific English-shaped construction |
 | `unslop-chinese-kimi-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
 | `unslop-chinese-kimi-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
