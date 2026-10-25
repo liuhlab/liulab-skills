@@ -26,6 +26,7 @@
 #                   hq-pause-sbatch|hq-pause-merge|unslop-chinese-kimi-original|
 #                   unslop-chinese-kimi-source|unslop-chinese-kimi-not-chinese|
 #                   unslop-chinese-kimi-translate|unslop-chinese-kimi-mixed|
+#                   unslop-chinese-kimi-polish-fix|unslop-chinese-kimi-polish-keep|
 #                   unslop-zh-rewrite|unslop-zh-not-chinese|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
@@ -42,7 +43,7 @@ set -u
 # tokens from the wrong directory is worse than one that never starts.
 cd "$(dirname "$0")/.." || exit 1
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-chinese-kimi-original unslop-chinese-kimi-source unslop-chinese-kimi-not-chinese unslop-chinese-kimi-translate unslop-chinese-kimi-mixed unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-chinese-kimi-original unslop-chinese-kimi-source unslop-chinese-kimi-not-chinese unslop-chinese-kimi-translate unslop-chinese-kimi-mixed unslop-chinese-kimi-polish-fix unslop-chinese-kimi-polish-keep unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -398,13 +399,29 @@ EDIT: 关于重试行为，v2.4.0的客户端在3次失败之后对读取请求�
 RUN: API_TOKEN=<token> ./bin/client --config config/prod.yaml --url 'https://example.test/v2/items?id={id}' --client-version v2.4.0
 NOTE: Keep the existing order. QUOTE: 'do not downgrade'"
 
-# 22. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
+# 22. Chinese polishing: repair the calque, not the meaning. The anchored ALSO
+#     protects an already-natural sentence; DENY rejects an unchanged first line.
+DENY='关于输入校验|对用户的输入进行验证|润色说明|检查清单|自检结果|评分|修改如下'
+ALSO='^若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。$'
+launch_eval unslop-chinese-kimi-polish-fix '解析器[^。]{0,30}验证用户(的)?输入' \
+  '请润色以下简体中文技术文档，只改确有问题的地方；已经自然的句子原样保留。保留事实、作者判断、责任主体、条件、范围、否定、情态、程度、引用和术语，不新增信息。只回复完整文本，不改文件。文本：
+关于输入校验，解析器在写入数据库前对用户的输入进行验证。
+若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。'
+
+# 23. Already-natural Traditional Chinese must survive byte for byte. An anchored
+#     EXPECT rejects gratuitous rewriting and script conversion, not only keywords.
+DENY='潤飾說明|润色说明|檢查清單|检查清单|自檢結果|自检结果|評分|评分|修改如下'
+launch_eval unslop-chinese-kimi-polish-keep '^雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。$' \
+  "請潤飾以下繁體中文，只改確有問題的地方；已經自然的文字必須完整保留，不要為了改寫而改寫，也不要轉換簡繁或改變文體。只回覆完整文本，不改檔案。文本：
+雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。"
+
+# 24. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
 if $LIVE; then
   launch_eval live-sbatch '[0-9]{5,}' \
     "Using the lab-hpc skill: ssh to the arc cluster and submit a minimal smoke-test Slurm job (payload just 'hostname', 5-minute time limit) to a no-cost partition suitable for smoke tests. You have my explicit approval to submit this job — no need to ask again. Report the job id and its state, then ensure nothing is left behind: scancel it if it is still pending or running. Do not touch any other jobs." \
     --allowedTools "Bash(ssh:*)"
 
-  # 23. Live Edison: one real standard literature call, one credit, and the answer
+  # 25. Live Edison: one real standard literature call, one credit, and the answer
   #     has to come back cited. The assertion looks for citation furniture the
   #     platform emits and the prompt does not contain — page spans, a DOI, an
   #     "et al", a reference list — so a confident summary with no sources fails.
