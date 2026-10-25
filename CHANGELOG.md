@@ -5,6 +5,25 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.14 — 2026-10-25
+
+The Kimi Chinese candidate now handles strict technical translation and mixed documents.
+
+### Added
+
+- **Strict technical translation in `lab-unslop-chinese-kimi`.** It reads the whole
+  source and writes Chinese by paragraph and meaning group. It preserves facts, logic,
+  document structure, terminology and degree qualifiers. Sentence splits, merges and
+  reordering are allowed, but source-based-writing omissions and restructuring are not.
+  Review reads the Chinese alone first, then checks it against the source.
+- **Two translation references.** One distills Yu Guangzhong's three essays on Chinese
+  westernization into contextual judgments, repairs, exceptions and modern technical
+  examples. The other covers terminology priority, established English, consistency,
+  technical register, hedging, punctuation and protected mixed content.
+- **Two eval cases** cover strict translation and mixed documents. Synthetic passing and
+  failing transcripts check fact and term fidelity, a specific translationese repair,
+  and exact protected strings in the existing static gate.
+
 ## 2026.10.13 — 2026-10-25
 
 A Kimi candidate for natural Chinese originals and source-based Chinese composition.

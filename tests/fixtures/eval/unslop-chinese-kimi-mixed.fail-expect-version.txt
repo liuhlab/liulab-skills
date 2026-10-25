@@ -1,0 +1,3 @@
+EDIT: v2.4.0的客户端在3次失败后重试读取请求，但不会自动重试写入。
+RUN: API_TOKEN=<token> ./bin/client --config config/prod.yaml --url 'https://example.test/v2/items?id={id}' --client-version v2．4．0
+NOTE: Keep the existing order. QUOTE: 'do not downgrade'

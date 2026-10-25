@@ -166,6 +166,8 @@ before `--all` or anything live.
 | `unslop-chinese-kimi-original` | A Chinese request produces an original Chinese final text without an English draft or process notes |
 | `unslop-chinese-kimi-source` | An English request composes Chinese from source facts without adding facts or exposing process notes |
 | `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate |
+| `unslop-chinese-kimi-translate` | Strict technical translation preserves facts and established terms while repairing a specific English-shaped construction |
+| `unslop-chinese-kimi-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 

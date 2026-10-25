@@ -53,10 +53,10 @@ Current skills:
   sentences, your way of addressing the reader and your facts all survive the
   edit. It loads only when what you are making is Chinese.
 
-- **`lab-unslop-chinese-kimi`** is a Kimi candidate for original Chinese writing and
-  Chinese composition from source material. It routes by the deliverable's language,
-  writes directly in Chinese, and keeps source facts and structure unless the task
-  allows changes.
+- **`lab-unslop-chinese-kimi`** is a Kimi candidate for Chinese writing and strict
+  technical translation. It routes by the deliverable's language and writes directly
+  in Chinese. Translations keep every detail, term and degree qualifier. Mixed
+  documents change only authorized Chinese text, leaving code and English intact.
 
 Skills taken from other projects keep their own names. These come from
 [mattpocock/skills](https://github.com/mattpocock/skills). Most are
