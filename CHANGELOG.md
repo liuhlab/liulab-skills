@@ -5,6 +5,48 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.12 — 2026-10-25
+
+A Chinese prose pass, `lab-unslop-zh`, and the length cap that makes a Chinese page
+measurable.
+
+### Added
+
+- **`lab-unslop-zh`**, the last pass over Chinese prose. It replaces `unslop` when the
+  deliverable is Chinese and stays out of the way otherwise. Its one instruction is to write
+  Chinese from meaning rather than translate it, which covers writing, editing and rewriting
+  English source alike. Behind it are three reference pages digesting 余光中's essays on
+  欧化中文: `ouhua-diagnosis.md` finds the fault by word class, `ouhua-repair.md` holds the
+  rewrites and the test for when to leave a borrowing alone, and `ouhua-self-check.md` counts
+  the 虚字 that give a translation away. A fourth page, `ai-tells.md`, covers the other half:
+  the set phrases, dashes and lead-in colons that mark machine writing rather than
+  translation. Every rule carries a **保留** case, a sentence with the same surface pattern
+  that must not be touched, so the rules cannot collapse into a word blacklist. The skill
+  also carries a table of features that are **not** a reason to edit, because over-editing is
+  the failure this pass guards against.
+- **Chinese length caps**, counted in `tests/lint.sh`: 1000 characters for a Chinese
+  `SKILL.md`, 2000 for a Chinese page under `references/`. Vale's word counter reads a run of
+  Chinese between two full-width commas as one word, so it passes a Chinese page at about ten
+  times the English budget. `.vale.ini` is unchanged
+  (`docs/adr/0015-chinese-caps-are-counted-in-lint.md`).
+- **Two eval cases.** `unslop-zh-rewrite` checks an English passage comes back written rather
+  than translated; `unslop-zh-not-chinese` checks the skill does not fire on an English
+  deliverable that merely mentions Chinese.
+
+### Changed
+
+- **`hq-mode` routes Chinese prose** to `lab-unslop-zh` and everything else to `unslop`.
+
+### Fixed
+
+- **Node belongs to the environment, not the machine.** `markdownlint-cli2` is an ES module
+  and `pyright` runs on node too, so both took whatever `node` the PATH offered. On a machine
+  whose system node predates ES modules, markdownlint, typecheck and the side-page test all
+  died at load with `ERR_REQUIRE_ESM`, and the gate reported a repo problem that was really a
+  laptop problem. `nodejs` is now a pixi dependency. The same move fixes the four
+  `tests/lint.sh` edison-preflight steps, which were failing because the system `python3` was
+  older than `str.removesuffix`.
+
 ## 2026.10.11 — 2026-10-13
 
 The guide an agent reads on every turn in this repo is now a short page of pointers. The

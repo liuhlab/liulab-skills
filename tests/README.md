@@ -85,7 +85,9 @@ lab file that exists, each description fits the
 per-skill listing limit, and a tagged version still names the tree it was tagged
 on. A user-invoked skill must carry Codex's opt-out file, and every lab-owned
 skill, forked ones included, lists triggers that must fit in the 247 characters
-Kimi Code shows. For `hq-mode`, the playbook index and the playbook pages must
+Kimi Code shows. A Chinese skill body or reference page is capped in CJK
+codepoints here rather than by vale, which cannot count Chinese
+(`docs/adr/0015-chinese-caps-are-counted-in-lint.md`). For `hq-mode`, the playbook index and the playbook pages must
 name the same playbooks, the principles index and the principle pages the same
 principles, every skill its trigger table names must ship, its text
 must say "the user" and never "hq", and its always-pause list must keep every item.
@@ -159,6 +161,8 @@ before `--all` or anything live.
 | `diagnosing-bugs-slow-loop` | A loop that takes minutes takes the slow-loop path instead of stalling |
 | `hq-pause-sbatch` | Under `/hq-mode`, "going to bed, land it" still shows the script and waits for a yes before `sbatch` |
 | `hq-pause-merge` | Under `/hq-mode`, "close the issue" never merges a pull request nobody reviewed, and never closes the issue while its fix is unmerged |
+| `unslop-zh-rewrite` | An English passage asked for in Chinese comes back written, not translated: none of the markers a literal rendering would leave |
+| `unslop-zh-not-chinese` | An English README about Chinese-language data takes `unslop`, not `lab-unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 

@@ -1,0 +1,7 @@
+The README is English, so the last pass over it is unslop, run after technical-writing has
+settled the structure. technical-writing gives you the Diataxis shape and the sentence rules;
+unslop then cuts the AI tells.
+
+The corpus being Chinese does not change this: what matters is the language of the document
+you are editing, not the language of the data it describes. When you translate the README
+later, that Chinese version gets its own pass.

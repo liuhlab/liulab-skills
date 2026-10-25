@@ -23,7 +23,8 @@
 #                  (trigger|explicit|reject|containers|jupyter-ircbc|reuse-job|
 #                   edison-refuse|edison-molecules|edison-kosmos|edison-recover|
 #                   prototype-language|diagnosing-bugs-slow-loop|
-#                   hq-pause-sbatch|hq-pause-merge|live-sbatch|live-edison)
+#                   hq-pause-sbatch|hq-pause-merge|unslop-zh-rewrite|
+#                   unslop-zh-not-chinese|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
 #                  cases as well: a tiny hostname job submitted and cleaned up on
@@ -39,7 +40,7 @@ set -u
 # tokens from the wrong directory is worse than one that never starts.
 cd "$(dirname "$0")/.." || exit 1
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -329,13 +330,44 @@ launch_eval hq-pause-merge "land it|always-pause|merg[^.]{0,80}${HQ_YES}|${HQ_YE
   "/hq-mode Suppose pull request #412 in this repo fixes issue #411. Its checks are green, and no one but its author has looked at it. My request: close the issue." \
   --permission-mode plan
 
-# 15. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
+# 15-16. `lab-unslop-zh`, named after its skill so the upstream sync can find them.
+#
+# 15. English source, Chinese deliverable. The expect only proves the answer came back in
+#     Chinese; the DENY is the real discriminator, and it holds the markers a sentence-by-
+#     sentence rendering of THIS passage produces: the 当…时 opener, 进行/作出 + noun, the
+#     topic shell 对于…来说, 这意味着 and …之一. The source sentences are built to invite
+#     exactly those, so a literal translation trips at least one, the 的-chain included:
+#     three 的 inside one clause with no punctuation between them, as in 用户的输入的验证的
+#     结果. None of the asserted Chinese appears in the prompt, which is English throughout,
+#     so the agent wrote it. The negation filter drops English lines holding "not"; the
+#     Chinese output has none.
+#
+#     The expect does NOT require the 中文（English）gloss form that issue #131 asked for.
+#     Forcing it would mean either a prompt that names the gloss (the prompt would then be
+#     producing the assertion) or failing a correct answer whose terms all have settled
+#     Chinese names and need no gloss. The DENY carries the discrimination instead.
+DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|这意味着|原因之一|之一的|的[^。，！？、]{1,6}的[^。，！？、]{1,6}的"
+launch_eval unslop-zh-rewrite '解析器|校验|验证|数据库' \
+  "Rewrite this passage as Chinese documentation for our lab wiki. Put the Chinese in your reply and change no files. Source: 'When the configuration file is absent, the loader raises an error. Validation of the user's input is performed by the parser before the record is written to the database. This means that an unvalidated field is one of the most common causes of a failed import.'" \
+  --permission-mode plan
+
+# 16. The false trigger. The skill's description is dense with the word Chinese, so an
+#     English deliverable that merely mentions Chinese is where it will wrongly fire. The
+#     prompt asks for English prose about a Chinese-language dataset, and the DENY is the
+#     skill being picked. A correct answer that names it while explaining why it does not
+#     apply says "not", "never" or "instead", which the negation filter drops.
+DENY="lab-unslop-zh|unslop-zh"
+launch_eval unslop-zh-not-chinese 'unslop' \
+  "/hq-mode I'm writing the README, in English, for a corpus of Chinese-language clinical notes, and I'll translate the README into Chinese later. Which skill is the last pass over the English README, and why? Plan only, write nothing." \
+  --permission-mode plan
+
+# 17. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
 if $LIVE; then
   launch_eval live-sbatch '[0-9]{5,}' \
     "Using the lab-hpc skill: ssh to the arc cluster and submit a minimal smoke-test Slurm job (payload just 'hostname', 5-minute time limit) to a no-cost partition suitable for smoke tests. You have my explicit approval to submit this job — no need to ask again. Report the job id and its state, then ensure nothing is left behind: scancel it if it is still pending or running. Do not touch any other jobs." \
     --allowedTools "Bash(ssh:*)"
 
-  # 16. Live Edison: one real standard literature call, one credit, and the answer
+  # 18. Live Edison: one real standard literature call, one credit, and the answer
   #     has to come back cited. The assertion looks for citation furniture the
   #     platform emits and the prompt does not contain — page spans, a DOI, an
   #     "et al", a reference list — so a confident summary with no sources fails.
