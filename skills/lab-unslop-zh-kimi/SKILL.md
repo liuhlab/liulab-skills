@@ -1,5 +1,5 @@
 ---
-name: lab-unslop-chinese-kimi
+name: lab-unslop-zh-kimi
 description: >-
   中文写作、中文原创、中文润色、中文翻译、英译中、技术文档翻译、根据资料写中文、
   write in Chinese、translate to Chinese、Chinese deliverable 时使用。只要目标产出含中文自然语言就加载，包括

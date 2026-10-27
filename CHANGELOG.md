@@ -11,7 +11,7 @@ The Kimi Chinese candidate now polishes Chinese with fewer unnecessary edits.
 
 ### Added
 
-- **Low-edit Chinese polishing in `lab-unslop-chinese-kimi`.** It changes only actual
+- **Low-edit Chinese polishing in `lab-unslop-zh-kimi`.** It changes only actual
   faults inside the authorized scope and returns already-natural text unchanged. It
   preserves the author's voice, facts, judgments, actors, conditions, scope, negation,
   modality, degree, quotations and terms. Simplified and Traditional Chinese, regional
@@ -43,7 +43,7 @@ The Kimi Chinese candidate now handles strict technical translation and mixed do
 
 ### Added
 
-- **Strict technical translation in `lab-unslop-chinese-kimi`.** It reads the whole
+- **Strict technical translation in `lab-unslop-zh-kimi`.** It reads the whole
   source and writes Chinese by paragraph and meaning group. It preserves facts, logic,
   document structure, terminology and degree qualifiers. Sentence splits, merges and
   reordering are allowed, but source-based-writing omissions and restructuring are not.
@@ -62,7 +62,7 @@ A Kimi candidate for natural Chinese originals and source-based Chinese composit
 
 ### Added
 
-- **`lab-unslop-chinese-kimi`** loads automatically for Chinese deliverables and can
+- **`lab-unslop-zh-kimi`** loads automatically for Chinese deliverables and can
   also be called by name. It writes directly in Chinese, defaults to simplified Chinese,
   follows specified regional and project conventions, and keeps source facts and
   structure unless the task allows changes.

@@ -53,7 +53,7 @@ Current skills:
   sentences, your way of addressing the reader and your facts all survive the
   edit. It loads only when what you are making is Chinese.
 
-- **`lab-unslop-chinese-kimi`** is a Kimi candidate for Chinese writing, strict
+- **`lab-unslop-zh-kimi`** is a Kimi candidate for Chinese writing, strict
   technical translation and polishing. It routes by the deliverable's language and
   writes directly in Chinese. Translations keep every detail, term and degree
   qualifier. Polishing repairs only actual faults, preserves the author's voice and

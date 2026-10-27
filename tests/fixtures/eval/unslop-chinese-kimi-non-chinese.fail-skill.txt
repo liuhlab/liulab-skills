@@ -1,2 +1,0 @@
-{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_japanese","name":"Skill","input":{"skill":"lab-unslop-chinese-kimi"}}]}}
-{"type":"result","subtype":"success","result":"パーサーは、レコードをデータベースに書き込む前にユーザー入力を検証します。"}

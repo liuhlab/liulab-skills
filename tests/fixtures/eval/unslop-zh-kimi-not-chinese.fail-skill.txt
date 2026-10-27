@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_not_chinese","name":"Skill","input":{"skill":"lab-unslop-zh-kimi"}}]}}
+{"type":"result","subtype":"success","result":"Use unslop for the final prose pass because the deliverable is English."}

@@ -893,7 +893,7 @@ bro: restate, last message, plain, jargon
 ketchup: ketchup, catch, last message, action item, summary
 technical-writing: technical, docs, README, RFC, protocol, PR description, commit message
 unslop: AI tells, writing
-lab-unslop-chinese-kimi: 中文写作, 中文原创, 中文润色, 中文翻译, 英译中, 技术文档翻译, 根据资料写中文, write in Chinese, translate to Chinese, Chinese deliverable
+lab-unslop-zh-kimi: 中文写作, 中文原创, 中文润色, 中文翻译, 英译中, 技术文档翻译, 根据资料写中文, write in Chinese, translate to Chinese, Chinese deliverable
 lab-unslop-zh: 中文, 翻译腔, AI 味, 英译中, Chinese, translationese
 '
 fx_fill() { printf '%*s' "$1" '' | tr ' ' w; } # <n>: one filler word, n characters long
