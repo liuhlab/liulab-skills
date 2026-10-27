@@ -45,6 +45,7 @@ set -u
 # `|| exit 1`: the cases below are written against the repo root, and a run that spends
 # tokens from the wrong directory is worse than one that never starts.
 cd "$(dirname "$0")/.." || exit 1
+source tests/eval_assert.sh
 
 CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-chinese-kimi-original unslop-chinese-kimi-source unslop-chinese-kimi-not-chinese unslop-chinese-kimi-english-delivery unslop-chinese-kimi-zh-request-english unslop-chinese-kimi-non-chinese unslop-chinese-kimi-code unslop-chinese-kimi-translate unslop-chinese-kimi-mixed unslop-chinese-kimi-polish-fix unslop-chinese-kimi-polish-keep unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
 
@@ -498,31 +499,16 @@ for i in "${!E_NAME[@]}"; do
   fi
   skill_failed=false
   skill_failure=""
-  if [ -n "${E_SKILL[$i]}" ]; then
-    skill_name="${E_SKILL[$i]}"
-    forbidden=false
-    if [ "${skill_name#!}" != "$skill_name" ]; then
-      forbidden=true
-      skill_name="${skill_name#!}"
-    fi
-    if python3 tests/eval_stream.py skill "$transcript" "$skill_name"; then invoked=true; else invoked=false; fi
-    if $forbidden && $invoked; then
-      skill_failed=true
-      skill_failure="invoked forbidden Skill $skill_name"
-    elif ! $forbidden && ! $invoked; then
-      skill_failed=true
-      skill_failure="no Skill invocation for $skill_name"
-    fi
+  if [ -n "${E_SKILL[$i]}" ] && ! skill_failure=$(eval_skill_assert "${E_SKILL[$i]}" "$transcript"); then
+    skill_failed=true
   fi
-  grep_assert=(grep -qiE)
-  [ "${E_CASE_SENSITIVE[$i]}" = true ] && grep_assert=(grep -qE)
-  if ! "${grep_assert[@]}" "${E_EXPECT[$i]}" "$text"; then
+  if ! eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_EXPECT[$i]}" "$text"; then
     echo "FAIL: ${E_NAME[$i]} no match for /${E_EXPECT[$i]}/ — transcript: $transcript"
     fail=1
-  elif [ -n "${E_ALSO[$i]}" ] && ! "${grep_assert[@]}" "${E_ALSO[$i]}" "$text"; then
+  elif [ -n "${E_ALSO[$i]}" ] && ! eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_ALSO[$i]}" "$text"; then
     echo "FAIL: ${E_NAME[$i]} no match for its ALSO /${E_ALSO[$i]}/ — transcript: $transcript"
     fail=1
-  elif [ -n "${E_EXTRA[$i]}" ] && ! "${grep_assert[@]}" "${E_EXTRA[$i]}" "$text"; then
+  elif [ -n "${E_EXTRA[$i]}" ] && ! eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_EXTRA[$i]}" "$text"; then
     echo "FAIL: ${E_NAME[$i]} no match for its EXTRA /${E_EXTRA[$i]}/ — transcript: $transcript"
     fail=1
   # Negated lines are dropped before the forbidden pattern is applied: a correct
@@ -530,7 +516,7 @@ for i in "${!E_NAME[@]}"; do
   # from the request it forbids. Dropping too much only weakens this check, which
   # is the right way for a loose assertion to be wrong.
   elif [ -n "${E_DENY[$i]}" ] &&
-    grep -viE "never|not|n't|avoid|instead" "$text" | "${grep_assert[@]}" "${E_DENY[$i]}"; then
+    grep -viE "never|not|n't|avoid|instead" "$text" | eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_DENY[$i]}" -; then
     echo "FAIL: ${E_NAME[$i]} matched forbidden /${E_DENY[$i]}/ — transcript: $transcript"
     fail=1
   elif $skill_failed; then

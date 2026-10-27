@@ -76,6 +76,13 @@ checks anything. These run `eval.sh --only` against a stub `claude` and a fake h
 and check that a plan named from `~` or by its full path is added. The stub is first
 on PATH, so no session starts.
 
+## Unit tests — shared eval assertions: `tests/test_eval_assert_sh.py`
+
+Free, seconds, in the same `pixi run test`. `tests/eval_assert.sh` is the shared
+interface used by `eval.sh` and `lint.sh`. These tests check case-sensitive and
+case-insensitive matching, required and forbidden Skill calls, `!` handling, and the
+failure reasons against existing stream-json fixtures. No session starts.
+
 ## Layer 1 — static lint: `tests/lint.sh`
 
 Free, seconds. Tests the **files**: manifests are valid JSON, every skill has
