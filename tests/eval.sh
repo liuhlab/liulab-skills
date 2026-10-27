@@ -398,7 +398,7 @@ launch_eval unslop-chinese-kimi-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-
   "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
   --output-format stream-json --verbose
 
-ALSO='stor(e|ed|age)|writ'
+ALSO='stor(e|ed|age|ing)|writ'
 SKILL='!lab-unslop-chinese-kimi'
 launch_eval unslop-chinese-kimi-english-delivery 'parser[^.]{0,80}validat' \
   "Polish this English API documentation and return only the final English text. Do not change files. Source: 'The parser performs validation of the user input before the record is stored. The field labels are Chinese.'" \
