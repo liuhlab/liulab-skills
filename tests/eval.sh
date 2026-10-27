@@ -444,7 +444,7 @@ NOTE: Keep the existing order. QUOTE: 'do not downgrade'"
 #     protects an already-natural sentence; DENY rejects an unchanged first line.
 DENY='对用户的输入进行验证|润色说明|检查清单|自检结果|评分|修改如下'
 ALSO='^若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。$'
-launch_eval unslop-chinese-kimi-polish-fix '解析器[^。]{0,30}验证用户(的)?输入' \
+launch_eval unslop-chinese-kimi-polish-fix '解析器[^。]{0,30}(验证|校验)用户(的)?输入' \
   '请润色以下简体中文技术文档，只改确有问题的地方；已经自然的句子原样保留。保留事实、作者判断、责任主体、条件、范围、否定、情态、程度、引用和术语，不新增信息。只回复完整文本，不改文件。文本：
 关于输入校验，解析器在写入数据库前对用户的输入进行验证。
 若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。'
