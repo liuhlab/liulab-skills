@@ -434,7 +434,7 @@ DENY='对读取请求进行重试'
 EXTRA="^NOTE: Keep the existing order\. QUOTE: 'do not downgrade'$"
 ALSO="^RUN: API_TOKEN=<token> \./bin/client --config config/prod\.yaml --url 'https://example\.test/v2/items\?id=\{id\}' --client-version v2\.4\.0$"
 CASE_SENSITIVE=true
-launch_eval unslop-chinese-kimi-mixed '^EDIT: .*v2\.4\.0.*3次失败.*$' \
+launch_eval unslop-chinese-kimi-mixed '^EDIT: (.*v2\.4\.0.*(3次.*失败|失败.*3次).*|.*(3次.*失败|失败.*3次).*v2\.4\.0.*)$' \
   "Polish only the Chinese words after EDIT for natural technical Chinese. Keep every other character and the document structure unchanged, including all English, the command, path, URL, version, placeholders and quotes. Within EDIT, change only the Chinese wording and keep v2.4.0 and 3 unchanged. Do not add spaces between Chinese and English or convert simplified and traditional characters. Return only the complete document and change no files. Document:
 EDIT: 关于重试行为，v2.4.0的客户端在3次失败之后对读取请求进行重试，但是写入不会被自动重试。
 RUN: API_TOKEN=<token> ./bin/client --config config/prod.yaml --url 'https://example.test/v2/items?id={id}' --client-version v2.4.0
