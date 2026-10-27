@@ -23,11 +23,13 @@ def events(path: Path) -> Iterator[dict[str, Any]]:
 
 def write_answer(path: Path) -> bool:
     """Print the last result answer and report whether one exists."""
-    answers = [
-        result
-        for event in events(path)
-        if event.get("type") == "result" and isinstance((result := event.get("result")), str)
-    ]
+    answers = []
+    for event in events(path):
+        if event.get("type") != "result":
+            continue
+        result = event.get("result")
+        if isinstance(result, str):
+            answers.append(result)
     if not answers:
         return False
     sys.stdout.write(answers[-1])
