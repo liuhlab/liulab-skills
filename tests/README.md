@@ -76,6 +76,13 @@ checks anything. These run `eval.sh --only` against a stub `claude` and a fake h
 and check that a plan named from `~` or by its full path is added. The stub is first
 on PATH, so no session starts.
 
+## Unit tests — shared eval assertions: `tests/test_eval_assert_sh.py`
+
+Free, seconds, in the same `pixi run test`. `tests/eval_assert.sh` is the shared
+interface used by `eval.sh` and `lint.sh`. These tests check case-sensitive and
+case-insensitive matching, required and forbidden Skill calls, `!` handling, and the
+failure reasons against existing stream-json fixtures. No session starts.
+
 ## Layer 1 — static lint: `tests/lint.sh`
 
 Free, seconds. Tests the **files**: manifests are valid JSON, every skill has
@@ -163,9 +170,13 @@ before `--all` or anything live.
 | `hq-pause-merge` | Under `/hq-mode`, "close the issue" never merges a pull request nobody reviewed, and never closes the issue while its fix is unmerged |
 | `unslop-zh-rewrite` | An English passage asked for in Chinese comes back written, not translated: none of the markers a literal rendering would leave |
 | `unslop-zh-not-chinese` | An English README about Chinese-language data takes `unslop`, not `lab-unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
-| `unslop-chinese-kimi-original` | A Chinese request produces an original Chinese final text without an English draft or process notes |
-| `unslop-chinese-kimi-source` | An English request composes Chinese from source facts without adding facts or exposing process notes |
-| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop`, not the Chinese candidate; a future mixed-document caveat may still name that candidate |
+| `unslop-chinese-kimi-original` | A Chinese request automatically invokes the candidate through the Skill tool and produces an original Chinese final text without an English draft or process notes |
+| `unslop-chinese-kimi-source` | An English request automatically invokes the candidate and composes Chinese from source facts without adding facts or exposing process notes |
+| `unslop-chinese-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop` without invoking the Chinese candidate; a future mixed-document caveat may still name that candidate |
+| `unslop-chinese-kimi-english-delivery` | An English editing task delivers English prose without invoking the Chinese candidate |
+| `unslop-chinese-kimi-zh-request-english` | A Chinese request for an English deliverable does not invoke the Chinese candidate |
+| `unslop-chinese-kimi-non-chinese` | A Japanese deliverable does not invoke the Chinese candidate |
+| `unslop-chinese-kimi-code` | A pure Python deliverable does not invoke the Chinese candidate |
 | `unslop-chinese-kimi-translate` | Strict technical translation preserves facts and established terms while repairing a specific English-shaped construction |
 | `unslop-chinese-kimi-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
 | `unslop-chinese-kimi-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
@@ -173,17 +184,18 @@ before `--all` or anything live.
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 
-Assertions are key-phrase greps, with exact anchored matches where a case requires
-byte preservation. Most cases carry a second, negative assertion — the thing the
-answer must *not* say — and a case can carry a second positive one, ALSO, for a
-thing on another line. `tests/lint.sh` tests those regexes for free against the
-synthetic transcripts in `fixtures/eval/`, reading them from `eval.sh --dump` so it
-checks the assertions that actually run. Some cases still have no fixtures; lint
-names them each run.
+Assertions include loose key phrases and exact anchored matches. A case can opt into
+case-sensitive matching for protected text. EXPECT, ALSO and EXTRA are positive
+assertions. DENY forbids a match. SKILL requires or forbids an actual Skill `tool_use`.
+For stream-json cases, text assertions read the final `result`, while SKILL reads the
+assistant events. A plugin listing or a skill named in prose does not count as an
+invocation. `tests/lint.sh` checks all these rules against synthetic transcripts in
+`fixtures/eval/`, reading the assertions from `eval.sh --dump`. Some cases still have
+no fixtures; lint names them each run.
 
 The polish cases reject an unchanged faulty line, a rewritten natural line and
-changes to protected meaning. Keyword and exact-match assertions do not prove
-naturalness, so transcript review and the frozen with-skill and without-skill
+changes to protected meaning. Keyword, exact-match and tool-call assertions do not
+prove naturalness, so transcript review and the frozen with-skill and without-skill
 comparison remain separate acceptance steps.
 
 A failure means "read the transcript in the temp directory", not necessarily "the

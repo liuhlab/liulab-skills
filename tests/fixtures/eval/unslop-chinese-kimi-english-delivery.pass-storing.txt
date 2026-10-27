@@ -1,0 +1,1 @@
+{"type":"result","subtype":"success","result":"The parser validates user input before storing the record. Field labels are in Chinese."}

@@ -1,1 +1,1 @@
-Use lab-unslop-chinese-kimi because the source field labels are Chinese.
+{"type":"result","subtype":"success","result":"Use lab-unslop-chinese-kimi because the source field labels are Chinese."}

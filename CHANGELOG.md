@@ -27,7 +27,15 @@ The Kimi Chinese candidate now polishes Chinese with fewer unnecessary edits.
 
 - **The English-deliverable eval accepts a valid mixed-document caveat.** It no longer
   fails a correct answer that names the Chinese candidate only for a future bilingual
-  section. It still rejects choosing that candidate for English prose.
+  section. It still rejects choosing that candidate for English prose. Its regression
+  fixture uses bare skill names.
+- **Kimi routing evals observe real Skill calls.** Chinese original and source-based cases
+  require automatic invocation. English, Japanese and pure-code deliveries forbid it, as
+  does a Chinese request for English. Text checks read the final answer, not the loaded
+  skill instructions.
+- **Mixed-content and polishing evals catch narrower faults.** Protected lines are anchored
+  and case-sensitive. The EDIT check keeps v2.4.0 and 3 in place. Safe repairs may retain
+  「关于重试行为」 and 「关于输入校验」; the weak-verb faults still fail.
 
 ## 2026.10.14 — 2026-10-25
 
