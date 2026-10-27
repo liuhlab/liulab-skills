@@ -23,8 +23,14 @@
 #                  (trigger|explicit|reject|containers|jupyter-ircbc|reuse-job|
 #                   edison-refuse|edison-molecules|edison-kosmos|edison-recover|
 #                   prototype-language|diagnosing-bugs-slow-loop|
-#                   hq-pause-sbatch|hq-pause-merge|unslop-zh-rewrite|
-#                   unslop-zh-not-chinese|live-sbatch|live-edison)
+#                   hq-pause-sbatch|hq-pause-merge|unslop-zh-kimi-original|
+#                   unslop-zh-kimi-source|unslop-zh-kimi-not-chinese|
+#                   unslop-zh-kimi-english-delivery|
+#                   unslop-zh-kimi-zh-request-english|
+#                   unslop-zh-kimi-non-chinese|unslop-zh-kimi-code|
+#                   unslop-zh-kimi-translate|unslop-zh-kimi-mixed|
+#                   unslop-zh-kimi-polish-fix|unslop-zh-kimi-polish-keep|
+#                   unslop-zh-rewrite|unslop-zh-not-chinese|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
 #                  cases as well: a tiny hostname job submitted and cleaned up on
@@ -33,14 +39,15 @@
 #   --dump         print each case's assertions and exit; runs nothing, spends
 #                  nothing. This is what `tests/lint.sh` reads.
 #
-# Assertions are loose key-phrase greps: evals are non-deterministic. On
+# Assertions include loose phrases, exact protected text and observed Skill calls. On
 # failure, read the saved transcript before concluding the skill is broken.
 set -u
 # `|| exit 1`: the cases below are written against the repo root, and a run that spends
 # tokens from the wrong directory is worse than one that never starts.
 cd "$(dirname "$0")/.." || exit 1
+source tests/eval_assert.sh
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-kimi-original unslop-zh-kimi-source unslop-zh-kimi-not-chinese unslop-zh-kimi-english-delivery unslop-zh-kimi-zh-request-english unslop-zh-kimi-non-chinese unslop-zh-kimi-code unslop-zh-kimi-translate unslop-zh-kimi-mixed unslop-zh-kimi-polish-fix unslop-zh-kimi-polish-keep unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -107,7 +114,7 @@ if ! $DUMP; then
   echo "transcripts: $tmp"
 fi
 
-declare -a E_NAME E_EXPECT E_DENY E_ALSO E_PID
+declare -a E_NAME E_EXPECT E_DENY E_ALSO E_EXTRA E_CASE_SENSITIVE E_SKILL E_PID
 
 # Set DENY on the line before a launch_eval call to give that one case a second,
 # NEGATIVE assertion: the transcript must not match this pattern. One regex cannot
@@ -115,10 +122,13 @@ declare -a E_NAME E_EXPECT E_DENY E_ALSO E_PID
 # then asks for the key in chat is the failure the case exists to catch. The call
 # consumes DENY, so it can never leak into the next case.
 DENY=""
-# ALSO is the same for a second POSITIVE assertion: the transcript must match this pattern
-# as well as the expect one. One regex cannot ask for two things on different lines, such as
-# a wait for the user's yes and the script it waits on. Consumed by the call, like DENY.
+# ALSO and EXTRA add positive assertions on separate lines. All three are consumed by the call.
 ALSO=""
+EXTRA=""
+# Exact protected text opts into case-sensitive matching. Other cases keep loose matching.
+CASE_SENSITIVE=false
+# SKILL requires an observed Skill call, or forbids one when the name starts with !.
+SKILL=""
 
 # A `--permission-mode plan` session may write its answer to a plan file and print only a
 # one-line pointer to it. Stdout then greps as an empty answer and a CORRECT run fails —
@@ -146,19 +156,22 @@ fold_plans() { # <transcript>
 
 launch_eval() { # <name> <expected-regex> <prompt> [extra claude flags...]
   local name="$1" expect="$2" prompt="$3"; shift 3
-  [ -n "$ONLY" ] && [ "$ONLY" != "$name" ] && { DENY=""; ALSO=""; return 0; }
+  [ -n "$ONLY" ] && [ "$ONLY" != "$name" ] &&
+    { DENY=""; ALSO=""; EXTRA=""; CASE_SENSITIVE=false; SKILL=""; return 0; }
   # One line per case, its fields split by the unit separator (\037) and not a tab: `read`
   # folds a run of tabs into one, so an empty DENY would shift ALSO into its place.
   if $DUMP; then
-    printf '%s\037%s\037%s\037%s\n' "$name" "$expect" "$DENY" "$ALSO"
-    DENY="" ALSO=""; return 0
+    printf '%s\037%s\037%s\037%s\037%s\037%s\037%s\n' \
+      "$name" "$expect" "$DENY" "$ALSO" "$EXTRA" "$CASE_SENSITIVE" "$SKILL"
+    DENY="" ALSO="" EXTRA="" CASE_SENSITIVE=false SKILL=""; return 0
   fi
   echo "-- $name: launched"
   # NOTE: prompt must precede flags — variadic flags (--allowedTools) would
   # otherwise swallow it.
   claude -p "$prompt" "$@" >"$tmp/$name.txt" 2>&1 &
-  E_NAME+=("$name"); E_EXPECT+=("$expect"); E_DENY+=("$DENY"); E_ALSO+=("$ALSO"); E_PID+=($!)
-  DENY="" ALSO=""
+  E_NAME+=("$name"); E_EXPECT+=("$expect"); E_DENY+=("$DENY"); E_ALSO+=("$ALSO")
+  E_EXTRA+=("$EXTRA"); E_CASE_SENSITIVE+=("$CASE_SENSITIVE"); E_SKILL+=("$SKILL"); E_PID+=($!)
+  DENY="" ALSO="" EXTRA="" CASE_SENSITIVE=false SKILL=""
 }
 
 # 1. Auto-trigger: HPC-flavored prompt, skill never named, plan mode (no
@@ -361,13 +374,96 @@ launch_eval unslop-zh-not-chinese 'unslop' \
   "/hq-mode I'm writing the README, in English, for a corpus of Chinese-language clinical notes, and I'll translate the README into Chinese later. Which skill is the last pass over the English README, and why? Plan only, write nothing." \
   --permission-mode plan
 
-# 17. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
+# 17-18. Chinese deliverables require the candidate's actual automatic Skill call. Assertions
+#     on the final answer still check the delivered prose, not the loaded skill instructions.
+DENY="英文草稿|English draft|内部纲要|写作纲要|检查清单|自检结果|评分"
+ALSO='4[[:space:]]*°[[:space:]]*C|4℃|记录本'
+SKILL=lab-unslop-zh-kimi
+launch_eval unslop-zh-kimi-original '登记|编号' \
+  "请为实验室公众号写一段中文原创说明，只回复成稿，不改文件。事实如下：样本到达后，工作人员先登记编号，再放入 4°C 冰箱；当天无法处理时，必须在记录本写明原因。读者是刚入组的学生，语气要清楚、正式，不要增添事实。" \
+  --output-format stream-json --verbose
+
+DENY="英文草稿|English draft|内部纲要|写作纲要|检查清单|自检结果|评分|离心|冷冻|37[[:space:]]*°"
+ALSO='核对|比对|联系'
+SKILL=lab-unslop-zh-kimi
+launch_eval unslop-zh-kimi-source '条码|条形码' \
+  "Write a Chinese instruction for new lab members using only the notes below. Keep the actions in their original order. Reply with only the final Chinese text and change no files. Notes: 'The intake desk scans each sample barcode. A second person compares it with the request form. If they differ, the desk holds the sample and contacts the submitter.'" \
+  --output-format stream-json --verbose
+
+# 19-23. Non-Chinese deliverables forbid only the candidate's Skill call. The existing routing
+#     question retains its mixed-document caveat; the four delivery cases observe real work.
+DENY='(use|choose|select|invoke|run|load)[^.]{0,80}(lab-)?unslop-zh-kimi'
+SKILL='!lab-unslop-zh-kimi'
+launch_eval unslop-zh-kimi-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-9_-]|$)' \
+  "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
+  --output-format stream-json --verbose
+
+ALSO='stor(e|ed|age|ing)|writ'
+SKILL='!lab-unslop-zh-kimi'
+launch_eval unslop-zh-kimi-english-delivery 'parser[^.]{0,80}validat' \
+  "Polish this English API documentation and return only the final English text. Do not change files. Source: 'The parser performs validation of the user input before the record is stored. The field labels are Chinese.'" \
+  --output-format stream-json --verbose
+
+ALSO='database'
+SKILL='!lab-unslop-zh-kimi'
+launch_eval unslop-zh-kimi-zh-request-english 'parser[^.]{0,80}validat|validat[^.]{0,80}parser' \
+  "请把这句技术文档润色为自然英文，只回复英文成稿，不改文件。原文：'写入数据库前，解析器会验证用户输入；字段标签是中文。'" \
+  --output-format stream-json --verbose
+
+ALSO='データベース|書き込'
+SKILL='!lab-unslop-zh-kimi'
+launch_eval unslop-zh-kimi-non-chinese '検証|入力' \
+  "Rewrite this documentation in natural Japanese. The deliverable must be Japanese, not Chinese. Reply with only the final Japanese text and change no files. Source: 'The parser validates user input before writing the record to the database.'" \
+  --output-format stream-json --verbose
+
+ALSO='record\.get'
+SKILL='!lab-unslop-zh-kimi'
+launch_eval unslop-zh-kimi-code 'def[[:space:]]+get_user_id' \
+  "Write only a Python function named get_user_id that takes a record dict and returns record.get('user_id', ''). No explanation, comments, docstring, or file changes." \
+  --output-format stream-json --verbose
+
+# 24. Strict technical translation: preserve facts and terms without carrying over
+#     English syntax. The DENY entries name only this scenario's bad renderings.
+DENY='电路断裂器|配置被验证[^。]{0,30}熔断器被启用|完全(避免|消除)[^。]{0,12}(过期|陈旧|旧数据)'
+ALSO='200[[:space:]]*(ms|毫秒)'
+launch_eval unslop-zh-kimi-translate '幂等' \
+  "Translate this technical documentation into natural Simplified Chinese. This is strict translation, not source-based writing: preserve every detail, condition, degree qualifier, document structure and technical term. Split or merge sentences and reorder information only where Chinese needs it, without changing the logic. Do not add, omit, summarize or explain. Reply with only the translation and change no files. Source: 'The configuration is validated before the circuit breaker is enabled. After three consecutive failures, the client waits 200 ms before retrying a read. It never automatically retries a write because the operation may not be idempotent. This safeguard can reduce duplicate requests, but it does not eliminate stale reads.'"
+
+# 25. Mixed content: repair only the authorized Chinese sentence. Case-sensitive,
+#     anchored assertions protect every line while leaving the Chinese rewrite flexible.
+DENY='对读取请求进行重试'
+EXTRA="^NOTE: Keep the existing order\. QUOTE: 'do not downgrade'$"
+ALSO="^RUN: API_TOKEN=<token> \./bin/client --config config/prod\.yaml --url 'https://example\.test/v2/items\?id=\{id\}' --client-version v2\.4\.0$"
+CASE_SENSITIVE=true
+launch_eval unslop-zh-kimi-mixed '^EDIT: (.*v2\.4\.0.*(3次.*失败|失败.*3次).*|.*(3次.*失败|失败.*3次).*v2\.4\.0.*)$' \
+  "Polish only the Chinese words after EDIT for natural technical Chinese. Keep every other character and the document structure unchanged, including all English, the command, path, URL, version, placeholders and quotes. Within EDIT, change only the Chinese wording and keep v2.4.0 and 3 unchanged. Do not add spaces between Chinese and English or convert simplified and traditional characters. Return only the complete document and change no files. Document:
+EDIT: 关于重试行为，v2.4.0的客户端在3次失败之后对读取请求进行重试，但是写入不会被自动重试。
+RUN: API_TOKEN=<token> ./bin/client --config config/prod.yaml --url 'https://example.test/v2/items?id={id}' --client-version v2.4.0
+NOTE: Keep the existing order. QUOTE: 'do not downgrade'"
+
+# 26. Chinese polishing: repair the calque, not the meaning. The anchored ALSO
+#     protects an already-natural sentence; DENY rejects an unchanged first line.
+DENY='对用户的输入进行验证|润色说明|检查清单|自检结果|评分|修改如下'
+ALSO='^若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。$'
+launch_eval unslop-zh-kimi-polish-fix '解析器[^。]{0,30}(验证|校验)用户(的)?输入' \
+  '请润色以下简体中文技术文档，只改确有问题的地方；已经自然的句子原样保留。保留事实、作者判断、责任主体、条件、范围、否定、情态、程度、引用和术语，不新增信息。只回复完整文本，不改文件。文本：
+关于输入校验，解析器在写入数据库前对用户的输入进行验证。
+若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。'
+
+# 27. Already-natural Traditional Chinese must survive byte for byte. An anchored
+#     EXPECT rejects gratuitous rewriting and script conversion, not only keywords.
+DENY='潤飾說明|润色说明|檢查清單|检查清单|自檢結果|自检结果|評分|评分|修改如下'
+launch_eval unslop-zh-kimi-polish-keep '^雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。$' \
+  "請潤飾以下繁體中文，只改確有問題的地方；已經自然的文字必須完整保留，不要為了改寫而改寫，也不要轉換簡繁或改變文體。只回覆完整文本，不改檔案。文本：
+雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。"
+
+# 28. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
 if $LIVE; then
   launch_eval live-sbatch '[0-9]{5,}' \
     "Using the lab-hpc skill: ssh to the arc cluster and submit a minimal smoke-test Slurm job (payload just 'hostname', 5-minute time limit) to a no-cost partition suitable for smoke tests. You have my explicit approval to submit this job — no need to ask again. Report the job id and its state, then ensure nothing is left behind: scancel it if it is still pending or running. Do not touch any other jobs." \
     --allowedTools "Bash(ssh:*)"
 
-  # 18. Live Edison: one real standard literature call, one credit, and the answer
+  # 29. Live Edison: one real standard literature call, one credit, and the answer
   #     has to come back cited. The assertion looks for citation furniture the
   #     platform emits and the prompt does not contain — page spans, a DOI, an
   #     "et al", a reference list — so a confident summary with no sources fails.
@@ -395,19 +491,36 @@ for i in "${!E_NAME[@]}"; do
   wait "${E_PID[$i]}"
   fold_plans "$tmp/${E_NAME[$i]}.txt"
   transcript="$tmp/${E_NAME[$i]}.txt"
-  if ! grep -qiE "${E_EXPECT[$i]}" "$transcript"; then
+  answer="$tmp/${E_NAME[$i]}.answer.txt"
+  if python3 tests/eval_stream.py answer "$transcript" >"$answer"; then
+    text="$answer"
+  else
+    text="$transcript"
+  fi
+  skill_failed=false
+  skill_failure=""
+  if [ -n "${E_SKILL[$i]}" ] && ! skill_failure=$(eval_skill_assert "${E_SKILL[$i]}" "$transcript"); then
+    skill_failed=true
+  fi
+  if ! eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_EXPECT[$i]}" "$text"; then
     echo "FAIL: ${E_NAME[$i]} no match for /${E_EXPECT[$i]}/ — transcript: $transcript"
     fail=1
-  elif [ -n "${E_ALSO[$i]}" ] && ! grep -qiE "${E_ALSO[$i]}" "$transcript"; then
+  elif [ -n "${E_ALSO[$i]}" ] && ! eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_ALSO[$i]}" "$text"; then
     echo "FAIL: ${E_NAME[$i]} no match for its ALSO /${E_ALSO[$i]}/ — transcript: $transcript"
+    fail=1
+  elif [ -n "${E_EXTRA[$i]}" ] && ! eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_EXTRA[$i]}" "$text"; then
+    echo "FAIL: ${E_NAME[$i]} no match for its EXTRA /${E_EXTRA[$i]}/ — transcript: $transcript"
     fail=1
   # Negated lines are dropped before the forbidden pattern is applied: a correct
   # answer SAYS it will never ask for the key, and grep cannot tell that sentence
   # from the request it forbids. Dropping too much only weakens this check, which
   # is the right way for a loose assertion to be wrong.
   elif [ -n "${E_DENY[$i]}" ] &&
-    grep -viE "never|not|n't|avoid|instead" "$transcript" | grep -qiE "${E_DENY[$i]}"; then
+    grep -viE "never|not|n't|avoid|instead" "$text" | eval_grep "${E_CASE_SENSITIVE[$i]}" "${E_DENY[$i]}" -; then
     echo "FAIL: ${E_NAME[$i]} matched forbidden /${E_DENY[$i]}/ — transcript: $transcript"
+    fail=1
+  elif $skill_failed; then
+    echo "FAIL: ${E_NAME[$i]} $skill_failure — transcript: $transcript"
     fail=1
   else
     echo "ok: ${E_NAME[$i]} matched /${E_EXPECT[$i]}/"

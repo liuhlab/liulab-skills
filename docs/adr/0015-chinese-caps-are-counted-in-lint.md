@@ -32,9 +32,9 @@ same broken units. So the choice was a second counter or a cap that silently doe
 - Two places now cap a file, and a reader has to know which one applies. `docs/agents/writing.md`
   says so in the same section as the word caps.
 - The 1000 and 2000 figures come from the English caps scaled by a rough 1.6 characters per
-  word. They are dials, set once and not measured against a corpus of Chinese skills, because
-  there is one Chinese skill. Raise them the way the word caps are raised: deliberately, with
-  the reason in the commit message.
+  word. They are dials, set once from that rough scaling rather than measured against a
+  corpus. The second Chinese skill uses the same uncalibrated dials. Raise them the way the
+  word caps are raised: deliberately, with the reason in the commit message.
 - The Chinese check reads every `SKILL.md` and reference page on each run. It is standard
   library and runs in well under a second, so the gate's cost does not change.
 

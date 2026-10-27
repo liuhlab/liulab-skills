@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_zh_english","name":"Skill","input":{"skill":"lab-unslop-zh-kimi"}}]}}
+{"type":"result","subtype":"success","result":"Before writing to the database, the parser validates user input. The field labels are in Chinese."}

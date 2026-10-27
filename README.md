@@ -53,6 +53,13 @@ Current skills:
   sentences, your way of addressing the reader and your facts all survive the
   edit. It loads only when what you are making is Chinese.
 
+- **`lab-unslop-zh-kimi`** is a Kimi candidate for Chinese writing, strict
+  technical translation and polishing. It routes by the deliverable's language and
+  writes directly in Chinese. Translations keep every detail, term and degree
+  qualifier. Polishing repairs only actual faults, preserves the author's voice and
+  can return natural text unchanged. Mixed documents change only authorized Chinese
+  text, leaving code and English intact.
+
 Skills taken from other projects keep their own names. These come from
 [mattpocock/skills](https://github.com/mattpocock/skills). Most are
 unchanged. A few carry a lab edit, which only adds what science work needs,

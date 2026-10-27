@@ -152,9 +152,10 @@ See `docs/adr/0007-edison-key-file-and-never-transmit.md`.
 ### Eval case
 
 One named scenario in `tests/eval.sh` — `trigger`, `containers`, `reuse-job`, and the
-rest. Each is a full headless agent session run against the *installed* plugin, asserting
-loose key phrases on the transcript. Evals test behavior; lint only proves the files are
-well-formed.
+rest. Each is a full headless agent session run against the *installed* plugin. As the case
+requires, assertions use loose key phrases, exact anchored text, case-sensitive protected
+text, or observed Skill tool calls. Evals test behavior; lint checks files and exercises
+those assertions against synthetic transcripts.
 
 ### Forked skill
 

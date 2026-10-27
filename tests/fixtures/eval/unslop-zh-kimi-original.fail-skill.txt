@@ -1,0 +1,3 @@
+{"type":"system","subtype":"init","skills":["unslop","lab-unslop-zh-kimi"]}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"I will use lab-unslop-zh-kimi for this request."}]}}
+{"type":"result","subtype":"success","result":"样本送达后，工作人员先登记编号，再放入 4°C 冰箱。若当天无法处理，须在记录本中写明原因。"}

@@ -5,6 +5,74 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.15 — 2026-10-25
+
+The Kimi Chinese candidate now polishes Chinese with fewer unnecessary edits.
+
+### Added
+
+- **Low-edit Chinese polishing in `lab-unslop-zh-kimi`.** It changes only actual
+  faults inside the authorized scope and returns already-natural text unchanged. It
+  preserves the author's voice, facts, judgments, actors, conditions, scope, negation,
+  modality, degree, quotations and terms. Simplified and Traditional Chinese, regional
+  wording and register follow the source and project. Examples cover technical, chat,
+  marketing and literary contexts without banning sentence forms.
+- **Two polishing eval cases** cover a fault that needs a safe repair and natural
+  Traditional Chinese that needs no change. Synthetic passing and failing transcripts
+  reject unchanged faulty text, rewritten natural text, changed protected meaning and
+  leaked review notes. Transcript review and a frozen manual comparison check Chinese
+  quality separately from keyword assertions.
+
+### Fixed
+
+- **The English-deliverable eval accepts a valid mixed-document caveat.** It no longer
+  fails a correct answer that names the Chinese candidate only for a future bilingual
+  section. It still rejects choosing that candidate for English prose. Its regression
+  fixture uses bare skill names.
+- **Kimi routing evals observe real Skill calls.** Chinese original and source-based cases
+  require automatic invocation. English, Japanese and pure-code deliveries forbid it, as
+  does a Chinese request for English. Text checks read the final answer, not the loaded
+  skill instructions.
+- **Mixed-content and polishing evals catch narrower faults.** Protected lines are anchored
+  and case-sensitive. The EDIT check keeps v2.4.0 and 3 in place. Safe repairs may retain
+  「关于重试行为」 and 「关于输入校验」; the weak-verb faults still fail.
+
+## 2026.10.14 — 2026-10-25
+
+The Kimi Chinese candidate now handles strict technical translation and mixed documents.
+
+### Added
+
+- **Strict technical translation in `lab-unslop-zh-kimi`.** It reads the whole
+  source and writes Chinese by paragraph and meaning group. It preserves facts, logic,
+  document structure, terminology and degree qualifiers. Sentence splits, merges and
+  reordering are allowed, but source-based-writing omissions and restructuring are not.
+  Review reads the Chinese alone first, then checks it against the source.
+- **Two translation references.** One distills Yu Guangzhong's three essays on Chinese
+  westernization into contextual judgments, repairs, exceptions and modern technical
+  examples. The other covers terminology priority, established English, consistency,
+  technical register, hedging, punctuation and protected mixed content.
+- **Two eval cases** cover strict translation and mixed documents. Synthetic passing and
+  failing transcripts check fact and term fidelity, a specific translationese repair,
+  and exact protected strings in the existing static gate.
+
+## 2026.10.13 — 2026-10-25
+
+A Kimi candidate for natural Chinese originals and source-based Chinese composition.
+
+### Added
+
+- **`lab-unslop-zh-kimi`** loads automatically for Chinese deliverables and can
+  also be called by name. It writes directly in Chinese, defaults to simplified Chinese,
+  follows specified regional and project conventions, and keeps source facts and
+  structure unless the task allows changes.
+- **A natural Chinese reference** covers collocations, subject-predicate relations,
+  reference, measure words, aspect markers, sentence structures and rhythm. Each rule
+  has conditions, examples and exceptions.
+- **Three eval cases** cover a Chinese original, an English request for Chinese
+  composition from source material, and an English deliverable that must not select the
+  candidate. Synthetic passing and failing transcripts run in the existing static gate.
+
 ## 2026.10.12 — 2026-10-25
 
 A Chinese prose pass, `lab-unslop-zh`, and the length cap that makes a Chinese page

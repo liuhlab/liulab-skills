@@ -1,0 +1,3 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_source","name":"Skill","input":{"skill":"lab-unslop-zh-kimi"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_fixture_source","content":"Launching skill: lab-unslop-zh-kimi"}]}}
+{"type":"result","subtype":"success","result":"工作人员先扫描每个样本的条形码，第二人再将条码与申请单核对。若两者不一致，工作人员暂存样本并联系提交人。"}
