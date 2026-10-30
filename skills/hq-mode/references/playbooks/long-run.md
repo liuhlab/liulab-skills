@@ -10,6 +10,9 @@
 4. Log every step per `references/show-me-your-work.md`.
 5. Mid-run problems are yours: fix them in their own change. Surface only an always-pause item,
    a real preference call, or a dead end.
-6. Pausing: a `wip:` commit and a `/handoff` note. Picking up: read the trail and redo nothing.
+6. Pausing: a `wip:` commit and a handoff note written by following the
+   [`handoff`](../../../handoff/SKILL.md) skill's file, then stop. A subagent pauses after
+   each unit, and when the orchestrator asks it to wrap up at its deadline or around half its
+   context. Picking up: read the trail and redo nothing.
 
 **Reply:** the predicate, steps run, what landed, what was reverted, the final state.
