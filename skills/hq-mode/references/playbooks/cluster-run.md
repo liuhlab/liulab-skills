@@ -39,15 +39,17 @@ requirements in implementer briefs, with the planned units and how each is verif
    target measure with its acceptable range. Size it for the full run, so one yes covers the
    pilot and every round. Post the approved plan on the run's issue, or in the work folder's
    README when there is no issue, and quote it word for word in every subagent brief. Inside
-   it, submit and cancel the plan's own jobs without asking. A job past any limit, a pilot
-   estimate past one, or cancelling a job the plan did not start goes back to the user: a
-   revised plan, or a yes for the cancel. The plan ends with the run. With no plan, "land it"
+   it, submit and cancel the plan's own jobs without asking. The plan does not cover a write
+   to shared data or the shared package store. A job past any limit, a pilot estimate past
+   one, cancelling a job the plan did not start, or such a write goes back to the user: a
+   revised plan, or a yes for that step. The plan ends with the run. With no plan, "land it"
    and "going to bed" change nothing: prepare everything else, then end the turn on the
    question.
 7. Run the pilot. Time each phase, observe CPU use and I/O, and identify the dominant cost
    with [`explain-the-number`](../principles/explain-the-number.md). Use those measurements
-   to choose what to parallelize. Keep fast steps simple. Give the user the full-run
-   estimate and resource plan before scaling.
+   to choose what to parallelize. Keep fast steps simple. Report the full-run estimate to
+   the user and scale within the plan; only an estimate past a plan limit goes back for a
+   revised plan.
 8. Before starting long work, compare expected workers and threads with allocated CPUs,
    memory and current free capacity from Slurm. A pass taking more than a few minutes on
    one core in a multicore allocation needs a measured justification or a revised plan.
@@ -64,8 +66,8 @@ requirements in implementer briefs, with the planned units and how each is verif
     after that. A job slower than the pilot predicts gets its cause found at once, before it
     burns its time budget.
 11. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
-    one unit), and wait for a yes unless the plan covers it. Never `scancel` a job you didn't
-    start.
+    one unit), and wait for a yes unless the plan covers it. Cancelling a job the plan did
+    not start needs a yes.
 12. Verify outputs, not exit codes: sizes, counts, a spot check against the pilot.
 
 ## Pilot design
