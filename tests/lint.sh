@@ -521,6 +521,29 @@ else
   err "check-hpc-config.sh with both dirs: expected 'both exist' and no mv, got exit $rc: $out"
 fi
 rm -rf "$hpc_home"
+# Connection reuse is advisory: the same aliases with and without a ControlMaster
+# stanza must exit alike, and only the one without it prints the advisory. The
+# aliases point at a placeholder jump host, so nothing here is a real connection.
+hpc_home=$(mktemp -d)
+cat > "$hpc_home/no-reuse" <<'EOF'
+Host arc chimera-login chimera-transfer ircbc ircbc-transfer
+  HostName fixture-login
+Host chimera-gpu chimera-cpu cpu0*
+  ProxyJump fixture-login
+EOF
+{ cat "$hpc_home/no-reuse"; printf '%s\n' 'Host *' '  ControlMaster auto' \
+  '  ControlPath ~/.ssh/cm-%C' '  ControlPersist 10m'; } > "$hpc_home/reuse"
+out_no=$(HOME="$hpc_home" bash skills/lab-hpc/scripts/check-hpc-config.sh -F "$hpc_home/no-reuse")
+rc_no=$?
+out_yes=$(HOME="$hpc_home" bash skills/lab-hpc/scripts/check-hpc-config.sh -F "$hpc_home/reuse")
+rc_yes=$?
+if [ $rc_no -eq $rc_yes ] && printf '%s' "$out_no" | grep -q 'connection reuse' \
+   && ! printf '%s' "$out_yes" | grep -q 'connection reuse'; then
+  ok "no ControlMaster → reuse advisory; with it → quiet; exit code the same"
+else
+  err "check-hpc-config.sh reuse advisory: want advisory only without reuse and equal exits, got $rc_no/$rc_yes: $out_no | $out_yes"
+fi
+rm -rf "$hpc_home"
 
 echo "== watch-job.sh self-test =="
 # A fake `ssh` first on PATH runs the watcher's remote command locally, against fake

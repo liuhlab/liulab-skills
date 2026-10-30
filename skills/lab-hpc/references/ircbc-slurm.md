@@ -14,6 +14,9 @@ expect other recent flags to be missing too. And `sbatch --test-only` does **not
 login and compute: it prints the would-be job id and start node while the queue stays empty. That is the dry
 run that pairs with the rule to show a script before submitting it.
 
+If `sacct` reports `Problem talking to the database`, the accounting database is down or slow. That is
+expected: fall back to `squeue -u $USER` for live jobs and `scontrol show job <jobid>` for one job's state.
+
 ## Partitions
 
 No accounting or QOS caps are exposed (`sacctmgr` returns nothing), so no `--account` is needed. The

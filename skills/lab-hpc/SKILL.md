@@ -27,6 +27,15 @@ Before designing a large-data pipeline or starting a long data job, read and app
 3. Ask which cluster unless context already pins it down. Then develop locally, push to GitHub,
    and `git pull` on the remote — code reaches a cluster through git, not scp.
 
+## Shell and environment
+
+- **The local shell on lab Macs is zsh.** Quote every URL, since `?` and `*` are globs. zsh
+  does not split an unquoted `$var` into words, so use an array or a loop over quoted items.
+  End a probe that may find nothing, such as `grep`, with `|| true`, so an empty result is not
+  a red error that hides real ones.
+- **Run project code on a cluster through `pixi run`,** never the system `python3`, which lacks
+  the project's modules.
+
 ## Work on a compute node, not the login node
 
 Get onto a compute node and stay there. A login node is a doorway, not a workspace: one shared
@@ -48,6 +57,9 @@ reasons, and only two**, to run anything on a login node:
    <alias> true` — probes fail fast, so sweeping every alias is cheap. Judge by exit status, not stderr.
 2. **Land and stay.** On arc, wrap commands in a login shell — `ssh <node> 'bash -lc "…"'` — or
    `pixi` and other user-installed tools are invisible.
+   Put each probe's commands into one ssh call, not one call per command: every call is a
+   connection through the login node. If ssh to an alias hangs after the VPN or network
+   dropped, clear the stale shared connection with `ssh -O exit <alias>`, then retry once.
 3. **No node anywhere?** Only then use the login node, and only to fix that: show the exact
    sbatch/salloc, get confirmation, submit, poll to RUNNING, ssh in, and leave. Footholds are
    preemptible; if one dies, repeat this step.
