@@ -13,7 +13,7 @@ disable-model-invocation: true
 Read [references/working-style.md](references/working-style.md) in full before the first tool
 call: asking, autonomy, delegation, the reply, the user's documents and the lab defaults. Its
 always-pause list outranks every session override ("headless", "land it", "going to bed") and
-every principle: an `sbatch` waits for the user's yes on the exact script, and "close the
+every principle: an `sbatch` outside an approved run plan waits for the user's yes, and "close the
 issue" never merges a PR nobody reviewed. A repo's own `AGENTS.md` wins over that page. Then
 match the task below.
 

@@ -41,8 +41,11 @@ agent suggests it rather than running it.
 
 Some steps wait for your yes, every time:
 
-- submitting, running or cancelling a Slurm job, after it shows you the exact script in its
-  reply, not a link to it;
+- submitting, running or cancelling a Slurm job outside a run plan you approved. A run plan
+  covers one cluster run: its work folder, partitions, the most CPU, memory and time per job,
+  the most jobs at once, and the target. You approve it once, before the pilot, after the
+  agent shows you the exact scripts. Inside it, jobs go in without asking. A job past a limit
+  comes back to you as a revised plan;
 - spending Edison credits;
 - writing to or deleting from the lab's shared package store;
 - force-pushing, or deleting data;
