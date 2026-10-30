@@ -75,8 +75,8 @@ report with the maintainer and decide nothing alone.
 9. Once it merges, on an up-to-date `main` and the maintainer's yes, tag the merged commit
    `v<version>` and `git push origin main --tags`, as `AGENTS.md` says.
 10. If the report lists **Eval cases to rerun**, upstream touched a skill whose lab edit has a
-    case. A case runs the installed plugin, so after step 9 run
-    `claude plugin marketplace update liulab` and `claude plugin update lab@liulab`. Ask about
-    each case, and on a yes run `bash tests/eval.sh --only <case>`. On a failure, read the
+    case. Use the development agent's verified installation. Ask about each case unless
+    already authorized, then run `bash tests/eval.sh --agent <agent> --only <case>`.
+    The runner installs and verifies an isolated snapshot. On a failure, read the
     transcript it names before calling the edit lost, then file an issue.
 11. Delete the temporary clones.

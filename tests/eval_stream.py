@@ -24,12 +24,28 @@ def events(path: Path) -> Iterator[dict[str, Any]]:
 def write_answer(path: Path) -> bool:
     """Print the last result answer and report whether one exists."""
     answers = []
+    codex_answer = None
     for event in events(path):
-        if event.get("type") != "result":
-            continue
-        result = event.get("result")
-        if isinstance(result, str):
-            answers.append(result)
+        kind = event.get("type")
+        if kind in {"error", "turn.failed"}:
+            return False
+        if kind == "turn.started":
+            answers.clear()
+            codex_answer = None
+        elif kind == "item.completed":
+            item = event.get("item", {})
+            if item.get("type") == "agent_message":
+                codex_answer = item.get("text")
+        elif kind == "turn.completed":
+            if isinstance(codex_answer, str) and codex_answer.strip():
+                answers.append(codex_answer)
+            codex_answer = None
+        elif kind == "result":
+            if event.get("is_error"):
+                return False
+            result = event.get("result")
+            if isinstance(result, str) and result.strip():
+                answers.append(result)
     if not answers:
         return False
     sys.stdout.write(answers[-1])

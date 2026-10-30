@@ -37,7 +37,7 @@ upstream name and is recorded in `upstream/`. Lint admits no other bare name
 
 - **Show the job first.** A skill never submits `sbatch` or `srun` work for the user without
   showing the exact script and getting a yes (`lab-hpc`'s hard rules).
-- **A change in behaviour is tested with `tests/eval.sh`**, not only with lint, which proves
+- **A change in behaviour is tested with `tests/eval.sh`**, using the development agent via `--agent`, not only with lint, which proves
   just that the files are well-formed. Run an eval for a behaviour change you need to verify,
   never as a routine check.
 - **`templates/` is documentation.** It holds the per-user files a member copies to their

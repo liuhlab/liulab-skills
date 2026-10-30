@@ -5,6 +5,16 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.19 — 2026-10-30
+
+### Fixed
+
+- Eval runs now select the development agent explicitly, install a private plugin snapshot,
+  and verify its content before launch. Codex runs no longer change other agents' installs.
+- Failed setup, failed runners and missing answers cannot pass through matching output.
+- Review and development guidance now checks eval evidence and carries authorization through
+  release and cleanup without weakening sandbox controls.
+
 ## 2026.10.18 — 2026-10-30
 
 ### Changed

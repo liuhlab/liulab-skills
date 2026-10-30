@@ -11,8 +11,9 @@ one running a command: Claude Code through `autoUpdate: true` on the `liulab` en
 `extraKnownMarketplaces`, Codex by upgrading its git marketplaces at startup, and Kimi by
 reading the clone live. One user-invoked skill, `/lab-setup`, sets a machine up, and links
 `bin/edison-cli` into a directory on the user's PATH for all three. Releasing is pushing. To
-update by hand, run `claude plugin marketplace update liulab`, then
-`claude plugin update lab@liulab`.
+update Claude Code by hand, run `claude plugin marketplace update liulab`, then
+`claude plugin update lab@liulab`. Codex uses its own plugin CLI. Development evals install
+and verify a private snapshot through the selected agent; they never refresh another agent.
 
 ## Why automatic
 

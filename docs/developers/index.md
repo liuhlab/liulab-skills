@@ -118,7 +118,7 @@ that task by name, so your machine and CI cannot drift apart. To add a check, ad
 
 Two more checks run only on your own machine, never in CI. `tests/preflight.sh` reads your
 real ssh config. `tests/eval.sh` runs a full agent session per case and costs tokens, so run
-one case with `--only` when a change to a skill's behavior needs proof.
+one case with `--agent codex --only <case>` when a change to a skill's behavior needs proof.
 
 ## The rules that hold everywhere
 
