@@ -32,4 +32,5 @@ For a quick ballpark the user asked for, one run is enough. Still check question
 
 ## Other perf material
 
+- A pilot for a cluster run, such as the fastest safe fetch rate from a server: design it with the cluster-run playbook's [Pilot design](playbooks/cluster-run.md#pilot-design) section, then vet its numbers here.
 - Vet the improve-a-metric playbook's harness (`playbooks/improve-a-metric.md`) before it is frozen. The frozen harness then prints error and work counts, so each keep-or-revert checks questions 4 and 7 for free.
