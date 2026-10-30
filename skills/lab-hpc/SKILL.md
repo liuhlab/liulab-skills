@@ -48,6 +48,9 @@ reasons, and only two**, to run anything on a login node:
    <alias> true` — probes fail fast, so sweeping every alias is cheap. Judge by exit status, not stderr.
 2. **Land and stay.** On arc, wrap commands in a login shell — `ssh <node> 'bash -lc "…"'` — or
    `pixi` and other user-installed tools are invisible.
+   Put each probe's commands into one ssh call, not one call per command: every call is a
+   connection through the login node. If ssh to an alias hangs after the VPN or network
+   dropped, clear the stale shared connection with `ssh -O exit <alias>`, then retry once.
 3. **No node anywhere?** Only then use the login node, and only to fix that: show the exact
    sbatch/salloc, get confirmation, submit, poll to RUNNING, ssh in, and leave. Footholds are
    preemptible; if one dies, repeat this step.
