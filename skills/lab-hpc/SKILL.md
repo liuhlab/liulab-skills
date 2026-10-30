@@ -66,10 +66,8 @@ reasons, and only two**, to run anything on a login node:
 
 ## Watching a job
 
-Poll a job only with `bash scripts/watch-job.sh <alias> <jobid> [file]`, run in the background,
-never a `sleep` loop. Each check is one ssh call; it exits 0 done, 1 failed, 3 when the file
-stops growing, 4 when it gets no answer (`-h` for flags). Every job-watching subagent's brief
-names it.
+Poll a job only with `bash scripts/watch-job.sh <alias> <jobid> [file]` in the background, never
+a `sleep` loop; `-h` lists its exit codes. Every job-watching subagent's brief names it.
 
 ## Hard rules
 
