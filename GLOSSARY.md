@@ -42,7 +42,7 @@ resolves to, and the no-secrets sweep fails a commit that does.
 ### Always-pause list
 
 The actions the mode never takes without the user's yes: submitting or cancelling Slurm
-work, spending Edison credits, force-pushing, deleting data, merging a pull request nobody
+work outside an approved run plan, spending Edison credits, force-pushing, deleting data, merging a pull request nobody
 reviewed, making private material public, and the rest, written once on the working-style
 page. It outranks every session override ("headless", "land it", "going to bed") and every
 principle. A lab safety rule lives here or in a lab-owned skill, and never inside upstream
@@ -336,6 +336,16 @@ costs no place in the skill listing.
 
 A long-lived Slurm job a user keeps to hold a node on a reserved partition. Never cancel
 one you did not start, and never cancel someone else's to make room.
+
+### Run plan
+
+The envelope and target a user approves once for one cluster run, before its pilot: the
+work folder, the partitions, the most CPU, memory and wall time per job, the most jobs at
+once, and the measure that counts with its acceptable range. Every job inside it runs
+without a further yes, a subagent's included, until the run ends; it is written on the
+run's issue so later sessions read the same limits. A job outside it, or cancelling a job
+the plan did not start, goes back to the always-pause list. See
+`docs/adr/0017-slurm-approval-is-per-run-plan.md`.
 
 ### Shared package store
 
