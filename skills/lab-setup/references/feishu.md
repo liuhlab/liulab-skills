@@ -53,5 +53,5 @@ fails with `invalid_client` (code 20002).
   `[verified]`: same token, one file in the folder, new content, and a new `version` in the
   reply.
 - The old version is kept `[verified]`: `drive +version-history` lists it, and
-  `drive +version-get --version <version>` downloads it. How long Drive keeps it is **open**
-  (liuhlab/liulab-skills#144).
+  `drive +version-get --version <version>` downloads it. No source says how long Drive
+  keeps it, so don't count on an old version lasting.
