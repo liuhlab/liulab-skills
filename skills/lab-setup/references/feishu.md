@@ -20,7 +20,9 @@ fails with `invalid_client` (code 20002).
 - With no user login, `lark-cli auth status` reports `"identity": "bot"` `[verified]`: a call
   without `--as` then runs as the bot, and any file it creates belongs to the bot's app.
 - `lark-cli config strict-mode user` makes implicit calls run as the user and refuses
-  `--as bot`. Its help forbids an agent from changing it without the user's yes.
+  `--as bot`. Its help forbids an agent from changing it without the user's yes. The lab
+  default is `user`, set with `--global` so every profile inherits it; a profile's own
+  setting overrides the global one.
 - Strict mode alone does not hold: when the CLI cannot load the account, it treats strict
   mode as off (read in the source, `ResolveStrictMode`). Hence the lab rule of `--as user` on
   every call.
@@ -51,5 +53,5 @@ fails with `invalid_client` (code 20002).
   `[verified]`: same token, one file in the folder, new content, and a new `version` in the
   reply.
 - The old version is kept `[verified]`: `drive +version-history` lists it, and
-  `drive +version-get --version <version>` downloads it. How long Drive keeps it is **open**
-  (liuhlab/liulab-skills#144).
+  `drive +version-get --version <version>` downloads it. No source says how long Drive
+  keeps it, so don't count on an old version lasting.

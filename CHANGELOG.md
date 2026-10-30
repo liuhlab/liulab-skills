@@ -5,6 +5,13 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.22 — 2026-10-30
+
+### Changed
+
+- `/lab-setup` now sets `lark-cli` strict mode to `user` for every app on the machine as the
+  lab default, after your yes, instead of only offering it. Every call then runs as you.
+
 ## 2026.10.21 — 2026-10-30
 
 ### Changed
