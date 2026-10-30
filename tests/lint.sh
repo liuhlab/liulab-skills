@@ -522,6 +522,60 @@ else
 fi
 rm -rf "$hpc_home"
 
+echo "== watch-job.sh self-test =="
+# A fake `ssh` first on PATH runs the watcher's remote command locally, against fake
+# squeue/scontrol/sacct that replay one scripted line per ssh call:
+# "<squeue> <scontrol> <sacct> <file size>", with "-" for no output (job gone, or a
+# database error). Nothing reaches a host.
+wj_dir=$(mktemp -d)
+mkdir "$wj_dir/bin"
+cat > "$wj_dir/bin/ssh" <<'EOF'
+#!/usr/bin/env bash
+remote="${*: -1}"
+n=$(( $(wc -l < "$WJ_DIR/calls") + 1 ))
+echo call >> "$WJ_DIR/calls"
+line=$(sed -n "${n}p" "$WJ_DIR/scenario")
+[ -n "$line" ] || exit 255
+set -- $line
+printf '%s\n' "$1" > "$WJ_DIR/squeue.out"
+printf '%s\n' "$2" > "$WJ_DIR/scontrol.out"
+printf '%s\n' "$3" > "$WJ_DIR/sacct.out"
+head -c "$4" /dev/zero > "$WJ_DIR/out.log"
+cd "$WJ_DIR" && sh -c "$remote"
+EOF
+cat > "$wj_dir/bin/slurm-fake" <<'EOF'
+#!/usr/bin/env bash
+t=$(basename "$0")
+v=$(cat "$WJ_DIR/$t.out")
+[ "$v" = - ] && exit 1
+if [ "$t" = scontrol ]; then printf 'JobId=1 JobName=x\n   JobState=%s Reason=None\n' "$v"
+else printf '%s\n' "$v"; fi
+EOF
+chmod +x "$wj_dir/bin/"*
+for t in squeue scontrol sacct; do ln -s slurm-fake "$wj_dir/bin/$t"; done
+wj_case() { # <label> <expected exit> <expected ssh calls> <scenario lines...>
+  local label="$1" want_rc="$2" want_calls="$3"; shift 3
+  printf '%s\n' "$@" > "$wj_dir/scenario"
+  : > "$wj_dir/calls"
+  local out rc calls
+  out=$(WJ_DIR="$wj_dir" PATH="$wj_dir/bin:$PATH" \
+        bash skills/lab-hpc/scripts/watch-job.sh -i 0.1 -n 2 somealias 123 out.log 2>&1)
+  rc=$?
+  calls=$(wc -l < "$wj_dir/calls" | tr -d ' ')
+  if [ "$rc" -eq "$want_rc" ] && [ "$calls" -eq "$want_calls" ]; then
+    ok "watch-job.sh $label → exit $rc after $calls ssh calls"
+  else
+    err "watch-job.sh $label: expected exit $want_rc after $want_calls ssh calls, got exit $rc after $calls: $out"
+  fi
+}
+wj_case "done" 0 3 \
+  "RUNNING - - 10" "RUNNING - - 20" "- COMPLETED COMPLETED 30"
+wj_case "failed (job gone from squeue and scontrol, sacct answers)" 1 2 \
+  "PENDING - - 0" "- - FAILED 0"
+wj_case "no growth (-n 2)" 3 4 \
+  "RUNNING - - 10" "RUNNING - - 20" "RUNNING - - 20" "RUNNING - - 20"
+rm -rf "$wj_dir"
+
 echo "== edison preflight self-test =="
 # Fixtures are built here and deleted on the way out; none is ever committed.
 # A committed fixture holding a fake key would trip the Edison rule in the sweep

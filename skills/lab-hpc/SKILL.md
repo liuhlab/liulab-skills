@@ -52,6 +52,13 @@ reasons, and only two**, to run anything on a login node:
    sbatch/salloc, get confirmation, submit, poll to RUNNING, ssh in, and leave. Footholds are
    preemptible; if one dies, repeat this step.
 
+## Watching a job
+
+Poll a job only with `bash scripts/watch-job.sh <alias> <jobid> [file]`, run in the background,
+never a `sleep` loop. Each check is one ssh call; it exits 0 done, 1 failed, 3 when the file
+stops growing, 4 when it gets no answer (`-h` for flags). Every job-watching subagent's brief
+names it.
+
 ## Hard rules
 
 - **Work on a compute node; the login node has exactly the two uses above.** Nothing else.
