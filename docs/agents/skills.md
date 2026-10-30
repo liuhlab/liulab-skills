@@ -35,8 +35,9 @@ upstream name and is recorded in `upstream/`. Lint admits no other bare name
 
 ## Rules every lab skill keeps
 
-- **Show the job first.** A skill never submits `sbatch` or `srun` work for the user without
-  showing the exact script and getting a yes (`lab-hpc`'s hard rules).
+- **Show the job first.** A skill never submits `sbatch` or `srun` work for the user outside
+  a run plan the user approved after seeing the exact scripts (`lab-hpc`'s hard rules,
+  `docs/adr/0017-slurm-approval-is-per-run-plan.md`).
 - **A change in behaviour is tested with `tests/eval.sh`**, using the development agent via `--agent`, not only with lint, which proves
   just that the files are well-formed. Run an eval for a behaviour change you need to verify,
   never as a routine check.

@@ -37,7 +37,7 @@ and shared I/O budgets.
 
 ## Submitting
 
-Never submit without showing the exact script and getting confirmation (`SKILL.md`). Read-only probes —
+Never submit outside an approved run plan (`SKILL.md`). Read-only probes —
 `squeue`, `sinfo`, `sbatch --test-only` — need no permission.
 
 ```bash

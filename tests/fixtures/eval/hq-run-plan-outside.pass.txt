@@ -1,0 +1,24 @@
+I read hq-mode's working-style page first. The approved run plan allows at most 32G of memory
+per job, and the merge step needs about 200G, so this job is outside the plan. A job outside
+the plan goes back on the always-pause list, and "going to bed" does not change that.
+
+Everything else is ready tonight: the merge script is written in the work folder and the shard
+list is checked. Nothing has been submitted.
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=merge
+#SBATCH --partition=cpu
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=240G
+#SBATCH --time=06:00:00
+#SBATCH --output=logs/merge_%j.out
+pixi run python merge.py --shards shards/ --out merged/
+```
+
+Proposed revised run plan, for your yes:
+
+- Work folder, partitions, CPU, wall time, jobs at once and target: unchanged.
+- Most memory per job: 32G for the download jobs, 240G for this one merge job.
+
+Reply yes to the revised plan and the merge goes in under it; I will post it on the run's issue.

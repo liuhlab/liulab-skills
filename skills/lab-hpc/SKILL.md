@@ -55,8 +55,16 @@ reasons, and only two**, to run anything on a login node:
 ## Hard rules
 
 - **Work on a compute node; the login node has exactly the two uses above.** Nothing else.
-- **Never submit sbatch/srun without showing the exact script and getting confirmation.**
-  Read-only probes like `squeue` and `sbatch --test-only` need no permission.
+- **Never submit sbatch/srun outside an approved run plan.** The user approves the plan once,
+  before the pilot and sized for the full run: work folder, partitions, the most CPU, memory
+  and wall time per job, the most jobs at once, and the target measure with its range. Show
+  the exact scripts when you propose it. Inside it, you and your subagents submit, and cancel
+  its own jobs, without asking. A job past any limit, or a pilot estimate past one, needs a
+  revised plan. Post the approved plan on the run's issue (no issue: the work folder's
+  README) and quote it word for word in every subagent brief. It ends with the run. With no
+  plan, show the exact script and get confirmation for every job; "headless", "land it" and
+  "going to bed" are not a yes. Read-only probes like `squeue` and `sbatch --test-only` need
+  no permission.
 - **Reachable never means permitted.** ircbc lets you ssh to a node you hold no job on; working
   there steals from the scheduler. Hold an allocation, and never scancel a job you didn't start.
 - If ssh to `ircbc` hangs, **stop and tell the user to check the VPN** (atrust, managed by

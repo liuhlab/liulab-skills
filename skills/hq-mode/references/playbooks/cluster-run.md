@@ -27,9 +27,17 @@ requirements in implementer briefs, with the planned units and how each is verif
 3. Write the sbatch scripts: one unit as a pilot (one sample, one chromosome, a small
    subsample), then the full set. Outputs and logs go to scratch or the project's output root,
    never the home directory and never the reference data root.
-4. Show the exact scripts and wait for the user's yes before any `sbatch` or `srun`, the pilot's
-   included. "Land it" and "going to bed" don't change this: prepare everything else, then end
-   the turn on the question.
+4. Propose the run plan, with the exact scripts in the reply, and wait for the user's yes
+   before any `sbatch` or `srun`, the pilot's included. The plan states the work folder, the
+   partitions, the most CPU, memory and wall time per job, the most jobs at once, and the
+   target measure with its acceptable range. Size it for the full run, so one yes covers the
+   pilot and every round. Post the approved plan on the run's issue, or in the work folder's
+   README when there is no issue, and quote it word for word in every subagent brief. Inside
+   it, submit and cancel the plan's own jobs without asking. A job past any limit, a pilot
+   estimate past one, or cancelling a job the plan did not start goes back to the user: a
+   revised plan, or a yes for the cancel. The plan ends with the run. With no plan, "land it"
+   and "going to bed" change nothing: prepare everything else, then end the turn on the
+   question.
 5. Run the pilot. Time each phase, observe CPU use and I/O, and identify the dominant cost
    with [`explain-the-number`](../principles/explain-the-number.md). Use those measurements
    to choose what to parallelize. Keep fast steps simple. Give the user the full-run
@@ -45,7 +53,7 @@ requirements in implementer briefs, with the planned units and how each is verif
    Check each unit as it finishes. If I/O or another measured limit favors serial work,
    record that reason and size the allocation accordingly.
 7. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
-   one unit), and wait for a yes. Never `scancel` a job you didn't start.
+   one unit), and wait for a yes unless the plan covers it. Never `scancel` a job you didn't start.
 8. Verify outputs, not exit codes: sizes, counts, a spot check against the pilot.
 
 **Reply:** what ran where, the pilot's numbers and the extrapolation, per-unit status as a
