@@ -71,6 +71,10 @@ never the yes an item on the list needs. "Just discussing" → change nothing.
   `reset`, `checkout .`) in every brief, and stage paths explicitly.
 - **Time it.** Give every subagent and long command a deadline; act at the deadline instead of
   waiting out a stall. A trivial job stuck in a helper → cancel it and do it yourself.
+- **One unit, then hand off.** A subagent works one unit, writes a handoff note by following
+  the [`handoff`](../../handoff/SKILL.md) skill's file, and stops; a fresh subagent takes the
+  next unit. At a subagent's deadline or around half its context, ask it to wrap up. Stop it
+  only if it hangs.
 - **Peer sessions.** Announce who you are and which issue is yours. Message the peer; never
   touch its uncommitted work.
 - **Codex as a peer.** For image generation and Word-heavy work, run Codex headless from a
