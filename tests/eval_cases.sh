@@ -287,7 +287,7 @@ launch_eval edison-recover 'task list|get_tasks|task history|trajector' \
 # invalidation, cluster constraints and submission approval; phrases alone cannot prove them.
 ALSO='checkpoint|resum|atomic|temporary.*rename'
 EXTRA='(reus|cach|persist|materializ|build once|derive once|index)[^.]{0,100}(input|snapshot|config|fingerprint|hash|version)|(input|snapshot|config|fingerprint|hash|version)[^.]{0,100}(reus|cach|persist|materializ|index)'
-launch_eval lab-hpc-data-job-planning 'cpus-per-task|CPU budget|core budget|workers?[^.]{0,60}(allocation|cores)|[0-9]+[- ]+(workers|threads|processes)' \
+launch_eval lab-hpc-data-job-planning 'cpus-per-task|CPU budget|core budget|workers?[^.]{0,60}(allocation|cores)|[0-9]+[- ]+(workers|threads|processes)|reader threads[[:space:]]*\+[[:space:]]*writer threads[[:space:]]*\+[[:space:]]*workers[[:space:]]*[×*][[:space:]]*threads per worker[[:space:]]*(≤|<=)[[:space:]]*[0-9]+' \
   "/lab-hpc We hold a 32-core allocation on arc. A 33 GB table and a 5 GB gzip containing about 166 GB of XML feed a metadata build. A timed pass over the XML took 24 minutes with one busy core, and each downstream build reads both source files again to pick a few records. Other partitions appear idle. Design the next implementation and run plan so it can finish unattended overnight. Explain what to measure and how to choose resources. Plan only, run no cluster commands or jobs." \
   --permission-mode plan
 

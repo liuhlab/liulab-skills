@@ -12,6 +12,7 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 - Eval runs now select the development agent explicitly, install a private plugin snapshot,
   and verify its content before launch. Codex runs no longer change other agents' installs.
 - Failed setup, failed runners and missing answers cannot pass through matching output.
+- The planning eval accepts an explicit equation that bounds total threads by the allocation.
 - Review and development guidance now checks eval evidence and carries authorization through
   release and cleanup without weakening sandbox controls.
 
