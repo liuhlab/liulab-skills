@@ -27,6 +27,8 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 4. Use **implementer subagents** to implement each ticket, each in its own worktree on its own branch. Each implementer subagent:
    - confirms its worktree is based on the integration branch before starting, and resets onto it if not;
    - calls the Skill tool with `tdd` to build the ticket;
+   - reads `lab-hpc` and `hq-mode`'s cluster-run playbook (`references/playbooks/cluster-run.md`) first, when its ticket touches a lab cluster;
+   - runs one plain command per call, from the worktree root, and puts longer logic in a script file run as one command;
    - merges the integration branch tip into its own branch before reporting done
 
 5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
@@ -36,5 +38,7 @@ Communication to and from subagents should be sparse. Communicate primarily thro
 7. Once all tickets are complete, call the Skill tool with `code-review` on the integration branch. Fix all issues raised by the code review in a single **implementer subagent**.
 
 8. If a draft PR exists, mark it ready for review. Otherwise, resolve each ticket the way the issue tracker closes work, and report the integration branch.
+   Either way, close each ticket as its work lands on the integration branch in step 5; the final pull request merge can wait.
 
 9. Clean up all **implementer subagent** worktrees.
+   Delete each merged branch, local and remote, along with its worktree, as `hq-mode`'s close-the-session playbook does.
