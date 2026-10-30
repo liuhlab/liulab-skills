@@ -1,0 +1,1 @@
+Use 8 workers and restart the entire scan from the beginning after every interruption.

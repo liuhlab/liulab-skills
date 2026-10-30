@@ -64,6 +64,9 @@ never the yes an item on the list needs. "Just discussing" → change nothing.
 - **Brief with pointers.** The issue, the files, the scope, the host rule from `lab-hpc`, and
   "read `hq-mode`'s working-style page first". A subagent can't type a user-invoked skill such
   as `/implement`: give it the skill file's path to read.
+- **Large-data design.** Require correctness, robustness, resumability and efficient resource
+  use in the design and every implementer brief. Before building a pipeline, apply
+  [`cluster-run`](playbooks/cluster-run.md)'s design and resource checks.
 - **One worktree per parallel worker.** In a shared checkout, forbid repo-wide git (`stash`,
   `reset`, `checkout .`) in every brief, and stage paths explicitly.
 - **Time it.** Give every subagent and long command a deadline; act at the deadline instead of
