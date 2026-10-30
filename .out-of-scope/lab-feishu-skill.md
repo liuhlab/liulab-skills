@@ -11,7 +11,7 @@ call runs as, the error format, missing scopes and the approval step for risky c
 ship with the CLI and update with it. A lab skill wrapping them would repeat that text and fall
 behind each release.
 
-What the official skills lack is short: how long a login lasts, and three Drive limits. That fits
+What the official skills lack is short: how long a login lasts, and a few Drive limits. That fits
 on one page, `skills/lab-setup/references/feishu.md`.
 
 ## When to revisit

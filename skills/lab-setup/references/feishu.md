@@ -5,15 +5,25 @@
 
 Read this before a lab task that keeps a login alive or pushes files to Drive. The official
 skills cover everything else: identity and `--as`, the error envelope on stderr, missing
-scopes, the high-risk approval step (exit 10, `--yes`) and `auth status --verify`. Read them
-with `lark-cli skills read lark-shared` and `lark-cli skills read lark-drive`, or from the
-installed copies. Nothing from them is repeated here. Setup is step 5 of `SKILL.md`.
+scopes and the high-risk approval step (exit 10, `--yes`). Read them with
+`lark-cli skills read lark-shared` and `lark-cli skills read lark-drive`, or from the
+installed copies. Setup is section 4 of `SKILL.md`.
 
 ## Setup
 
 To reuse an app, pass `--app-id` to `config init`, as `SKILL.md` does. A plain interactive
 `config init` can keep an old App ID and pair it with the new secret, and every call then
 fails with `invalid_client` (code 20002).
+
+## Identity
+
+- With no user login, `lark-cli auth status` reports `"identity": "bot"` `[verified]`: a call
+  without `--as` then runs as the bot, and any file it creates belongs to the bot's app.
+- `lark-cli config strict-mode user` makes implicit calls run as the user and refuses
+  `--as bot`. Its help forbids an agent from changing it without the user's yes.
+- Strict mode alone does not hold: when the CLI cannot load the account, it treats strict
+  mode as off (read in the source, `ResolveStrictMode`). Hence the lab rule of `--as user` on
+  every call.
 
 ## Login life
 
@@ -38,7 +48,7 @@ fails with `invalid_client` (code 20002).
 - `drive +push` has no exclude option `[verified]`: it uploads `.DS_Store`, lock files and
   anything else in the folder. Push a clean copy of the folder, not a working tree.
 - `drive +version-history` lists a file's old versions `[verified]`. How long Drive keeps
-  them is **open**.
+  them is **open** (liuhlab/liulab-skills#144).
 - `drive +upload --file-token <token>` is documented to overwrite a file in place. Whether
-  it does on the lab tenant is **open** `[unverified]`; check the file's version history
-  after the first one.
+  it does on the lab tenant is **open** `[unverified]` (liuhlab/liulab-skills#144); check the
+  file's version history after the first one.

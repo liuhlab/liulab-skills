@@ -12,9 +12,10 @@ disable-model-invocation: true
 
 # Set this machine up for the lab plugin
 
-One script does the work: `scripts/lab_setup.py` in this skill's folder. Only `lark-cli` is set
-up by hand (step 5). The script acts on the home directory named on its command line, changes
-only what is not yet set up, and removes nothing. A second run on a set-up machine changes no file, so a rerun repairs a half-done one.
+One script does the work: `scripts/lab_setup.py` in this skill's folder. It acts on the home
+directory named on its command line, changes only what is not yet set up, and removes
+nothing. A second run on a set-up machine changes no file, so a rerun repairs a half-done one.
+Feishu's `lark-cli` is the exception: section 4 sets it up by hand.
 
 | Step | What it sets up |
 | --- | --- |
@@ -58,25 +59,12 @@ user agreed to, for example
 `<python> <skill dir>/scripts/lab_setup.py --home "$HOME" --only claude --only kimi`, and
 relay what it prints. Each line should now read `changed` or `ok`.
 
-## 4. What happens next
-
-- **Claude Code** checks the marketplace in the background after the first message of a
-  session, and loads an update at the next launch. By hand:
-  `claude plugin marketplace update liulab`, then `claude plugin update lab@liulab`.
-- **Codex** upgrades the marketplace at every startup; restart it once now.
-- **Kimi Code** reads the clone live, so it follows each Claude Code update.
-- **`edison-cli`** works as a bare command in a new shell. `/lab-edison` checks the key.
-- **`lark-cli`** needs a new login at least every 7 days of disuse: see
-  [references/feishu.md](references/feishu.md).
-- **The lab defaults** load in each new session. An edit to the page reaches every agent with
-  the next update, no rerun. If the user once appended the old `CLAUDE-stub.md` rules to
-  `~/.claude/CLAUDE.md`, say the page carries them now; removing that copy is the user's call.
-
-## 5. Feishu's `lark-cli`, by hand
+## 4. Feishu's `lark-cli`, by hand
 
 The script does not run these: the app and the login need the user in a browser or a terminal.
-Offer them after the script, skip any `lark-cli auth status --json` shows done, and ask
-before each:
+Offer them after the script and ask before each. Skip what is done: `command -v lark-cli` for
+1, the `lark-*` folders in `~/.agents/skills` for 2, `lark-cli auth status --json` for 3 to 5,
+`lark-cli config strict-mode` for 6.
 
 1. `npm install -g @larksuite/cli`. No `npm`: the user installs Node.js.
 2. `npx -y skills add https://open.feishu.cn -g --skill '*' -y`: Feishu's official `lark-*`
@@ -91,9 +79,22 @@ before each:
 4. `lark-cli auth login --recommend`. It blocks too; relay its link at once, as it expires in
    minutes.
 5. `lark-cli auth status --verify --json` must show `identities.user.status` as `ready`.
-6. Offer `lark-cli config strict-mode user`: implicit calls then run as the user, and
-   `--as bot` is refused. Run it only on the user's yes, as the CLI's help requires. The lab
-   defaults' `--as user` rule holds either way.
+6. Offer `lark-cli config strict-mode user`, and run it only on the user's yes. What it does
+   and why the `--as user` rule still holds: [references/feishu.md](references/feishu.md).
+
+## 5. What happens next
+
+- **Claude Code** checks the marketplace in the background after the first message of a
+  session, and loads an update at the next launch. By hand:
+  `claude plugin marketplace update liulab`, then `claude plugin update lab@liulab`.
+- **Codex** upgrades the marketplace at every startup; restart it once now.
+- **Kimi Code** reads the clone live, so it follows each Claude Code update.
+- **`edison-cli`** works as a bare command in a new shell. `/lab-edison` checks the key.
+- **`lark-cli`** keeps its login only while it is used: see
+  [references/feishu.md](references/feishu.md).
+- **The lab defaults** load in each new session. An edit to the page reaches every agent with
+  the next update, no rerun. If the user once appended the old `CLAUDE-stub.md` rules to
+  `~/.claude/CLAUDE.md`, say the page carries them now; removing that copy is the user's call.
 
 ## Rules
 
