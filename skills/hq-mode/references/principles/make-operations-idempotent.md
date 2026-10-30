@@ -11,6 +11,7 @@ Design operations so they converge to the correct state regardless of how many t
 - Self-healing locks: use PID-based stale lock detection
 - Locks on a shared filesystem: a PID means something on one node only, so a live lock held by a job on another node looks stale and gets stolen. A lock names its host and job. Prefer per-job outputs, which need no lock.
 - Atomic outputs: write to a temporary name, then rename. Skip an output only if it exists and validates, never because it exists: a requeued job otherwise counts a half-written file as done.
+- Reusable data: record the input identity and relevant code and configuration with each completed unit or derived index. Reuse only when those match and the output validates. Rebuild affected units when they change, and restart interrupted units without treating temporary files as finished work.
 - Idempotent scheduling: failed work respawns cleanly, fresh input regenerated after each cycle
 
 **The test:**

@@ -5,6 +5,20 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.18 — 2026-10-30
+
+### Changed
+
+- Large data jobs now require a plan for safe restarts and useful parallel work.
+  Agents measure the slow step, match workers to available cores and memory, and reuse
+  derived data instead of scanning the same snapshot for every build.
+- Cluster guidance connects that plan to each cluster's limits. The arc priority queue
+  also allows preemption, so a held node does not guarantee an uninterrupted run.
+
+### Added
+
+- A focused eval checks planning for a slow snapshot scan on a multicore allocation.
+
 ## 2026.10.17 — 2026-10-30
 
 Real evals caught three false failures in the Chinese assertions. The skill is unchanged.

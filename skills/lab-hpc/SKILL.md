@@ -13,6 +13,9 @@ description: >-
 
 Per-cluster detail sits in `references/`: `arc-hpc.md` and `ircbc-hpc.md` for hosts, network and storage; `arc-slurm.md` and `ircbc-slurm.md` for partitions and submitting.
 
+Before designing a large-data pipeline or starting a long data job, read and apply
+[`cluster-run`](../hq-mode/references/playbooks/cluster-run.md), including on a held node.
+
 ## Step 0 — before the first ssh
 
 1. Run `bash scripts/check-hpc-config.sh` (`--live` also tests ssh). If the cluster the task needs

@@ -35,6 +35,12 @@ projected start time. Jobs there are preemptible, so a foothold can vanish mid-t
 land again rather than drifting back to the login node.
 Requeue-tolerant fan-outs: `preemptible` (GPU) or `cpu_preemptible`; smoke tests `quick_preemptible`.
 
+Before long data work, apply the [`cluster-run` resource checks](../../hq-mode/references/playbooks/cluster-run.md).
+Compare eligible partitions with `sinfo` and inspect the held allocation with `scontrol show job`.
+The priority row's `PreemptMode=REQUEUE` means neither that partition nor a held node guarantees
+an uninterrupted pass. Make such passes resumable, or justify the bounded work that would
+repeat after interruption.
+
 ## Submitting
 
 `sh_gpu [1-4] [srun opts]` and `sh_dev [srun opts]` wrap an interactive `srun`; `sh_gpu` asks for 1 GPU +

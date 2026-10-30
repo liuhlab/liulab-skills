@@ -29,6 +29,12 @@ No accounting or QOS caps are exposed (`sacctmgr` returns nothing), so no `--acc
 Nodes are shared and some are usually drained, so read `sinfo -p compute_cpu` for what is free right now
 rather than assuming a node is idle.
 
+Before long data work, apply the [`cluster-run` resource checks](../../hq-mode/references/playbooks/cluster-run.md).
+Compare planned workers and threads with `scontrol show job` and current `sinfo` capacity.
+Use this cluster's partitions and node limits above, not arc's preemptible tiers. Independent
+jobs can use eligible free nodes after allocation, with concurrency bounded by CPU, memory
+and shared I/O budgets.
+
 ## Submitting
 
 Never submit without showing the exact script and getting confirmation (`SKILL.md`). Read-only probes —

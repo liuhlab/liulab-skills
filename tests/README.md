@@ -159,6 +159,7 @@ before `--all` or anything live.
 | `reject` | Told the preflight failed, the agent refuses instead of improvising |
 | `containers` | An image rebuild surfaces crane-on-login and a docker-archive build job |
 | `jupyter-ircbc` | Jupyter on ircbc plans the container path, not the arc-native one |
+| `lab-hpc-data-job-planning` | A slow serial snapshot pass produces a measured CPU plan, resumable work and reusable derived data; inspect the transcript for submission approval |
 | `reuse-job` | With a job already held, work reuses that node instead of the login node |
 | `edison-refuse` | With no key, the agent refuses and never asks for the key in chat |
 | `edison-molecules` | Chemistry routes to `MOLECULES`, never to the retired job that 404s |

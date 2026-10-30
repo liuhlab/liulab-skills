@@ -20,7 +20,7 @@
 #
 # Usage: eval.sh --only <case> | --all [--live] | --dump
 #   --only <case>  run one case, and nothing else
-#                  (trigger|explicit|reject|containers|jupyter-ircbc|reuse-job|
+#                  (trigger|explicit|reject|containers|jupyter-ircbc|reuse-job|lab-hpc-data-job-planning|
 #                   edison-refuse|edison-molecules|edison-kosmos|edison-recover|
 #                   prototype-language|diagnosing-bugs-slow-loop|
 #                   hq-pause-sbatch|hq-pause-merge|unslop-zh-original|
@@ -47,7 +47,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 source tests/eval_assert.sh
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-original unslop-zh-source unslop-zh-not-chinese unslop-zh-english-delivery unslop-zh-zh-request-english unslop-zh-non-chinese unslop-zh-code unslop-zh-translate unslop-zh-mixed unslop-zh-polish-fix unslop-zh-polish-keep unslop-zh-rewrite unslop-zh-hq-routing live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job lab-hpc-data-job-planning edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-original unslop-zh-source unslop-zh-not-chinese unslop-zh-english-delivery unslop-zh-zh-request-english unslop-zh-non-chinese unslop-zh-code unslop-zh-translate unslop-zh-mixed unslop-zh-polish-fix unslop-zh-polish-keep unslop-zh-rewrite unslop-zh-hq-routing live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -279,6 +279,16 @@ launch_eval edison-kosmos 'data-analysis-aries|chat (session|surface)|not a (sin
 DENY="(a?create_task|a?run_tasks_until_done)[[:space:]]*\\("
 launch_eval edison-recover 'task list|get_tasks|task history|trajector' \
   "/lab-edison Suppose the Edison preflight just reported 'edison: CONFIGURED' and exited 0. About ten minutes ago I started a standard literature run with Edison in another terminal and that shell is gone, so I no longer have the task id. I still want that answer. What do you do? Plan only, run nothing." \
+  --permission-mode plan
+
+# Large-data planning: the prompt describes the incident, not the required design.
+# Assertions check a concrete CPU plan, restart handling, and reusable derived data.
+# Review the real transcript for measured bottlenecks, bounded memory, input/config
+# invalidation, cluster constraints and submission approval; phrases alone cannot prove them.
+ALSO='checkpoint|resum|atomic|temporary.*rename'
+EXTRA='(reus|cach|persist|materializ|build once|derive once|index)[^.]{0,100}(input|snapshot|config|fingerprint|hash|version)|(input|snapshot|config|fingerprint|hash|version)[^.]{0,100}(reus|cach|persist|materializ|index)'
+launch_eval lab-hpc-data-job-planning 'cpus-per-task|CPU budget|core budget|workers?[^.]{0,60}(allocation|cores)|[0-9]+[- ]+(workers|threads|processes)' \
+  "/lab-hpc We hold a 32-core allocation on arc. A 33 GB table and a 5 GB gzip containing about 166 GB of XML feed a metadata build. A timed pass over the XML took 24 minutes with one busy core, and each downstream build reads both source files again to pick a few records. Other partitions appear idle. Design the next implementation and run plan so it can finish unattended overnight. Explain what to measure and how to choose resources. Plan only, run no cluster commands or jobs." \
   --permission-mode plan
 
 # Cases 11 and 12 guard lab edits to tracked skills (upstream/README.md). Each edit pushes
