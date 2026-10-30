@@ -27,6 +27,15 @@ Before designing a large-data pipeline or starting a long data job, read and app
 3. Ask which cluster unless context already pins it down. Then develop locally, push to GitHub,
    and `git pull` on the remote — code reaches a cluster through git, not scp.
 
+## Shell and environment
+
+- **The local shell on lab Macs is zsh.** Quote every URL, since `?` and `*` are globs. zsh
+  does not split an unquoted `$var` into words, so use an array or a loop over quoted items.
+  End a probe that may find nothing, such as `grep`, with `|| true`, so an empty result is not
+  a red error that hides real ones.
+- **Run project code on a cluster through `pixi run`,** never the system `python3`, which lacks
+  the project's modules.
+
 ## Work on a compute node, not the login node
 
 Get onto a compute node and stay there. A login node is a doorway, not a workspace: one shared
