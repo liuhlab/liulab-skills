@@ -47,8 +47,9 @@ fails with `invalid_client` (code 20002).
 - Drive rejects an empty file. Skip or fill zero-byte files before an upload.
 - `drive +push` has no exclude option `[verified]`: it uploads `.DS_Store`, lock files and
   anything else in the folder. Push a clean copy of the folder, not a working tree.
-- `drive +version-history` lists a file's old versions `[verified]`. How long Drive keeps
-  them is **open** (liuhlab/liulab-skills#144).
-- `drive +upload --file-token <token>` is documented to overwrite a file in place. Whether
-  it does on the lab tenant is **open** `[unverified]` (liuhlab/liulab-skills#144); check the
-  file's version history after the first one.
+- `drive +upload --file-token <token>` overwrites a file in place on the lab tenant
+  `[verified]`: same token, one file in the folder, new content, and a new `version` in the
+  reply.
+- The old version is kept `[verified]`: `drive +version-history` lists it, and
+  `drive +version-get --version <version>` downloads it. How long Drive keeps it is **open**
+  (liuhlab/liulab-skills#144).

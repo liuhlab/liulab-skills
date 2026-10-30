@@ -5,6 +5,13 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.21 — 2026-10-30
+
+### Changed
+
+- The Feishu page now confirms that uploading over an existing Drive file replaces it in
+  place and keeps the old version, which can still be downloaded.
+
 ## 2026.10.20 — 2026-10-30
 
 ### Added
