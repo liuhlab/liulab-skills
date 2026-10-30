@@ -53,11 +53,14 @@ printf '%s' "$JOB" | grep -Eq '^[0-9]+(_[0-9]+)?$' \
   || { echo "jobid must be a Slurm job id, got: $JOB" >&2; exit 2; }
 case "$ALIAS" in -*|*[[:space:]]*|'') echo "bad alias: $ALIAS" >&2; exit 2 ;; esac
 
-# The remote side is plain POSIX sh, so it runs under whatever login shell the
-# user has on the cluster.
+# The remote side is plain POSIX sh run by ssh's non-interactive shell: the
+# Slurm client commands are system-installed, so no login shell is needed.
+# sacct -P prints the whole state: a fixed-width column would cut
+# OUT_OF_MEMORY to OUT_OF_ME+, and the first word of "CANCELLED by <uid>" is
+# the state.
 REMOTE="s=\$(squeue -h -j $JOB -o %T 2>/dev/null | head -n 1)
 [ -n \"\$s\" ] || s=\$(scontrol show job $JOB 2>/dev/null | sed -n 's/.*JobState=\\([A-Z_]*\\).*/\\1/p' | head -n 1)
-[ -n \"\$s\" ] || s=\$(sacct -n -X -j $JOB -o State 2>/dev/null | awk 'NF{print \$1; exit}')
+[ -n \"\$s\" ] || s=\$(sacct -n -P -X -j $JOB -o State 2>/dev/null | awk 'NF{print \$1; exit}')
 echo \"state=\${s:-UNKNOWN}\""
 if [ -n "$FILE" ]; then
   q="'$(printf '%s' "$FILE" | sed "s/'/'\\\\''/g")'"

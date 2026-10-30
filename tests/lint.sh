@@ -571,7 +571,21 @@ cat > "$wj_dir/bin/slurm-fake" <<'EOF'
 t=$(basename "$0")
 v=$(cat "$WJ_DIR/$t.out")
 [ "$v" = - ] && exit 1
+v=${v//_by_/ by }
 if [ "$t" = scontrol ]; then printf 'JobId=1 JobName=x\n   JobState=%s Reason=None\n' "$v"
+elif [ "$t" = sacct ]; then
+  # Real sacct cuts a value to its column width (State: 10) and marks the cut with
+  # "+", unless the field asks for more (State%30) or -P turns off padding.
+  w=10
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -P|--parsable2) w=0 ;;
+      -o) case "$2" in *%*) w=${2#*%} ;; esac; shift ;;
+    esac
+    shift
+  done
+  [ "$w" -gt 0 ] && [ ${#v} -gt "$w" ] && v="${v:0:$((w - 1))}+"
+  printf '%s\n' "$v"
 else printf '%s\n' "$v"; fi
 EOF
 chmod +x "$wj_dir/bin/"*
@@ -595,6 +609,10 @@ wj_case "done" 0 3 \
   "RUNNING - - 10" "RUNNING - - 20" "- COMPLETED COMPLETED 30"
 wj_case "failed (job gone from squeue and scontrol, sacct answers)" 1 2 \
   "PENDING - - 0" "- - FAILED 0"
+wj_case "out of memory (only sacct answers, past its default column width)" 1 2 \
+  "RUNNING - - 0" "- - OUT_OF_MEMORY 0"
+wj_case "cancelled by a user id (only sacct answers)" 1 2 \
+  "RUNNING - - 0" "- - CANCELLED_by_1234 0"
 wj_case "no growth (-n 2)" 3 4 \
   "RUNNING - - 10" "RUNNING - - 20" "RUNNING - - 20" "RUNNING - - 20"
 rm -rf "$wj_dir"

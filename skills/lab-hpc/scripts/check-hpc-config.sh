@@ -85,9 +85,13 @@ check_cluster() {
   fi
 }
 
+# Compute-node aliases: checked as cluster aliases below, and for connection reuse.
+arc_nodes=(chimera-gpu chimera-cpu)
+ircbc_nodes=(cpu01 cpu02 cpu03 cpu04 cpu05 cpu06 cpu07 cpu08)
+
 ok=1
 if check_cluster arc_hpc arc \
-  arc chimera-login chimera-transfer chimera-gpu chimera-cpu; then
+  arc chimera-login chimera-transfer "${arc_nodes[@]}"; then
   ok=0
   # Warn-only: lab-jupyter tunnels also need per-node aliases (GPU****/
   # CPU****-style names, usually one wildcard Host block). Probe a shaped
@@ -96,7 +100,7 @@ if check_cluster arc_hpc arc \
     echo "arc_hpc: WARNING (no GPU****/CPU****-style node aliases found — lab-jupyter tunnels need them)"
 fi
 check_cluster ircbc_hpc ircbc \
-  ircbc ircbc-transfer cpu01 cpu02 cpu03 cpu04 cpu05 cpu06 cpu07 cpu08 && ok=0
+  ircbc ircbc-transfer "${ircbc_nodes[@]}" && ok=0
 
 # Advisory only, never changes the exit code: compute-node aliases without
 # connection reuse open a fresh login-node hop per ssh call, and many agents
@@ -110,7 +114,7 @@ reuses_connection() {
   case "$cp" in none|"") return 1 ;; esac
 }
 no_reuse=()
-for a in chimera-gpu chimera-cpu cpu01 cpu02 cpu03 cpu04 cpu05 cpu06 cpu07 cpu08; do
+for a in "${arc_nodes[@]}" "${ircbc_nodes[@]}"; do
   if alias_configured "$a" && ! reuses_connection "$a"; then no_reuse+=("$a"); fi
 done
 if [ ${#no_reuse[@]} -gt 0 ]; then
