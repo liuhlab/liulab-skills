@@ -1411,7 +1411,7 @@ if [ -z "${dump:-}" ]; then
   err "no case list to check (tests/eval.sh --dump printed nothing)"
 else
   listfail=0
-  for f in tests/eval.sh tests/README.md; do
+  for f in tests/eval_cases.sh tests/README.md; do
     [ -f "$f" ] || { err "$f is missing, so its eval case list cannot be checked"; listfail=1; continue; }
     missing=""
     while IFS="$(printf '\037')" read -r cname _rest; do

@@ -64,7 +64,7 @@ MANIFESTS = (".claude-plugin/plugin.json", ".cursor-plugin/plugin.json")
 WRITES = ("skills", "upstream", ".vale.ini", ".markdownlint-cli2.yaml")
 ATTRIBUTION = "upstream/attribution.json"
 #: The agent evals. A case named `<skill>-*` guards a lab edit to that skill (upstream/README.md).
-EVALS = "tests/eval.sh"
+EVALS = "tests/eval_cases.sh"
 _CASES_RE = re.compile(r'^CASES="([^"]*)"', re.MULTILINE)
 VALE = ".vale.ini"
 MARKDOWNLINT = ".markdownlint-cli2.yaml"
@@ -770,7 +770,7 @@ def sync_pin(lab: Lab, pin: Pin, clone: Clone, records: dict[str, Any]) -> Resul
 
 
 def eval_cases(lab: Lab) -> list[str]:
-    """Return the case names `tests/eval.sh` lists, in its order; none when it has no list."""
+    """Return the case names the shared catalogue lists, in its order; none when it has no list."""
     path = lab.root / EVALS
     match = _CASES_RE.search(path.read_text(encoding="utf-8")) if path.exists() else None
     return match.group(1).split() if match else []

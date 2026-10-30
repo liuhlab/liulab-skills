@@ -142,10 +142,9 @@ def test_an_eval_case_is_listed_only_for_a_skill_upstream_changed(
     lab = make_lab(
         upstream, base, tracked={"prototype": "engineering", "diagnosing-bugs": "engineering"}
     )
-    lab.write(
-        "tests/eval.sh",
-        '#!/usr/bin/env bash\nCASES="trigger prototype-language diagnosing-bugs-slow-loop"\n',
-    )
+    repo = Path(__file__).resolve().parents[2]
+    for name in ("eval.sh", "eval_cases.sh"):
+        lab.write(f"tests/{name}", (repo / "tests" / name).read_text())
     lines = numbered("diagnosing-bugs")
     lab.write("skills/diagnosing-bugs/SKILL.md", skill("diagnosing-bugs", [*lines, "Slow loop."]))
     lab.commit("eval cases, and a lab edit upstream never touched")
@@ -172,7 +171,7 @@ def test_an_eval_case_belongs_to_the_longest_skill_name_it_starts_with(
     lab = make_lab(
         upstream, base, tracked={"implement": "engineering", "implement-spec": "engineering"}
     )
-    lab.write("tests/eval.sh", 'CASES="implement-lanes implement-spec-plan"\n')
+    lab.write("tests/eval_cases.sh", 'CASES="implement-lanes implement-spec-plan"\n')
     lab.commit("eval cases")
     upstream.write("skills/engineering/implement/SKILL.md", skill("implement", ["Reworded."]))
     upstream.commit()

@@ -26,7 +26,11 @@ release.
 | Gate | `pixi run check` | Every static check, unit test and `tests/lint.sh`; what CI runs on each PR. All failures print in one run, so read to the bottom |
 | Docs | `pixi run docs-build` | The site builds strictly. CI runs it too |
 | Preflight | `bash tests/preflight.sh [--live]` | This machine is set up for the clusters. Local only |
-| Evals | `bash tests/eval.sh --only <case>` | A skill's behaviour, in a real headless session against the *installed* plugin: push and update it first. Costs tokens: ask the user before `--all` or `--live` |
+| Evals | `bash tests/eval.sh --agent <agent> --only <case>` | A skill's behaviour, in a real headless session against the *installed* plugin: the runner installs and verifies a private snapshot first. Costs tokens: ask the user before `--all` or `--live` |
+
+Use the development agent for evals. Manage only its installation. Carry authorization
+through review, release and cleanup; batch routine steps and reuse approved prefixes.
+Request only sandbox permissions the environment requires.
 
 ## Release
 

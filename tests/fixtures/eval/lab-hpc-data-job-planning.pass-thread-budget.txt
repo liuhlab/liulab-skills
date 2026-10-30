@@ -1,0 +1,10 @@
+Source: focused Codex eval of commit 183f7a94d4aa479b69193b69dccfcc8163f86a5e on 2026-10-30.
+Reviewed excerpt of its final answer, with no personal paths or configuration.
+
+Use the held 32-core allocation for the pilot, subject to its actual memory and remaining wall time. Budget reader, writer, worker processes, and internal library threads together:
+
+reader threads + writer threads + workers × threads per worker ≤ 32
+
+First check for existing prepared metadata or indexes. Otherwise, scan the 33 GB table once and stream the gzip XML once. Extract the required fields into a versioned, indexed store keyed by the identifiers downstream builds select.
+
+Use bounded units with per-unit logs and manifests. Record source identity, code version, schema, configuration, counts, and checksums. Write temporary outputs, validate them, then atomically publish them. Reuse only matching, validated outputs.

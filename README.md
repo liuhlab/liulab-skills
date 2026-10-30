@@ -187,7 +187,7 @@ Three layers under [tests/](tests/) — see [tests/README.md](tests/README.md):
 pixi run check                          # the gate: linters + tests/lint.sh, all at once, every failure reported
 bash tests/lint.sh                      # static: manifests, frontmatter, naming, no-secrets sweep
 bash tests/preflight.sh --live          # this machine's ssh config + login-node reachability
-bash tests/eval.sh [--live] [--only <case>]  # headless claude -p behavior evals (costs tokens; --live submits a real job on arc)
+bash tests/eval.sh --agent codex --only lab-hpc-data-job-planning  # selected-agent behavior eval (costs tokens)
 ```
 
 `pixi run check` is what CI runs on every pull request. The other two layers

@@ -8,6 +8,7 @@ spends a token: the stub is first on PATH, and each test checks it was the one c
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 from pathlib import Path
@@ -34,7 +35,10 @@ def test_a_named_plan_file_is_folded_into_the_transcript(tmp_path: Path, from_ho
     calls = tmp_path / "claude-calls"
     stub = bin_dir / "claude"
     stub.write_text(
-        f"#!/bin/sh\necho x >>'{calls}'\necho 'The plan is written to `{pointer}`.'\n",
+        f"#!/bin/sh\necho x >>'{calls}'\n"
+        + "printf '%s\\n' "
+        + repr(json.dumps({"type": "result", "result": f"The plan is written to `{pointer}`."}))
+        + "\n",
         encoding="utf-8",
     )
     stub.chmod(0o755)
@@ -47,8 +51,11 @@ def test_a_named_plan_file_is_folded_into_the_transcript(tmp_path: Path, from_ho
         "TMPDIR": str(runs),
         "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
     }
+    context = tmp_path / "context.json"
+    context.write_text(json.dumps({"agent": "claude", "env": {}, "plugin_root": str(home)}))
+    env.update(LAB_EVAL_CONTEXT=str(context), LAB_EVAL_WORKSPACE=str(tmp_path))
     result = subprocess.run(
-        ["bash", str(REPO / "tests" / "eval.sh"), "--only", CASE],
+        ["bash", str(REPO / "tests" / "eval_cases.sh"), "--only", CASE],
         env=env,
         capture_output=True,
         text=True,
@@ -60,6 +67,8 @@ def test_a_named_plan_file_is_folded_into_the_transcript(tmp_path: Path, from_ho
     assert calls.read_text(encoding="utf-8").count("x") == 1, report
     transcripts = list(runs.glob(f"lab-skill-eval.*/{CASE}.txt"))
     assert len(transcripts) == 1, report
-    transcript = transcripts[0].read_text(encoding="utf-8")
+    assert result.returncode == 0, report
+    assert "EVAL PASS" in report
+    transcript = transcripts[0].with_name(f"{CASE}.answer.txt").read_text(encoding="utf-8")
     assert f"--- plan file {plan} ---" in transcript
     assert PLAN_TEXT in transcript

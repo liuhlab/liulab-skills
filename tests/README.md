@@ -72,7 +72,7 @@ the upstream page keeps its exemption while the side page meets the lab's rules.
 
 Free, seconds, in the same `pixi run test`. A plan-mode eval session may print only
 the path to its plan file, so `eval.sh` adds that file to the transcript before it
-checks anything. These run `eval.sh --only` against a stub `claude` and a fake home,
+checks anything. These run the shared case catalogue against a stub `claude` and a fake home,
 and check that a plan named from `~` or by its full path is added. The stub is first
 on PATH, so no session starts.
 
@@ -132,14 +132,14 @@ VPN is down.
 
 ## Layer 3 — agent evals: `tests/eval.sh`
 
-Costs tokens. Every case is a real headless `claude -p` session, so **there is no
+Costs tokens. Every case is a real headless session in the explicitly selected agent, so **there is no
 default run** — a bare `eval.sh` prints the case list and exits without launching
 anything. Ask for what you want by name:
 
 ```bash
-bash tests/eval.sh --only edison-kosmos   # one case
-bash tests/eval.sh --all                  # every non-live case
-bash tests/eval.sh --all --live           # plus the cluster job and one real credit
+bash tests/eval.sh --agent codex --only edison-kosmos   # one case
+bash tests/eval.sh --agent claude --all                  # every non-live case
+bash tests/eval.sh --agent claude --all --live           # plus the cluster job and one real credit
 ```
 
 `--live` on its own is refused: it is a modifier, not a request. Naming a `live-*`
@@ -147,10 +147,27 @@ case turns it on by itself. Layer 3 **never runs in CI** — on a public repo,
 anyone who could open a pull request could spend that budget. Cases run
 concurrently, so a suite takes about as long as its slowest case.
 
-Evals exercise the **installed** plugin, not this working tree: push, then run
-`claude plugin marketplace update liulab` and `claude plugin update lab@liulab`,
-or you are testing the previous version. If you are an agent doing this for someone, prefer `--only`, and ask
-before `--all` or anything live.
+Evals exercise an **installed** plugin. Select the development agent with `--agent codex`
+or `--agent claude`. The runner snapshots the working tree, creates a private agent home,
+installs through that agent's CLI and compares every shipped file before launching. Failed
+setup or a mismatch launches nothing. Normal settings and marketplace checkouts stay intact.
+Authentication links are removed after the run; credentials are never copied into evidence.
+
+Codex currently supports `trigger`, `explicit`, `reject`, `edison-kosmos` and
+`lab-hpc-data-job-planning`. Other Codex cases, including all live cases and the full suite,
+fail before setup. Claude supports the full catalogue. No runner silently falls back.
+Codex uses read-only mode with no interactive approvals in a private empty workspace.
+The plan-only case must read the selected agent's installed skill from its cache.
+
+Each run prints its agent and private `evidence.json` location. The record binds the agent,
+version, source commit and dirty state, snapshot content hash, verification, assertion result
+and transcript locations. Nonzero runner status, error events or a missing final answer fail.
+Inspect the transcript for the intended behavior and installed skill read before claiming
+success. Keep transcripts local; scrub connection details before posting any excerpts.
+Prefer `--only`; ask before `--all` or anything live. Existing authorization carries through
+setup, review, release and cleanup. Batch safe steps and reuse approved command prefixes;
+sandbox escalation remains subject to the execution environment. Count actual user prompts
+separately from tool calls and escalation requests when reporting approval burden.
 
 | Case | What it proves |
 | --- | --- |
