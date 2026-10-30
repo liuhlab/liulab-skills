@@ -28,9 +28,10 @@ Agent Skills standard), and the pages it needs beside it.
 ## Names
 
 A skill the lab wrote or derived is `lab-*`; `liulab` names only the repo, the GitHub org and
-the marketplace. An adopted skill keeps its upstream name and is recorded in `upstream/`. Lint
-admits a name outside `lab-*` only then, or for `hq-mode`
-(`docs/adr/0013-adopted-skills-keep-upstream-names.md`).
+the marketplace. `hq-mode` and `unslop-zh` are the two exceptions. An adopted skill keeps its
+upstream name and is recorded in `upstream/`. Lint admits no other bare name
+(`docs/adr/0013-adopted-skills-keep-upstream-names.md`,
+`docs/adr/0016-unslop-zh-is-a-naming-exception.md`).
 
 ## Rules every lab skill keeps
 

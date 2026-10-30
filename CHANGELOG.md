@@ -5,6 +5,26 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.16 — 2026-10-30
+
+The two Chinese skills are now one `unslop-zh`.
+
+### Changed
+
+- **Combined `lab-unslop-zh` and `lab-unslop-zh-kimi` into `unslop-zh`.** It covers Chinese
+  originals, source-based writing, strict translation, polishing and mixed documents. The
+  merged workflow keeps task-specific limits, two-pass review and protected content, then
+  applies the translationese and AI-tell checks without stacking `unslop` on Chinese prose.
+- **Reduced seven reference pages to five.** Yu Guangzhong's retained examples stay unchanged.
+  The three self-check questions join the diagnosis page, technical examples move to the
+  technical Chinese page, and general rules no longer repeat across pages. Grammar terms and
+  formatting rules are consistent.
+- **Added a second lab-owned naming exception.** `unslop-zh` pairs with `unslop`; ADR 0016
+  records the decision and its shadowing cost. Naming lint and trigger checks recognize the
+  exception without admitting other unrecorded bare names.
+- **Updated the Chinese evals and fixtures for the merged name.** The rewrite case no longer
+  treats natural use of 「之一」 as translationese, so the source's non-unique meaning can stay.
+
 ## 2026.10.15 — 2026-10-25
 
 The Kimi Chinese candidate now polishes Chinese with fewer unnecessary edits.

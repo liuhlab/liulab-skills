@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_code","name":"Skill","input":{"skill":"unslop-zh"}}]}}
+{"type":"result","subtype":"success","result":"def get_user_id(record):\n    return record.get('user_id', '')"}

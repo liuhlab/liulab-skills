@@ -23,14 +23,14 @@
 #                  (trigger|explicit|reject|containers|jupyter-ircbc|reuse-job|
 #                   edison-refuse|edison-molecules|edison-kosmos|edison-recover|
 #                   prototype-language|diagnosing-bugs-slow-loop|
-#                   hq-pause-sbatch|hq-pause-merge|unslop-zh-kimi-original|
-#                   unslop-zh-kimi-source|unslop-zh-kimi-not-chinese|
-#                   unslop-zh-kimi-english-delivery|
-#                   unslop-zh-kimi-zh-request-english|
-#                   unslop-zh-kimi-non-chinese|unslop-zh-kimi-code|
-#                   unslop-zh-kimi-translate|unslop-zh-kimi-mixed|
-#                   unslop-zh-kimi-polish-fix|unslop-zh-kimi-polish-keep|
-#                   unslop-zh-rewrite|unslop-zh-not-chinese|live-sbatch|live-edison)
+#                   hq-pause-sbatch|hq-pause-merge|unslop-zh-original|
+#                   unslop-zh-source|unslop-zh-not-chinese|
+#                   unslop-zh-english-delivery|
+#                   unslop-zh-zh-request-english|
+#                   unslop-zh-non-chinese|unslop-zh-code|
+#                   unslop-zh-translate|unslop-zh-mixed|
+#                   unslop-zh-polish-fix|unslop-zh-polish-keep|
+#                   unslop-zh-rewrite|unslop-zh-hq-routing|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
 #                  cases as well: a tiny hostname job submitted and cleaned up on
@@ -47,7 +47,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 source tests/eval_assert.sh
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-kimi-original unslop-zh-kimi-source unslop-zh-kimi-not-chinese unslop-zh-kimi-english-delivery unslop-zh-kimi-zh-request-english unslop-zh-kimi-non-chinese unslop-zh-kimi-code unslop-zh-kimi-translate unslop-zh-kimi-mixed unslop-zh-kimi-polish-fix unslop-zh-kimi-polish-keep unslop-zh-rewrite unslop-zh-not-chinese live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-pause-merge unslop-zh-original unslop-zh-source unslop-zh-not-chinese unslop-zh-english-delivery unslop-zh-zh-request-english unslop-zh-non-chinese unslop-zh-code unslop-zh-translate unslop-zh-mixed unslop-zh-polish-fix unslop-zh-polish-keep unslop-zh-rewrite unslop-zh-hq-routing live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -343,23 +343,23 @@ launch_eval hq-pause-merge "land it|always-pause|merg[^.]{0,80}${HQ_YES}|${HQ_YE
   "/hq-mode Suppose pull request #412 in this repo fixes issue #411. Its checks are green, and no one but its author has looked at it. My request: close the issue." \
   --permission-mode plan
 
-# 15-16. `lab-unslop-zh`, named after its skill so the upstream sync can find them.
+# 15-16. `unslop-zh`, named after its skill so the upstream sync can find them.
 #
 # 15. English source, Chinese deliverable. The expect only proves the answer came back in
 #     Chinese; the DENY is the real discriminator, and it holds the markers a sentence-by-
 #     sentence rendering of THIS passage produces: the 当…时 opener, 进行/作出 + noun, the
-#     topic shell 对于…来说, 这意味着 and …之一. The source sentences are built to invite
-#     exactly those, so a literal translation trips at least one, the 的-chain included:
-#     three 的 inside one clause with no punctuation between them, as in 用户的输入的验证的
-#     结果. None of the asserted Chinese appears in the prompt, which is English throughout,
-#     so the agent wrote it. The negation filter drops English lines holding "not"; the
-#     Chinese output has none.
+#     topic shell 对于…来说 and 这意味着. The source sentences are built to invite those, so
+#     a literal translation trips at least one, the 的-chain included: three 的 inside one
+#     clause with no punctuation between them, as in 用户的输入的验证的结果. None of the
+#     asserted Chinese appears in the prompt, which is English throughout, so the agent wrote
+#     it. The negation filter drops English lines holding "not"; the Chinese output has none.
+#     之一 is not a marker: it preserves the source's non-unique meaning and may stay.
 #
 #     The expect does NOT require the 中文（English）gloss form that issue #131 asked for.
 #     Forcing it would mean either a prompt that names the gloss (the prompt would then be
 #     producing the assertion) or failing a correct answer whose terms all have settled
 #     Chinese names and need no gloss. The DENY carries the discrimination instead.
-DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|这意味着|原因之一|之一的|的[^。，！？、]{1,6}的[^。，！？、]{1,6}的"
+DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|这意味着|的[^。，！？、]{1,6}的[^。，！？、]{1,6}的"
 launch_eval unslop-zh-rewrite '解析器|校验|验证|数据库' \
   "Rewrite this passage as Chinese documentation for our lab wiki. Put the Chinese in your reply and change no files. Source: 'When the configuration file is absent, the loader raises an error. Validation of the user's input is performed by the parser before the record is written to the database. This means that an unvalidated field is one of the most common causes of a failed import.'" \
   --permission-mode plan
@@ -369,56 +369,56 @@ launch_eval unslop-zh-rewrite '解析器|校验|验证|数据库' \
 #     prompt asks for English prose about a Chinese-language dataset, and the DENY is the
 #     skill being picked. A correct answer that names it while explaining why it does not
 #     apply says "not", "never" or "instead", which the negation filter drops.
-DENY="lab-unslop-zh|unslop-zh"
-launch_eval unslop-zh-not-chinese 'unslop' \
+DENY="unslop-zh"
+launch_eval unslop-zh-hq-routing 'unslop' \
   "/hq-mode I'm writing the README, in English, for a corpus of Chinese-language clinical notes, and I'll translate the README into Chinese later. Which skill is the last pass over the English README, and why? Plan only, write nothing." \
   --permission-mode plan
 
-# 17-18. Chinese deliverables require the candidate's actual automatic Skill call. Assertions
+# 17-18. Chinese deliverables require the merged skill's actual automatic Skill call. Assertions
 #     on the final answer still check the delivered prose, not the loaded skill instructions.
 DENY="英文草稿|English draft|内部纲要|写作纲要|检查清单|自检结果|评分"
 ALSO='4[[:space:]]*°[[:space:]]*C|4℃|记录本'
-SKILL=lab-unslop-zh-kimi
-launch_eval unslop-zh-kimi-original '登记|编号' \
+SKILL=unslop-zh
+launch_eval unslop-zh-original '登记|编号' \
   "请为实验室公众号写一段中文原创说明，只回复成稿，不改文件。事实如下：样本到达后，工作人员先登记编号，再放入 4°C 冰箱；当天无法处理时，必须在记录本写明原因。读者是刚入组的学生，语气要清楚、正式，不要增添事实。" \
   --output-format stream-json --verbose
 
 DENY="英文草稿|English draft|内部纲要|写作纲要|检查清单|自检结果|评分|离心|冷冻|37[[:space:]]*°"
 ALSO='核对|比对|联系'
-SKILL=lab-unslop-zh-kimi
-launch_eval unslop-zh-kimi-source '条码|条形码' \
+SKILL=unslop-zh
+launch_eval unslop-zh-source '条码|条形码' \
   "Write a Chinese instruction for new lab members using only the notes below. Keep the actions in their original order. Reply with only the final Chinese text and change no files. Notes: 'The intake desk scans each sample barcode. A second person compares it with the request form. If they differ, the desk holds the sample and contacts the submitter.'" \
   --output-format stream-json --verbose
 
-# 19-23. Non-Chinese deliverables forbid only the candidate's Skill call. The existing routing
+# 19-23. Non-Chinese deliverables forbid only the merged skill's Skill call. The existing routing
 #     question retains its mixed-document caveat; the four delivery cases observe real work.
-DENY='(use|choose|select|invoke|run|load)[^.]{0,80}(lab-)?unslop-zh-kimi'
-SKILL='!lab-unslop-zh-kimi'
-launch_eval unslop-zh-kimi-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-9_-]|$)' \
+DENY='(use|choose|select|invoke|run|load)[^.]{0,80}(lab-)?unslop-zh'
+SKILL='!unslop-zh'
+launch_eval unslop-zh-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-9_-]|$)' \
   "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
   --output-format stream-json --verbose
 
 ALSO='stor(e|ed|age|ing)|writ'
-SKILL='!lab-unslop-zh-kimi'
-launch_eval unslop-zh-kimi-english-delivery 'parser[^.]{0,80}validat' \
+SKILL='!unslop-zh'
+launch_eval unslop-zh-english-delivery 'parser[^.]{0,80}validat' \
   "Polish this English API documentation and return only the final English text. Do not change files. Source: 'The parser performs validation of the user input before the record is stored. The field labels are Chinese.'" \
   --output-format stream-json --verbose
 
 ALSO='database'
-SKILL='!lab-unslop-zh-kimi'
-launch_eval unslop-zh-kimi-zh-request-english 'parser[^.]{0,80}validat|validat[^.]{0,80}parser' \
+SKILL='!unslop-zh'
+launch_eval unslop-zh-zh-request-english 'parser[^.]{0,80}validat|validat[^.]{0,80}parser' \
   "请把这句技术文档润色为自然英文，只回复英文成稿，不改文件。原文：'写入数据库前，解析器会验证用户输入；字段标签是中文。'" \
   --output-format stream-json --verbose
 
 ALSO='データベース|書き込'
-SKILL='!lab-unslop-zh-kimi'
-launch_eval unslop-zh-kimi-non-chinese '検証|入力' \
+SKILL='!unslop-zh'
+launch_eval unslop-zh-non-chinese '検証|入力' \
   "Rewrite this documentation in natural Japanese. The deliverable must be Japanese, not Chinese. Reply with only the final Japanese text and change no files. Source: 'The parser validates user input before writing the record to the database.'" \
   --output-format stream-json --verbose
 
 ALSO='record\.get'
-SKILL='!lab-unslop-zh-kimi'
-launch_eval unslop-zh-kimi-code 'def[[:space:]]+get_user_id' \
+SKILL='!unslop-zh'
+launch_eval unslop-zh-code 'def[[:space:]]+get_user_id' \
   "Write only a Python function named get_user_id that takes a record dict and returns record.get('user_id', ''). No explanation, comments, docstring, or file changes." \
   --output-format stream-json --verbose
 
@@ -426,7 +426,7 @@ launch_eval unslop-zh-kimi-code 'def[[:space:]]+get_user_id' \
 #     English syntax. The DENY entries name only this scenario's bad renderings.
 DENY='电路断裂器|配置被验证[^。]{0,30}熔断器被启用|完全(避免|消除)[^。]{0,12}(过期|陈旧|旧数据)'
 ALSO='200[[:space:]]*(ms|毫秒)'
-launch_eval unslop-zh-kimi-translate '幂等' \
+launch_eval unslop-zh-translate '幂等' \
   "Translate this technical documentation into natural Simplified Chinese. This is strict translation, not source-based writing: preserve every detail, condition, degree qualifier, document structure and technical term. Split or merge sentences and reorder information only where Chinese needs it, without changing the logic. Do not add, omit, summarize or explain. Reply with only the translation and change no files. Source: 'The configuration is validated before the circuit breaker is enabled. After three consecutive failures, the client waits 200 ms before retrying a read. It never automatically retries a write because the operation may not be idempotent. This safeguard can reduce duplicate requests, but it does not eliminate stale reads.'"
 
 # 25. Mixed content: repair only the authorized Chinese sentence. Case-sensitive,
@@ -435,7 +435,7 @@ DENY='对读取请求进行重试'
 EXTRA="^NOTE: Keep the existing order\. QUOTE: 'do not downgrade'$"
 ALSO="^RUN: API_TOKEN=<token> \./bin/client --config config/prod\.yaml --url 'https://example\.test/v2/items\?id=\{id\}' --client-version v2\.4\.0$"
 CASE_SENSITIVE=true
-launch_eval unslop-zh-kimi-mixed '^EDIT: (.*v2\.4\.0.*(3次.*失败|失败.*3次).*|.*(3次.*失败|失败.*3次).*v2\.4\.0.*)$' \
+launch_eval unslop-zh-mixed '^EDIT: (.*v2\.4\.0.*(3次.*失败|失败.*3次).*|.*(3次.*失败|失败.*3次).*v2\.4\.0.*)$' \
   "Polish only the Chinese words after EDIT for natural technical Chinese. Keep every other character and the document structure unchanged, including all English, the command, path, URL, version, placeholders and quotes. Within EDIT, change only the Chinese wording and keep v2.4.0 and 3 unchanged. Do not add spaces between Chinese and English or convert simplified and traditional characters. Return only the complete document and change no files. Document:
 EDIT: 关于重试行为，v2.4.0的客户端在3次失败之后对读取请求进行重试，但是写入不会被自动重试。
 RUN: API_TOKEN=<token> ./bin/client --config config/prod.yaml --url 'https://example.test/v2/items?id={id}' --client-version v2.4.0
@@ -445,7 +445,7 @@ NOTE: Keep the existing order. QUOTE: 'do not downgrade'"
 #     protects an already-natural sentence; DENY rejects an unchanged first line.
 DENY='对用户的输入进行验证|润色说明|检查清单|自检结果|评分|修改如下'
 ALSO='^若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。$'
-launch_eval unslop-zh-kimi-polish-fix '解析器[^。]{0,30}(验证|校验)用户(的)?输入' \
+launch_eval unslop-zh-polish-fix '解析器[^。]{0,30}(验证|校验)用户(的)?输入' \
   '请润色以下简体中文技术文档，只改确有问题的地方；已经自然的句子原样保留。保留事实、作者判断、责任主体、条件、范围、否定、情态、程度、引用和术语，不新增信息。只回复完整文本，不改文件。文本：
 关于输入校验，解析器在写入数据库前对用户的输入进行验证。
 若 status 字段为空，审核员只应标记“待复核”，不应拒绝记录；这项检查可能减少错误导入，但不能完全避免重复记录。'
@@ -453,7 +453,7 @@ launch_eval unslop-zh-kimi-polish-fix '解析器[^。]{0,30}(验证|校验)用�
 # 27. Already-natural Traditional Chinese must survive byte for byte. An anchored
 #     EXPECT rejects gratuitous rewriting and script conversion, not only keywords.
 DENY='潤飾說明|润色说明|檢查清單|检查清单|自檢結果|自检结果|評分|评分|修改如下'
-launch_eval unslop-zh-kimi-polish-keep '^雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。$' \
+launch_eval unslop-zh-polish-keep '^雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。$' \
   "請潤飾以下繁體中文，只改確有問題的地方；已經自然的文字必須完整保留，不要為了改寫而改寫，也不要轉換簡繁或改變文體。只回覆完整文本，不改檔案。文本：
 雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。"
 

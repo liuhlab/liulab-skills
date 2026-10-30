@@ -1,4 +1,0 @@
-{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_original","name":"Skill","input":{"skill":"lab-unslop-zh-kimi"}}]}}
-{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_fixture_original","content":"Launching skill: lab-unslop-zh-kimi"}]}}
-{"type":"user","message":{"role":"user","content":[{"type":"text","text":"用中文整理事实，直接写中文，不经过英文草稿。"}]}}
-{"type":"result","subtype":"success","result":"样本送达后，工作人员先登记编号，再放入 4°C 冰箱。若当天无法处理，须在记录本中写明原因。"}

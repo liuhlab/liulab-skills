@@ -38,7 +38,7 @@ grill, spec or research session: the user types the next step.
 | Time for upkeep | `/improve-codebase-architecture`; a module's shape, `codebase-design`; the words, `domain-modeling` |
 | A cluster, ssh, Slurm, a GPU | `lab-hpc` before the first ssh. Notebooks: `lab-jupyter`. Containers: `lab-containers` |
 | Edison | Only when the user types `/lab-edison` |
-| Prose a person reads | `unslop` as the last pass, or `lab-unslop-zh` when the output is Chinese. Docs, READMEs, PR bodies, protocols: `technical-writing`. Skills and agent docs: `writing-for-agents` |
+| Prose a person reads | `unslop` as the last pass, or `unslop-zh` when the output contains Chinese. Docs, READMEs, PR bodies, protocols: `technical-writing`. Skills and agent docs: `writing-for-agents` |
 | A number you measured or will report | The explain-the-number principle; for a timing, `references/benchmark-checklist.md` |
 | Work the user steps away from | The checks it rests on, per `references/verification.md`; a decision trail per `references/show-me-your-work.md` |
 | A correction from the user | Write it at once where it lasts: the repo's `AGENTS.md`, the skill, or memory. Then ask what would stop it recurring |

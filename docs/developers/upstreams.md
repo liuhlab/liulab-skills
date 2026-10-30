@@ -101,7 +101,7 @@ An adopted skill keeps its upstream name, typed bare: `/grilling`, not `/lab-gri
 Upstream skills name each other in their text. `wayfinder` names `grilling`, `research` and
 `prototype`, so a rename would have to be redone on every sync. A `lab-*` name therefore
 marks a skill the lab wrote. `tests/lint.sh` fails any other name unless `upstream/` records
-it, with `hq-mode` the one exception.
+it, with `hq-mode` and `unslop-zh` as the two lab-owned exceptions.
 
 The cost is shadowing. A bare name reaches whichever skill holds it, so an old copy of
 `grilling` in a user's own skills folder wins over the plugin's without a word.

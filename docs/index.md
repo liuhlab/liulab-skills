@@ -16,12 +16,11 @@ plugin holds that knowledge.
 | [lab-edison](skills/lab-edison.md) | The Edison platform: Kosmos for a whole research goal, cited literature answers and data analysis for a single question. No cluster. |
 | [lab-setup](skills/lab-setup.md) | One step after installing: the plugin updates by itself, and Codex and Kimi Code get it too. |
 | [hq-mode](skills/hq-mode.md) | A whole task done the lab's way: working rules, a playbook per kind of task, and a list of steps that always wait for your yes. |
-| [lab-unslop-zh](skills/lab-unslop-zh.md) | The last pass over Chinese writing: it writes Chinese rather than translating it, and leaves your voice and your facts alone. |
-| [lab-unslop-zh-kimi](skills/lab-unslop-zh-kimi.md) | A Kimi candidate for natural Chinese writing and strict technical translation, with protected mixed content. |
+| [unslop-zh](skills/unslop-zh.md) | Chinese writing, strict translation and polishing, with protected mixed content and no unnecessary rewrites. |
 
 The three cluster skills load by themselves when your request touches remote compute.
-The Chinese writing skills load when the deliverable is Chinese, and you can also call
-them by name. Call lab-edison, lab-setup and hq-mode by name: lab-edison because every
+The Chinese writing skill loads when the deliverable contains Chinese, and you can also
+call it by name. Call lab-edison, lab-setup and hq-mode by name: lab-edison because every
 run costs you money, lab-setup because you need it once per machine, and hq-mode
 because you choose when a task gets it.
 

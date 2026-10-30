@@ -87,8 +87,8 @@ failure reasons against existing stream-json fixtures. No session starts.
 
 Free, seconds. Tests the **files**: manifests are valid JSON, every skill has
 parseable `name`/`description` front matter, names follow the naming policy
-(`lab-*`, or recorded as adopted in `upstream/`), every item a pin maps points at a
-lab file that exists, each description fits the
+(`lab-*`, recorded as adopted in `upstream/`, or one of the two lab-owned exceptions),
+every item a pin maps points at a lab file that exists, each description fits the
 per-skill listing limit, and a tagged version still names the tree it was tagged
 on. A user-invoked skill must carry Codex's opt-out file, and every lab-owned
 skill, forked ones included, lists triggers that must fit in the 247 characters
@@ -168,19 +168,19 @@ before `--all` or anything live.
 | `diagnosing-bugs-slow-loop` | A loop that takes minutes takes the slow-loop path instead of stalling |
 | `hq-pause-sbatch` | Under `/hq-mode`, "going to bed, land it" still shows the script and waits for a yes before `sbatch` |
 | `hq-pause-merge` | Under `/hq-mode`, "close the issue" never merges a pull request nobody reviewed, and never closes the issue while its fix is unmerged |
-| `unslop-zh-rewrite` | An English passage asked for in Chinese comes back written, not translated: none of the markers a literal rendering would leave |
-| `unslop-zh-not-chinese` | An English README about Chinese-language data takes `unslop`, not `lab-unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
-| `unslop-zh-kimi-original` | A Chinese request automatically invokes the candidate through the Skill tool and produces an original Chinese final text without an English draft or process notes |
-| `unslop-zh-kimi-source` | An English request automatically invokes the candidate and composes Chinese from source facts without adding facts or exposing process notes |
-| `unslop-zh-kimi-not-chinese` | English documentation about Chinese-labelled data selects `unslop` without invoking the Chinese candidate; a future mixed-document caveat may still name that candidate |
-| `unslop-zh-kimi-english-delivery` | An English editing task delivers English prose without invoking the Chinese candidate |
-| `unslop-zh-kimi-zh-request-english` | A Chinese request for an English deliverable does not invoke the Chinese candidate |
-| `unslop-zh-kimi-non-chinese` | A Japanese deliverable does not invoke the Chinese candidate |
-| `unslop-zh-kimi-code` | A pure Python deliverable does not invoke the Chinese candidate |
-| `unslop-zh-kimi-translate` | Strict technical translation preserves facts and established terms while repairing a specific English-shaped construction |
-| `unslop-zh-kimi-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
-| `unslop-zh-kimi-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
-| `unslop-zh-kimi-polish-keep` | Already-natural Traditional Chinese stays on one exact line without rewriting, script conversion or process notes |
+| `unslop-zh-rewrite` | An English passage asked for in Chinese comes back written, not translated: none of the markers a literal rendering would leave, while natural 「之一」 may stay |
+| `unslop-zh-hq-routing` | An English README about Chinese-language data takes `unslop`, not `unslop-zh`. The skill's description is dense with "Chinese", so this is where it would wrongly fire |
+| `unslop-zh-original` | A Chinese request automatically invokes `unslop-zh` through the Skill tool and produces an original Chinese final text without an English draft or process notes |
+| `unslop-zh-source` | An English request automatically invokes `unslop-zh` and composes Chinese from source facts without adding facts or exposing process notes |
+| `unslop-zh-not-chinese` | English documentation about Chinese-labelled data selects `unslop` without invoking `unslop-zh`; a future mixed-document caveat may still name it |
+| `unslop-zh-english-delivery` | An English editing task delivers English prose without invoking `unslop-zh` |
+| `unslop-zh-zh-request-english` | A Chinese request for an English deliverable does not invoke `unslop-zh` |
+| `unslop-zh-non-chinese` | A Japanese deliverable does not invoke `unslop-zh` |
+| `unslop-zh-code` | A pure Python deliverable does not invoke `unslop-zh` |
+| `unslop-zh-translate` | Strict technical translation preserves facts and established terms while repairing a specific English-shaped construction |
+| `unslop-zh-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
+| `unslop-zh-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
+| `unslop-zh-polish-keep` | Already-natural Traditional Chinese stays on one exact line without rewriting, script conversion or process notes |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 

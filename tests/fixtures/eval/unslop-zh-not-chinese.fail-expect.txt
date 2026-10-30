@@ -1,2 +1,1 @@
-I would run technical-writing over the README and then read it aloud once more. The corpus
-language does not change the editing pass.
+{"type":"result","subtype":"success","result":"No writing skill is needed for this task."}

@@ -95,8 +95,8 @@ instead of quoting one.
 ### Derived skill
 
 A skill the lab owns from the start but built from upstream skills or ideas, carrying their
-attribution. It takes a `lab-*` name, except the mode. Contrast a forked skill, which began
-as an adopted copy and keeps its upstream name.
+attribution. It takes a `lab-*` name, except `hq-mode` and `unslop-zh`. Contrast a forked
+skill, which began as an adopted copy and keeps its upstream name.
 
 ### Description budget
 
@@ -211,9 +211,10 @@ the pin, with its reason in the commit message and the changelog.
 ### `lab-*` name
 
 The mark of a skill the lab wrote, such as `lab-hpc` or `lab-setup`, or derived. An adopted
-skill never takes one, tracked or forked. The mode is the one exception: `hq-mode`. Lint
-admits any other name only when the repo records the skill as adopted. See
-`docs/adr/0013-adopted-skills-keep-upstream-names.md`.
+skill never takes one, tracked or forked. `hq-mode` and `unslop-zh` are the two exceptions.
+Lint admits any other name only when the repo records the skill as adopted. See
+`docs/adr/0013-adopted-skills-keep-upstream-names.md` and
+`docs/adr/0016-unslop-zh-is-a-naming-exception.md`.
 
 ### liulab-runtime
 
@@ -238,9 +239,9 @@ plugin, so for a while after an update the two can differ. See
 ### Mode
 
 `hq-mode`: a user-invoked router over playbooks, with a working-style page that every session
-reads first. Its name follows pstack's `<handle>-mode` convention, and it is the one derived
-skill without a `lab-*` name. Its text says "the user", so any lab member who types
-`/hq-mode` gets that way of working applied to their own work.
+reads first. Its name follows pstack's `<handle>-mode` convention and takes no `lab-*` prefix.
+Its text says "the user", so any lab member who types `/hq-mode` gets that way of working
+applied to their own work.
 
 ### Name cache
 
