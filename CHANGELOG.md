@@ -5,6 +5,19 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.20 — 2026-10-30
+
+### Added
+
+- `/lab-setup` can set up `lark-cli`, Feishu's command-line tool. It installs the tool and
+  Feishu's own skills, sets up an app and logs you in. An existing app's secret goes from your
+  own terminal straight to the tool, so the agent never sees it. It offers strict mode, which
+  makes every call run as you, and turns it on only if you say yes.
+- The lab defaults add one rule: every `lark-cli` call says `--as user`, so no call runs as the
+  app by mistake.
+- A short Feishu page lists what Feishu's own skills leave out: how long a login lasts, and
+  the limits on Drive folders and uploads.
+
 ## 2026.10.19 — 2026-10-30
 
 ### Fixed

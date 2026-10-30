@@ -19,6 +19,10 @@ up to date without you running anything. `edison-cli` works in all three as well
   every Claude Code update.
 - **`edison-cli`** gets a link in `~/.local/bin` or `~/bin`, whichever your shell already
   searches, so the command works outside Claude Code too.
+- **`lark-cli`**, Feishu's command-line tool, if you want it. The agent installs it and
+  Feishu's own skills, then hands you two steps: setting up an app and logging in, each
+  through a link you open. If you reuse an app, you type its secret into your own terminal,
+  so the agent never sees it. The login lapses after 7 days without use; log in again when it does.
 - **The lab's defaults** reach all three agents. Each agent's own notes file gets a short
   block that points at one page in the plugin. That page says where a repo's issues go,
   which labels to use, and the safety rules for the clusters. So a new repo needs no setup,

@@ -34,5 +34,7 @@ Single-context, with `GLOSSARY.md` and `docs/adr/` at the repo root:
 - Load `lab-hpc` before any ssh or Slurm step.
 - Never compute on a login node: get a Slurm job first.
 - If ssh to `ircbc` hangs or times out, stop and tell the user to check the VPN.
+- Pass `--as user` on every `lark-cli` call, strict mode or not. Why, login life and Drive
+  limits: `skills/lab-setup/references/feishu.md`.
 - For any non-trivial task, read `hq-mode`'s working-style page first:
   `skills/hq-mode/references/working-style.md`.
