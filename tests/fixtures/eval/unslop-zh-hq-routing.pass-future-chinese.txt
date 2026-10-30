@@ -1,0 +1,3 @@
+The last pass over the English README is `unslop`.
+If a later revision adds Chinese prose, use `unslop-zh` for that prose. The Chinese translation
+later gets `unslop-zh` as its own last pass.

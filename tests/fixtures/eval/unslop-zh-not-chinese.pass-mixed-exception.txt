@@ -1,1 +1,1 @@
-{"type":"result","subtype":"success","result":"Use `unslop` for the final prose pass because this deliverable stays English.\nIf a later revision adds a bilingual section, `unslop-zh` should handle only its Chinese sentences."}
+{"type":"result","subtype":"success","result":"Use `unslop` for the final prose pass because this deliverable stays English.\nIf a later revision adds Chinese prose, run `unslop-zh` on those parts only."}

@@ -5,6 +5,18 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.17 — 2026-10-30
+
+Real evals caught three false failures in the Chinese assertions. The skill is unchanged.
+
+### Fixed
+
+- **The rewrite eval accepts the source's own rhetoric.** Natural use of 「这意味着」 may stay,
+  alongside the existing protection for 「之一」. Its passing fixture now covers both.
+- **The routing evals distinguish present and future work.** They reject choosing `unslop-zh`
+  for an English deliverable without rejecting a valid exception for later Chinese or mixed
+  prose. New and updated fixtures reproduce the observed correct answers.
+
 ## 2026.10.16 — 2026-10-30
 
 The two Chinese skills are now one `unslop-zh`.

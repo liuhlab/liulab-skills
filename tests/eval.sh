@@ -347,29 +347,29 @@ launch_eval hq-pause-merge "land it|always-pause|merg[^.]{0,80}${HQ_YES}|${HQ_YE
 #
 # 15. English source, Chinese deliverable. The expect only proves the answer came back in
 #     Chinese; the DENY is the real discriminator, and it holds the markers a sentence-by-
-#     sentence rendering of THIS passage produces: the 当…时 opener, 进行/作出 + noun, the
-#     topic shell 对于…来说 and 这意味着. The source sentences are built to invite those, so
-#     a literal translation trips at least one, the 的-chain included: three 的 inside one
-#     clause with no punctuation between them, as in 用户的输入的验证的结果. None of the
-#     asserted Chinese appears in the prompt, which is English throughout, so the agent wrote
-#     it. The negation filter drops English lines holding "not"; the Chinese output has none.
-#     之一 is not a marker: it preserves the source's non-unique meaning and may stay.
+#     sentence rendering of THIS passage produces: the 当…时 opener, 进行/作出 + noun and the
+#     topic shell 对于…来说. The source sentences are built to invite those, so a literal
+#     translation trips at least one, the 的-chain included: three 的 inside one clause with
+#     no punctuation between them, as in 用户的输入的验证的结果. None of the asserted Chinese
+#     appears in the prompt, which is English throughout, so the agent wrote it. The negation
+#     filter drops English lines holding "not"; the Chinese output has none. 之一 and 这意味着
+#     are not markers: they can preserve the source's non-unique meaning and own rhetoric.
 #
 #     The expect does NOT require the 中文（English）gloss form that issue #131 asked for.
 #     Forcing it would mean either a prompt that names the gloss (the prompt would then be
 #     producing the assertion) or failing a correct answer whose terms all have settled
 #     Chinese names and need no gloss. The DENY carries the discrimination instead.
-DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|这意味着|的[^。，！？、]{1,6}的[^。，！？、]{1,6}的"
+DENY="当[^。]{0,40}(时|的时候)|(进行|作出)[^。]{0,8}(验证|校验|处理|说明|分析)|对于[^。]{0,25}来说|的[^。，！？、]{1,6}的[^。，！？、]{1,6}的"
 launch_eval unslop-zh-rewrite '解析器|校验|验证|数据库' \
   "Rewrite this passage as Chinese documentation for our lab wiki. Put the Chinese in your reply and change no files. Source: 'When the configuration file is absent, the loader raises an error. Validation of the user's input is performed by the parser before the record is written to the database. This means that an unvalidated field is one of the most common causes of a failed import.'" \
   --permission-mode plan
 
 # 16. The false trigger. The skill's description is dense with the word Chinese, so an
 #     English deliverable that merely mentions Chinese is where it will wrongly fire. The
-#     prompt asks for English prose about a Chinese-language dataset, and the DENY is the
-#     skill being picked. A correct answer that names it while explaining why it does not
-#     apply says "not", "never" or "instead", which the negation filter drops.
-DENY="unslop-zh"
+#     prompt asks for English prose about a Chinese-language dataset, and the DENY rejects
+#     choosing the Chinese skill as the English text's final pass. Naming it for a later
+#     Chinese translation or a real mixed-document exception is correct and must not fail.
+DENY='(use|choose|select|invoke|run|load|reach for)[^.]{0,80}(lab-)?unslop-zh[^.]{0,80}(final|last)( prose)? pass'
 launch_eval unslop-zh-hq-routing 'unslop' \
   "/hq-mode I'm writing the README, in English, for a corpus of Chinese-language clinical notes, and I'll translate the README into Chinese later. Which skill is the last pass over the English README, and why? Plan only, write nothing." \
   --permission-mode plan
@@ -390,9 +390,10 @@ launch_eval unslop-zh-source '条码|条形码' \
   "Write a Chinese instruction for new lab members using only the notes below. Keep the actions in their original order. Reply with only the final Chinese text and change no files. Notes: 'The intake desk scans each sample barcode. A second person compares it with the request form. If they differ, the desk holds the sample and contacts the submitter.'" \
   --output-format stream-json --verbose
 
-# 19-23. Non-Chinese deliverables forbid only the merged skill's Skill call. The existing routing
-#     question retains its mixed-document caveat; the four delivery cases observe real work.
-DENY='(use|choose|select|invoke|run|load)[^.]{0,80}(lab-)?unslop-zh'
+# 19-23. Non-Chinese deliverables forbid an actual Skill call. The routing question also
+#     rejects a direct recommendation at the answer's start, but allows a later mixed-document
+#     exception; the four delivery cases observe real work.
+DENY='^(Use|Choose|Select|Invoke|Run|Load) [[:punct:]]*(lab[-:])?unslop-zh([ .[:punct:]]|$)'
 SKILL='!unslop-zh'
 launch_eval unslop-zh-not-chinese '(^|[^A-Za-z0-9_-])unslop([^A-Za-z0-9_-]|$)' \
   "I'm preparing English API documentation for a dataset whose field labels are in Chinese. The deliverable stays English. Which installed skill should do the final prose pass, and why? Plan only, write nothing." \
