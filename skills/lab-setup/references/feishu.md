@@ -20,7 +20,9 @@ fails with `invalid_client` (code 20002).
 - With no user login, `lark-cli auth status` reports `"identity": "bot"` `[verified]`: a call
   without `--as` then runs as the bot, and any file it creates belongs to the bot's app.
 - `lark-cli config strict-mode user` makes implicit calls run as the user and refuses
-  `--as bot`. Its help forbids an agent from changing it without the user's yes.
+  `--as bot`. Its help forbids an agent from changing it without the user's yes. The lab
+  default is `user`, set with `--global` so every profile inherits it; a profile's own
+  setting overrides the global one.
 - Strict mode alone does not hold: when the CLI cannot load the account, it treats strict
   mode as off (read in the source, `ResolveStrictMode`). Hence the lab rule of `--as user` on
   every call.

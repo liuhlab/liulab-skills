@@ -79,8 +79,8 @@ Offer them after the script and ask before each. Skip what is done: `command -v 
 4. `lark-cli auth login --recommend`. It blocks too; relay its link at once, as it expires in
    minutes.
 5. `lark-cli auth status --verify --json` must show `identities.user.status` as `ready`.
-6. Offer `lark-cli config strict-mode user`, and run it only on the user's yes. What it does
-   and why the `--as user` rule still holds: [references/feishu.md](references/feishu.md).
+6. `lark-cli config strict-mode user --global`, the lab default; the user's yes to it is the
+   confirmation the CLI's help asks for. Why: [references/feishu.md](references/feishu.md).
 
 ## 5. What happens next
 
