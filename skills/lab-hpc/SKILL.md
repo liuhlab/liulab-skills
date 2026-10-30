@@ -11,7 +11,7 @@ description: >-
 
 # Lab HPC clusters & remote-compute workflow
 
-Per-cluster detail sits in `references/`: `arc-hpc.md` and `ircbc-hpc.md` for hosts, network and storage; `arc-slurm.md` and `ircbc-slurm.md` for partitions and submitting.
+Per-cluster detail is in `references/`: `*-hpc.md` for hosts, network and storage; `*-slurm.md` for partitions and submitting.
 
 Before designing a large-data pipeline or starting a long data job, read and apply
 [`cluster-run`](../hq-mode/references/playbooks/cluster-run.md), including on a held node.
@@ -29,37 +29,33 @@ Before designing a large-data pipeline or starting a long data job, read and app
 
 ## Shell and environment
 
-- **The local shell on lab Macs is zsh.** Quote every URL, since `?` and `*` are globs. zsh
-  does not split an unquoted `$var` into words, so use an array or a loop over quoted items.
-  End a probe that may find nothing, such as `grep`, with `|| true`, so an empty result is not
-  a red error that hides real ones.
-- **Run project code on a cluster through `pixi run`,** never the system `python3`, which lacks
-  the project's modules.
+- **The local shell on lab Macs is zsh.** Quote every URL (`?` and `*` are globs). An unquoted
+  `$var` is not split into words, so use an array. End a probe that may find nothing with
+  `|| true`, so an empty result doesn't hide real errors.
+- **Run project code on a cluster through `pixi run`,** not the system `python3`.
 
 ## Work on a compute node, not the login node
 
-Get onto a compute node and stay there. A login node is a doorway, not a workspace: one shared
-machine per cluster, and a fan-out of "small" agent commands is what takes it down. `ssh arc
-'<cmd>'` is the wrong reflex even for a one-liner — and rarely needed, since the whole Slurm
-client (`squeue`, `sbatch`, `scancel`, `sinfo`) runs on the compute node. There are **two
-reasons, and only two**, to run anything on a login node:
+Get onto a compute node and stay there. A login node is one shared machine per cluster, and a
+fan-out of "small" agent commands takes it down. `ssh arc '<cmd>'` is the wrong reflex even for
+a one-liner: the whole Slurm client (`squeue`, `sbatch`, `scancel`) runs on the compute node.
+Only **two reasons** justify a login node:
 
 1. **You hold no job**, so no compute node is yours yet. Only a login node can submit that
    first one.
-2. **The compute node lacks what you need.** On ircbc that means internet (its compute nodes
-   are offline) and `git` (not installed there). On **arc it means nothing at all** — arc
-   compute nodes have direct internet and a full toolchain, so once you hold one, never leave.
+2. **The compute node lacks what you need:** on ircbc, internet and `git`. On **arc, nothing**:
+   its compute nodes have internet and a full toolchain, so once you hold one, never leave.
 
 ## SOP — take a foothold, then keep it
 
 1. **Find and reuse the node you already hold.** The lab parks a long-lived idle GPU job on arc for this.
    Check `personal.md`, then probe aliases with `ssh -o BatchMode=yes -o ConnectTimeout=10
-   <alias> true` — probes fail fast, so sweeping every alias is cheap. Judge by exit status, not stderr.
+   <alias> true` — a sweep is cheap. Judge by exit status, not stderr.
 2. **Land and stay.** On arc, wrap commands in a login shell — `ssh <node> 'bash -lc "…"'` — or
    `pixi` and other user-installed tools are invisible.
-   Put each probe's commands into one ssh call, not one call per command: every call is a
-   connection through the login node. If ssh to an alias hangs after the VPN or network
-   dropped, clear the stale shared connection with `ssh -O exit <alias>`, then retry once.
+   Put each probe's commands into one ssh call: every call is a connection through the login
+   node. If ssh hangs after the VPN or network dropped, clear the stale shared connection with
+   `ssh -O exit <alias>`, then retry once.
 3. **No node anywhere?** Only then use the login node, and only to fix that: show the exact
    sbatch/salloc, get confirmation, submit, poll to RUNNING, ssh in, and leave. Footholds are
    preemptible; if one dies, repeat this step.
