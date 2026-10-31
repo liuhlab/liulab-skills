@@ -119,6 +119,20 @@ details.
    per-node compute aliases, `ircbc`, `ircbc-transfer`, `cpu01`…`cpu08`) with
    your own usernames and keys. Ask a lab member for a working example —
    this repo intentionally does not ship one.
+
+   Then add this block at the end of the file, so that many ssh calls share
+   one connection instead of each opening a new one through the login node:
+
+   ```text
+   Host *
+     ControlMaster auto
+     ControlPath ~/.ssh/cm-%C
+     ControlPersist 10m
+   ```
+
+   `%C` gives each connection its own socket file. The shared connection
+   stays open ten minutes after the last call. The config check prints an
+   `ssh: ADVISORY` line while the compute-node aliases lack it.
 2. Copy [templates/personal.md](templates/personal.md) to
    `~/.claude/lab/personal.md` and fill in your usernames/directories.
    Never commit it anywhere.

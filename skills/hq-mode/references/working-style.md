@@ -36,8 +36,15 @@ failure they have never seen.
 principle.** Do everything else first. Then, at an item on it, stop: show exactly what you would
 run and wait for the user's yes. In a session the user has left, end the turn on that question.
 
-- `sbatch`, `srun`, `scancel`: show the exact script in the reply, not a link to it (`lab-hpc`),
-  a pilot's included.
+- `sbatch`, `srun`, `scancel` outside an approved **run plan** (`lab-hpc`). The user approves
+  it once, before the pilot and sized for the full run: the work folder, the partitions, the
+  most CPU, memory and wall time per job, the most jobs at once, and the target measure with
+  its acceptable range. Show the exact scripts in the reply when you propose it. Inside it,
+  you and your subagents submit, and cancel the plan's own jobs, unasked. A job or pilot
+  estimate past any limit needs a revised plan; cancelling a job the plan did not start needs
+  a yes. Post the plan on the run's issue, or in the work folder's README if there is none,
+  and quote it word for word in every subagent brief. It ends with the run. No plan: every
+  job, a pilot's included, waits for a yes.
 - Any Edison spend: user-invoked only (`lab-edison`).
 - Writes or deletes in the shared package store or the shared lab data root.
 - Force-push to a shared branch; deleting data, or a branch with unmerged work.
@@ -52,7 +59,7 @@ run and wait for the user's yes. In a session the user has left, end the turn on
 
 "Headless", "land it", "going to bed" → keep going to the end through everything the
 always-pause list doesn't name. "Land it" covers merging the PR you were asked to land; it is
-never the yes an item on the list needs. "Just discussing" → change nothing.
+never the yes an item on the list needs, nor a run plan. "Just discussing" → change nothing.
 
 ## Delegation
 
@@ -71,6 +78,10 @@ never the yes an item on the list needs. "Just discussing" → change nothing.
   `reset`, `checkout .`) in every brief, and stage paths explicitly.
 - **Time it.** Give every subagent and long command a deadline; act at the deadline instead of
   waiting out a stall. A trivial job stuck in a helper → cancel it and do it yourself.
+- **One unit, then hand off.** A subagent works one unit, writes a handoff note by following
+  the [`handoff`](../../handoff/SKILL.md) skill's file, and stops; a fresh subagent takes the
+  next unit. At a subagent's deadline or around half its context, ask it to wrap up. Stop it
+  only if it hangs.
 - **Peer sessions.** Announce who you are and which issue is yours. Message the peer; never
   touch its uncommitted work.
 - **Codex as a peer.** For image generation and Word-heavy work, run Codex headless from a

@@ -5,6 +5,31 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.10.23 — 2026-10-30
+
+### Changed
+
+- Slurm jobs no longer wait for a yes one by one. You approve a run plan once, before the
+  pilot: the work folder, partitions, most CPU, memory and wall time per job, most jobs at
+  once, and the target measure with its range. Agents then submit, and cancel, the plan's own
+  jobs without asking. A job outside the plan, cancelling a job the plan did not start, and
+  writes to shared data still wait for your yes. With no plan, every job still waits.
+- The cluster-run playbook now covers a large run from start to finish: agree the target,
+  propose the plan with one work folder, design the pilot, scale up in rounds sized to what is
+  still unknown, check each new job in its first minutes, and report each round the same way.
+- A subagent now works one unit, writes a handoff note and stops, so no subagent runs for hours.
+- Spec work and wayfinder tasks that touch a cluster now read the cluster rules first, and each
+  ticket closes as its work lands.
+
+### Added
+
+- `watch-job.sh` in `lab-hpc` watches a Slurm job, and optionally a file's growth, with one ssh
+  call per check, and exits when the job is done, failed or stalled. Run it in the background
+  instead of a `sleep` loop.
+- The README shows an ssh connection-reuse block, and the config check advises when your
+  compute-node aliases lack it.
+- `lab-hpc` notes for zsh quoting, `pixi run`, a down `sacct` database and rclone on ircbc.
+
 ## 2026.10.22 — 2026-10-30
 
 ### Changed

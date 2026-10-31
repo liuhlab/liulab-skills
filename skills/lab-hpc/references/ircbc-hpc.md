@@ -48,6 +48,10 @@ which reads like a broken proxy but means "no internet here". `unset` all six at
 The missing `git` is the one that bites: even an offline `git status` or `git log` needs a login-node hop. Drive git from `ircbc` against
 `/share`, or put git inside your container or pixi env so compute-side sessions stand alone. Compute PATH is bare — `~/.pixi/bin:/usr/local/bin:/usr/bin:/opt/ibutils/bin`.
 
+**rclone: not the module's.** The module rclone reads a system `rclone.conf` that users cannot read, so it fails with
+`permission denied`. Run the project environment's rclone (`pixi run rclone`) and set `RCLONE_CONFIG` to a config file you own.
+Your remotes, paths and destinations go in `~/.claude/lab/personal.md`, never in this repo.
+
 ## Storage and the `$LIU_LAB_PACKAGES` image store
 
 `/share` is mounted and writable on login and compute alike. It is the big shared filesystem and it does fill up — `df -h /share` before

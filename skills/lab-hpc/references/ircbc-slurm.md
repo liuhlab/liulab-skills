@@ -11,8 +11,12 @@ queue is never a reason to ssh to the login node.
 
 Two dialect notes for 18.08. `squeue --me` does not exist (`unrecognized option`) — use `squeue -u $USER`, and
 expect other recent flags to be missing too. And `sbatch --test-only` does **not** submit, confirmed from both
-login and compute: it prints the would-be job id and start node while the queue stays empty. That is the dry
-run that pairs with the rule to show a script before submitting it.
+login and compute: it prints the would-be job id and start node while the queue stays empty. Use it to check
+a script before proposing it in a run plan.
+
+If `sacct` reports `Problem talking to the database`, the accounting database is down or slow. That
+is expected: fall back to `squeue -u $USER` for live jobs and `scontrol show job <jobid>` for one
+job's state, rather than retrying `sacct`.
 
 ## Partitions
 
@@ -25,7 +29,7 @@ No accounting or QOS caps are exposed (`sacctmgr` returns nothing), so no `--acc
 | `compute_fat` | 2 fat nodes | 160 CPUs, ~1–2 TB RAM | Big-memory jobs |
 | `compute_gpu_2080` | 2 nodes | 4× RTX 2080 | Habitually **drained** — treat ircbc as CPU-only unless `sinfo` says otherwise |
 
-`DefaultTime=NONE` means a job submitted without `-t` has no walltime to fall back on, so **always pass `-t`**.
+`DefaultTime=NONE` means a job submitted without `-t` has no wall time to fall back on, so **always pass `-t`**.
 Nodes are shared and some are usually drained, so read `sinfo -p compute_cpu` for what is free right now
 rather than assuming a node is idle.
 
@@ -37,7 +41,7 @@ and shared I/O budgets.
 
 ## Submitting
 
-Never submit without showing the exact script and getting confirmation (`SKILL.md`). Read-only probes —
+Never submit outside an approved run plan (`SKILL.md`). Read-only probes —
 `squeue`, `sinfo`, `sbatch --test-only` — need no permission.
 
 ```bash

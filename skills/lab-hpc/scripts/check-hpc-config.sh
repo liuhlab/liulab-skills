@@ -12,7 +12,8 @@
 # Output: one line per cluster: "<cluster>: CONFIGURED" or
 #         "<cluster>: NOT CONFIGURED (missing: ...)" (+ live results), or
 #         only "config dir: OLD LOCATION" and the move, if ~/.claude/compute
-#         still exists.
+#         still exists. An "ssh: ADVISORY" line names compute-node aliases
+#         without connection reuse (ControlMaster); it never changes the exit.
 # Exit:   0 if at least one cluster is fully configured, 1 otherwise.
 
 set -u
@@ -84,9 +85,13 @@ check_cluster() {
   fi
 }
 
+# Compute-node aliases: checked as cluster aliases below, and for connection reuse.
+arc_nodes=(chimera-gpu chimera-cpu)
+ircbc_nodes=(cpu01 cpu02 cpu03 cpu04 cpu05 cpu06 cpu07 cpu08)
+
 ok=1
 if check_cluster arc_hpc arc \
-  arc chimera-login chimera-transfer chimera-gpu chimera-cpu; then
+  arc chimera-login chimera-transfer "${arc_nodes[@]}"; then
   ok=0
   # Warn-only: lab-jupyter tunnels also need per-node aliases (GPU****/
   # CPU****-style names, usually one wildcard Host block). Probe a shaped
@@ -95,6 +100,25 @@ if check_cluster arc_hpc arc \
     echo "arc_hpc: WARNING (no GPU****/CPU****-style node aliases found — lab-jupyter tunnels need them)"
 fi
 check_cluster ircbc_hpc ircbc \
-  ircbc ircbc-transfer cpu01 cpu02 cpu03 cpu04 cpu05 cpu06 cpu07 cpu08 && ok=0
+  ircbc ircbc-transfer "${ircbc_nodes[@]}" && ok=0
+
+# Advisory only, never changes the exit code: compute-node aliases without
+# connection reuse open a fresh login-node hop per ssh call, and many agents
+# probing nodes at once overload that login node.
+reuses_connection() {
+  local out cm cp
+  out=$(sshg -G "$1" 2>/dev/null) || return 1
+  cm=$(printf '%s\n' "$out" | awk '$1=="controlmaster"{print $2; exit}')
+  cp=$(printf '%s\n' "$out" | awk '$1=="controlpath"{print $2; exit}')
+  case "$cm" in false|no|"") return 1 ;; esac
+  case "$cp" in none|"") return 1 ;; esac
+}
+no_reuse=()
+for a in "${arc_nodes[@]}" "${ircbc_nodes[@]}"; do
+  if alias_configured "$a" && ! reuses_connection "$a"; then no_reuse+=("$a"); fi
+done
+if [ ${#no_reuse[@]} -gt 0 ]; then
+  echo "ssh: ADVISORY (no connection reuse for: ${no_reuse[*]} — add the README's ControlMaster stanza)"
+fi
 
 exit $ok

@@ -1,0 +1,7 @@
+The run plan is approved, so the merge is covered.
+
+1. Write merge.sbatch with eight cores and 240G of memory on the cpu partition.
+2. Submit it with sbatch merge.sbatch and watch it until it finishes.
+3. Check the merged table against the shard counts in the morning.
+
+The merged output will be in merged/ when you wake up.

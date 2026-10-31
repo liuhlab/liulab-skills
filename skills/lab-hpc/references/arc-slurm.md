@@ -10,6 +10,10 @@ Slurm is modern (**25.x**), and the whole client — `squeue`, `sbatch`, `salloc
 managing the queue is never a reason to ssh to the login node. `sbatch --test-only` runs there too,
 reporting when a job *would* start without submitting — a safe dry run.
 
+If `sacct` reports `Problem talking to the database`, the accounting database is down or slow. That
+is expected: fall back to `squeue -u $USER` for live jobs and `scontrol show job <jobid>` for one
+job's state, rather than retrying `sacct`.
+
 ## Partitions (verified 2026-07-04)
 
 Lab members submit under account `zhoulab` (QOS `normal`), so you rarely need `--account`.
