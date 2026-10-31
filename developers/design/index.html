@@ -1,0 +1,1187 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Teach AI coding agents how the Liu Lab works, starting with its HPC clusters">
+      
+      
+      
+        <link rel="canonical" href="https://liuhlab.github.io/liulab-skills/developers/design/">
+      
+      
+        <link rel="prev" href="../upstreams/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.57">
+    
+    
+      
+        <title>Design choices - Liu Lab Skills</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-6M1CJF9WXY"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-6M1CJF9WXY",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-6M1CJF9WXY",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#design-choices" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Liu Lab Skills" class="md-header__button md-logo" aria-label="Liu Lab Skills" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Liu Lab Skills
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Design choices
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/liuhlab/liulab-skills" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    liuhlab/liulab-skills
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Liu Lab Skills" class="md-nav__button md-logo" aria-label="Liu Lab Skills" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
+
+    </a>
+    Liu Lab Skills
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/liuhlab/liulab-skills" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    liuhlab/liulab-skills
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Basic usage
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Skills
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Skills
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-hpc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-hpc
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-jupyter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-jupyter
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-containers
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-edison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-edison
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-setup
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/hq-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  hq-mode
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/unslop-zh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  unslop-zh
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Developers
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Developers
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Repo layout
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upstreams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Upstream skills
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Design choices
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Design choices
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#one-plugin-updated-as-a-whole" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        One plugin, updated as a whole
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-version-names-one-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        A version names one tree
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#facts-and-procedures-live-apart" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Facts and procedures live apart
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#no-secrets-by-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        No secrets, by construction
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules-become-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rules become structure
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#two-kinds-of-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Two kinds of page
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upstream-skills-keep-upstream-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Upstream skills keep upstream text
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-docs-site-runs-on-an-alpha" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The docs site runs on an alpha
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#one-plugin-updated-as-a-whole" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        One plugin, updated as a whole
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-version-names-one-tree" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        A version names one tree
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#facts-and-procedures-live-apart" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Facts and procedures live apart
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#no-secrets-by-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        No secrets, by construction
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules-become-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rules become structure
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#two-kinds-of-page" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Two kinds of page
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upstream-skills-keep-upstream-text" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Upstream skills keep upstream text
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-docs-site-runs-on-an-alpha" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The docs site runs on an alpha
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+<h1 id="design-choices">Design choices<a class="headerlink" href="#design-choices" title="Permanent link">&para;</a></h1>
+<p>The choices below shape most changes to this repo. Each one names what it costs, and links
+the decision record that argues it in full. The records live under <code>docs/adr/</code>. A choice
+that was later reversed links the record that reversed it.</p>
+<h2 id="one-plugin-updated-as-a-whole">One plugin, updated as a whole<a class="headerlink" href="#one-plugin-updated-as-a-whole" title="Permanent link">&para;</a></h2>
+<p>Every skill ships in one plugin, <code>lab</code>, from one marketplace, <code>liulab</code>. The skills lean on
+each other: <code>lab-jupyter</code> takes a job line word for word from <code>lab-containers</code>, and both
+defer to <code>lab-hpc</code> for the safety rules. A machine running two skills at two different
+versions is a mix nobody tests. That mix fails as a wrong command on a real cluster, which is
+the worst place to find out.</p>
+<p>One plugin makes an update all or nothing. The cost is that a lab member who wants one skill
+installs all of them, and every skill's description takes a little of every agent's context.
+That pressure is why descriptions stay short and dense with trigger words.</p>
+<p>Read the record: <a href="../../adr/0001-repo-root-is-the-plugin/">The repo root is the plugin, and one plugin holds every
+skill</a>.</p>
+<h2 id="a-version-names-one-tree">A version names one tree<a class="headerlink" href="#a-version-names-one-tree" title="Permanent link">&para;</a></h2>
+<p>Every change merged to <code>main</code> bumps the version, even a change to a test or a comment. The
+whole tree ships, so two different trees must never answer to one number. <code>tests/lint.sh</code>
+fails a tagged version whose files have moved since the tag.</p>
+<pre class="mermaid"><code>flowchart LR
+    merge["A change merges to main"] --&gt; ver["A new version,&lt;br/&gt;tagged on main after the merge"]
+    ver --&gt; cc["Claude Code:&lt;br/&gt;autoUpdate on the marketplace"]
+    ver --&gt; codex["Codex:&lt;br/&gt;upgrades at startup"]
+    ver --&gt; kimi["Kimi Code:&lt;br/&gt;reads Claude Code's clone"]</code></pre>
+<p>Versions are calendar dates, <code>YEAR.MONTH.PATCH</code>. What ships is prose an agent reads, with no
+API to break, so the only thing a version needs to say is how old a copy is.</p>
+<p>Installed copies update on their own. Releasing is pushing, and a fixed safety rule reaches
+every machine at its next launch. So does a bad release, with nobody choosing to take it.</p>
+<p>Read the records: <a href="../../adr/0008-version-identifies-the-content/">The version names one tree</a>,
+<a href="../../adr/0004-calver-and-manual-updates/">CalVer</a>, and <a href="../../adr/0014-installed-copies-update-on-their-own/">Installed copies update on their
+own</a>, which reversed the manual-update
+half of the CalVer record.</p>
+<h2 id="facts-and-procedures-live-apart">Facts and procedures live apart<a class="headerlink" href="#facts-and-procedures-live-apart" title="Permanent link">&para;</a></h2>
+<p>New content goes where its kind says, not where the person asking for it happens to work.</p>
+<pre class="mermaid"><code>flowchart LR
+    q{"What are you&lt;br/&gt;adding?"}
+    q --&gt;|"how a cluster behaves"| a["skills/lab-hpc/references/&lt;br/&gt;checked on a compute node, dated"]
+    q --&gt;|"how a vendor platform behaves"| b["the owning skill's references/&lt;br/&gt;under a provenance block"]
+    q --&gt;|"a repeatable procedure"| c["its own lab-* skill,&lt;br/&gt;pointing at the facts"]
+    q --&gt;|"a one-line tip"| d["a bullet in lab-hpc"]
+    q --&gt;|"what a word means"| e["GLOSSARY.md"]
+    q --&gt;|"a hard-to-reverse decision"| f["docs/adr/"]
+    q --&gt;|"open work"| g["a GitHub issue"]</code></pre>
+<p>A fact copied into two skills goes stale in one of them, and no check can tell which copy is
+right. On a cluster that is not a stale sentence. It is an agent typing <code>squeue --me</code> on a
+Slurm version that lacks it.</p>
+<p>Two rules keep facts honest:</p>
+<ul>
+<li><strong>Record configuration, never measurements.</strong> Configuration is what an agent must type: a
+  partition's time limit, a port, a module name. A measurement is free disk space, a queue
+  wait or a node count. It is true for one afternoon, and the agent cannot tell when it went
+  stale. Write the guidance and the command that gives a live value instead: "<code>/large_storage</code>
+  fills up, check <code>df -h</code>", not "81% used".</li>
+<li><strong>Facts carry their source.</strong> A vendor fact cannot be checked again for free, so each
+  <code>lab-edison</code> reference page opens with a provenance block. The block gives its source, the
+  date it was checked, and one of three tiers. <em>Verified</em> means we ran it. <em>Read</em> means it
+  came from the package source or a vendor page. <em>Unverified</em> means it was inferred. Lint
+  fails a page without one.</li>
+</ul>
+<p>Read the records: <a href="../../adr/0002-facts-vs-recipes/">Facts versus recipes</a>, <a href="../../adr/0003-jupyter-containers-ownership-split/">Jupyter and
+containers split at the job line</a>, and
+<a href="../../adr/0009-facts-carry-their-provenance/">Facts carry their provenance</a>.</p>
+<h2 id="no-secrets-by-construction">No secrets, by construction<a class="headerlink" href="#no-secrets-by-construction" title="Permanent link">&para;</a></h2>
+<p>The repo is public, so it holds no connection details at all. Skills name hosts only by the
+lab's ssh alias names, and read everything else from the user's machine when they run.</p>
+<pre class="mermaid"><code>flowchart LR
+    subgraph pub["Public repo"]
+        skill["Skill text&lt;br/&gt;alias names only:&lt;br/&gt;arc, ircbc, ..."]
+    end
+    subgraph mine["The user's machine, never committed"]
+        direction TB
+        ssh["~/.ssh/config&lt;br/&gt;hosts, usernames, keys"]
+        pers["~/.claude/lab/personal.md&lt;br/&gt;folders, ports, job defaults"]
+        key["~/.claude/lab/edison.env&lt;br/&gt;the Edison key"]
+    end
+    skill --&gt;|"resolves aliases at run time"| ssh
+    skill --&gt;|"reads into the agent's context"| pers
+    skill --&gt;|"edison-cli sources it into&lt;br/&gt;its process, never into context"| key</code></pre>
+<p><code>tests/lint.sh</code> sweeps every file for a leaked address, hostname or username. It reads your
+own ssh config to know which names to look for, so the sweep is complete only on a machine
+with the lab's ssh aliases. CI cannot run it in full, which is why you run the gate before you push.</p>
+<p>The Edison key gets a file of its own because <code>personal.md</code> is read into the agent's
+context. That is its job. A key written there would land in the transcript of every session.
+The key file is sourced by a shell instead, so the key reaches the client without ever
+appearing as text.</p>
+<p>Read the record: <a href="../../adr/0007-edison-key-file-and-never-transmit/">The Edison key gets its own file</a>.</p>
+<h2 id="rules-become-structure">Rules become structure<a class="headerlink" href="#rules-become-structure" title="Permanent link">&para;</a></h2>
+<p>A rule an agent must remember at the moment it matters fails sooner or later. Where a rule
+guards something costly, the repo turns it into something that runs.</p>
+<ul>
+<li><strong>Preflights refuse.</strong> <code>lab-hpc</code> checks the machine's ssh setup before any cluster work, and
+  refuses on a machine that is not set up rather than asking for an address.</li>
+<li><strong>Spending goes through a command.</strong> <code>lab-edison</code> once taught an agent to submit a task,
+  print its id, and only then poll. A real session lost a paid run's id anyway, and it had to
+  be dug out of the task history. Now <code>edison-cli</code> does it in order:</li>
+</ul>
+<pre class="mermaid"><code>flowchart TB
+    typed["A person types /lab-edison"] --&gt; pre["edison-cli runs its preflight: no key file, no spend"]
+    pre --&gt; file["The question goes into a file, which the person sees in full"]
+    file --&gt; submit["Submit from that file: the task id is the first line out"]
+    submit --&gt; poll["Poll, then fetch the answer"]</code></pre>
+<ul>
+<li><strong>Lint checks the conventions.</strong> Names, version tags, eval case lists and the no-secrets
+  sweep are all checks in <code>tests/lint.sh</code>, not reminders in a document.</li>
+<li><strong>Some steps always wait for a person.</strong> <code>hq-mode</code>'s always-pause list, such as submitting
+  a Slurm job or merging an unreviewed pull request, outranks anything said in the session,
+  "land it" included.</li>
+</ul>
+<p>Read the records: <a href="../../adr/0010-edison-skill-runs-through-a-script/">The Edison skill ships its spend path</a>
+and <a href="../../adr/0011-the-spend-path-became-a-package/">The spend path became a package</a>.</p>
+<h2 id="two-kinds-of-page">Two kinds of page<a class="headerlink" href="#two-kinds-of-page" title="Permanent link">&para;</a></h2>
+<p>Every page is written either for an agent that has to act, or for a person reading this site.
+The gate checks each kind for different things.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>For agents</th>
+<th>For people</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Files</td>
+<td><code>AGENTS.md</code>, every <code>SKILL.md</code> and <code>references/</code> page, <code>docs/adr/</code>, <code>docs/agents/</code></td>
+<td><code>README.md</code>, <code>CHANGELOG.md</code>, the pages in this site's menu</td>
+</tr>
+<tr>
+<td>Checked for</td>
+<td>A word cap for each kind of file</td>
+<td>No jargon from the lab's list, and a reading grade of 11 or below</td>
+</tr>
+<tr>
+<td>On this site</td>
+<td>Out of the menu and search, still reachable by URL</td>
+<td>In the menu and search</td>
+</tr>
+</tbody>
+</table>
+<p>A cap that fires means the text belongs somewhere else, such as a <code>references/</code> page, not that
+the cap should rise. Upstream text in an adopted skill is exempt, so it passes unchanged. <code>docs/agents/writing.md</code> has the caps
+and how to measure against them.</p>
+<h2 id="upstream-skills-keep-upstream-text">Upstream skills keep upstream text<a class="headerlink" href="#upstream-skills-keep-upstream-text" title="Permanent link">&para;</a></h2>
+<p>The lab takes general engineering skills from mattpocock/skills and pstack instead of writing
+its own. A tracked skill only ever gains text, and keeps its upstream name, so each sync
+merges cleanly. <a href="../upstreams/">Skills from mattpocock and pstack</a> has the whole story.</p>
+<h2 id="the-docs-site-runs-on-an-alpha">The docs site runs on an alpha<a class="headerlink" href="#the-docs-site-runs-on-an-alpha" title="Permanent link">&para;</a></h2>
+<p>This site is built by zensical, an early <code>0.0.x</code> builder from the makers of Material for
+MkDocs. The lab wants every repo on one builder, and this repo is the cheapest place to try
+it: a few hand-written pages, nothing generated. The pin is exact, and moving back to mkdocs
+is a short change to <code>pyproject.toml</code> and <code>mkdocs.yml</code>.</p>
+<p>Read the record: <a href="../../adr/0005-docs-site-on-zensical/">The docs site is built by zensical</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../upstreams/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Upstream skills">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Upstream skills
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.code.copy","navigation.footer"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
+      
+    
+  </body>
+</html>
