@@ -39,7 +39,7 @@ run and wait for the user's yes. In a session the user has left, end the turn on
 - `sbatch`, `srun`, `scancel` outside an approved **run plan** (`lab-hpc`). The user approves
   it once, before the pilot and sized for the full run: the work folder, the partitions, the
   most CPU, memory and wall time per job, the most jobs at once, and the target measure with
-  its acceptable range. Ask for it only with the exact scripts in the reply. Inside it,
+  its acceptable range. Show the exact scripts in the reply when you propose it. Inside it,
   you and your subagents submit, and cancel the plan's own jobs, unasked. A job or pilot
   estimate past any limit needs a revised plan; cancelling a job the plan did not start needs
   a yes. Post the plan on the run's issue, or in the work folder's README if there is none,
