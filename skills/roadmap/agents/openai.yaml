@@ -1,0 +1,5 @@
+interface:
+  display_name: "Roadmap"
+  short_description: "Plan a goal bigger than one map as stages"
+policy:
+  allow_implicit_invocation: false

@@ -26,7 +26,7 @@ grill, spec or research session: the user types the next step.
 | When | Go to |
 | --- | --- |
 | A question for the user | The asking rules first. A fact is never the user's to answer |
-| An idea in a repo | `/grill-with-docs`; with no repo, `/grill-me`. Too big for one session: `/wayfinder` |
+| An idea in a repo | `/grill-with-docs`; with no repo, `/grill-me`. Too big for one session: `/wayfinder`; too big for one map: `/roadmap` |
 | A design question code can settle | `prototype`, bridged by `/handoff` when it needs its own folder |
 | The idea is settled | `/to-spec`, `/to-tickets`, then the land-the-tickets playbook: `/implement` per ticket or `/implement-spec` for all, each driving `tdd` and `code-review`; `pr` writes the PR body |
 | A build just ended | `/retro` |

@@ -48,6 +48,7 @@ nav:
       - lab-setup: skills/lab-setup.md
       - hq-mode: skills/hq-mode.md
       - unslop-zh: skills/unslop-zh.md
+      - roadmap: skills/roadmap.md
   - Developers:
       - Repo layout: developers/index.md
       - Upstream skills: developers/upstreams.md

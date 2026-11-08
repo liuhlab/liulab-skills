@@ -95,7 +95,7 @@ instead of quoting one.
 ### Derived skill
 
 A skill the lab owns from the start but built from upstream skills or ideas, carrying their
-attribution. It takes a `lab-*` name, except `hq-mode` and `unslop-zh`. Contrast a forked
+attribution. It takes a `lab-*` name, except `hq-mode`, `unslop-zh` and `roadmap`. Contrast a forked
 skill, which began as an adopted copy and keeps its upstream name.
 
 ### Description budget
@@ -211,10 +211,12 @@ the pin, with its reason in the commit message and the changelog.
 ### `lab-*` name
 
 The mark of a skill the lab wrote, such as `lab-hpc` or `lab-setup`, or derived. An adopted
-skill never takes one, tracked or forked. `hq-mode` and `unslop-zh` are the two exceptions.
+skill never takes one, tracked or forked. `hq-mode`, `unslop-zh` and `roadmap` are the three
+exceptions.
 Lint admits any other name only when the repo records the skill as adopted. See
-`docs/adr/0013-adopted-skills-keep-upstream-names.md` and
-`docs/adr/0016-unslop-zh-is-a-naming-exception.md`.
+`docs/adr/0013-adopted-skills-keep-upstream-names.md`,
+`docs/adr/0016-unslop-zh-is-a-naming-exception.md` and
+`docs/adr/0018-roadmap-is-a-naming-exception.md`.
 
 ### liulab-runtime
 

@@ -52,6 +52,10 @@ Current skills:
   changes only what the task allows. Polishing preserves the author's voice and
   can return natural text unchanged. Code, English and other protected content
   stay intact.
+- **`roadmap`** — type `/roadmap` with a goal too big for one `wayfinder`
+  map. It files one issue with the final deliverable, the checks that say it
+  is done, and the stages; each stage then gets its own map, spec and tickets.
+  It also starts and ends stages and closes the roadmap when every check passes.
 
 Skills taken from other projects keep their own names. These come from
 [mattpocock/skills](https://github.com/mattpocock/skills). Most are
