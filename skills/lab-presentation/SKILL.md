@@ -25,7 +25,7 @@ Open a page in full at the step that needs it, not before.
 | [references/slide-rules.md](references/slide-rules.md) | Before the outline, and before any edit to a slide |
 | [references/practice.md](references/practice.md) | When you plan the outline or the notes, or when the user questions a rule |
 | The build and round-trip page | At step 3. It arrives with the `lab-deck` command |
-| The images page | When a slide needs a drawn picture. It arrives with the image recipe |
+| [references/images.md](references/images.md) | When a slide needs a picture: a real figure panel, or one drawn with Codex |
 
 ## 1. The audience brief
 
