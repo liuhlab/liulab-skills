@@ -32,6 +32,11 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   else in it.
 - A build page in `lab-presentation` that describes the deck folder, the slide helpers, the
   steps of the build and the known limits of PptxGenJS.
+- An images page in `lab-presentation`. When a slide needs a drawn picture, the agent has
+  Codex draw it with no text in it, and the words stay as PowerPoint text you can edit. The
+  background is made pure white, so the picture hides no text. The prompt is kept beside the
+  picture, so it can be made again. Where a real figure panel exists, the agent uses that
+  instead, made simpler for the slide.
 - `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
   Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
 
