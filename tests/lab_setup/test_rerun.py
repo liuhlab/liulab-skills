@@ -64,7 +64,7 @@ def test_a_dry_run_reports_each_change_and_makes_none(machine: FakeMachine) -> N
 
     assert machine.snapshot() == before
     assert machine.codex_calls() == []
-    for step in ("claude", "codex", "kimi", "defaults", "edison-cli"):
+    for step in ("claude", "codex", "kimi", "defaults", "edison-cli", "lab-deck"):
         assert any(
             line.startswith("would change") and step in line for line in result.stdout.splitlines()
         ), step

@@ -9,6 +9,14 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
 ### Added
 
+- `lab-deck`, a command that ships with the plugin and builds a slide deck. `lab-deck new`
+  makes a deck folder with its own git history: the audience brief, the slide order, one
+  source file per slide, pictures, notes and the theme. It warns if the folder is inside a
+  synced cloud folder. `lab-deck build` turns a one-slide deck folder into a 16:9 PowerPoint
+  file. A failed build leaves the last built deck as it was.
+- `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
+  Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
+
 ## 2026.10.23 — 2026-10-30
 
 ### Changed
