@@ -22,8 +22,16 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 - `lab-deck`, a command that ships with the plugin and builds a slide deck. `lab-deck new`
   makes a deck folder with its own git history: the audience brief, the slide order, one
   source file per slide, pictures, notes and the theme. It warns if the folder is inside a
-  synced cloud folder. `lab-deck build` turns a one-slide deck folder into a 16:9 PowerPoint
-  file. A failed build leaves the last built deck as it was.
+  synced cloud folder. `lab-deck build` turns the deck folder into a 16:9 PowerPoint file. A
+  failed build leaves the last built deck as it was.
+- `lab-deck build` builds a deck of many slides, in the order `deck.toml` lists them. Every
+  slide but the title has a page number in the bottom right corner. To insert a slide, add
+  one file and one name: no other slide is renamed. Tables work. The same deck folder always
+  builds to the same file, so a rebuild that changes nothing shows no change in git.
+- The theme file may change the font and the accent colour only. The build refuses anything
+  else in it.
+- A build page in `lab-presentation` that describes the deck folder, the slide helpers, the
+  steps of the build and the known limits of PptxGenJS.
 - `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
   Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
 

@@ -1,0 +1,107 @@
+# The build
+
+How a deck folder becomes a PowerPoint file. Open this page at step 3, before you write a
+slide source or run `lab-deck`.
+
+`lab-deck` ships with the plugin and is on the PATH after `/lab-setup`. The build code lives
+in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-the-plugin.md`).
+
+## Commands
+
+| Command | Does |
+| --- | --- |
+| `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
+| `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
+
+Exit codes: 0 fine, 1 refused with the reason on stderr, 2 wrong usage.
+
+## The deck folder
+
+| Path | Holds |
+| --- | --- |
+| `brief.toml` | The audience brief: `audience`, `knows`, `minutes`, `language`, `known_terms`, `room`, `use` |
+| `deck.toml` | `title`, `output` (the built file's name) and `slides`, the slide ids in the order shown |
+| `theme.toml` | `font` and `accent`, and nothing else |
+| `slides/<id>.js` | One source file per slide. The file name is the slide's id |
+| `pictures/` | Pictures, each with the prompt that made it beside it |
+| `notes/<id>.md` | Speaker notes |
+| `<output>` | The built deck |
+
+A slide's id is a name, never a number: letters, digits, `-`, `_` and `.`. To insert a slide,
+write `slides/<new id>.js` and add the id to `slides` in `deck.toml` at its place. Rename
+nothing. To reorder, move ids in the list. To drop a slide, remove its id.
+
+`room` in the brief sets the sizes: `"meeting room"` gives 24 pt body text and a 20 pt floor,
+`"hall"` gives 28 pt and 24 pt. A missing room means a meeting room.
+
+The theme is a white background, Arial, black text and one accent colour, blue `0072B2`.
+`theme.toml` may change `font` and `accent`. The build refuses any other key.
+
+## A slide source
+
+```js
+module.exports = (slide, deck) => {
+  deck.title(slide, "Trimming raises the alignment rate in every sample");
+  deck.lines(slide, ["Trimmed reads: higher rate", { text: "About 80%", accent: true }]);
+};
+```
+
+`slide` is the PptxGenJS slide, so every PptxGenJS call works on it. `deck` carries the house
+style. A source requires nothing: no `require("pptxgenjs")`, no path to the build.
+
+| On `deck` | Is |
+| --- | --- |
+| `title(slide, text)` | The slide's conclusion, top left, bold |
+| `lines(slide, items, box)` | Phrases, one per line. An item is a string or `{ text, accent, bold }` |
+| `table(slide, rows, box)` | A table. The first row is the header. A cell is a string or `{ text, accent, bold }` |
+| `picture(name)` | The path of a file in `pictures/`, for `slide.addImage({ path })` |
+| `font`, `accent`, `text` | The theme's font, its accent colour and black |
+| `size` | `title`, `body`, `floor` and `citation`, in points, for the brief's room |
+| `W`, `H`, `margin` | 13.333 by 7.5 inches, and the 0.7 inch margin |
+| `pres` | The PptxGenJS presentation, for `deck.pres.ShapeType` |
+
+`box` overrides the place: `{ x, y, w, h, fontSize }`, in inches and points. Pass `fontFace:
+deck.font` on every raw `addText` and `addTable`. Give a shape that a later step must find an
+`objectName`.
+
+## What the build does
+
+1. Reads the deck folder, and refuses a slide id with no source or a theme with an extra key.
+2. Runs each slide source on its own, into a one-slide file. A slide's shape ids depend on
+   that slide's source alone: the nth thing the source draws has id n + 1.
+3. Draws the page number last on every slide but the first, as a plain text box named
+   `Page number`, at the citation size in the bottom right margin. The number is the slide's
+   place in the deck. The first slide is the title and has none.
+4. Gives each table's frame the id its place in the drawing order gives it, and names the
+   slide by its id inside the file.
+5. Merges the one-slide files in the order of `deck.toml`. Each slide's XML goes in byte for
+   byte. A picture used on several slides is stored once.
+6. Reads the merged file back: every part present and declared, slides in order, no two
+   shapes with one id, no negative size.
+7. Moves the checked file over the last built deck in one step.
+
+A failure at any step leaves the last built deck as it was and names the slide. The same deck
+folder builds to the same bytes, so a rebuild that changes nothing shows no change in git.
+For that, the times inside the file are fixed at 1980-01-01.
+
+Inserting a slide changes one thing on the slides after it: the digits of the page number.
+
+## Known PptxGenJS limits
+
+The build uses PptxGenJS 4.0.1. Each limit below was read in its source and holds in 3.12 too.
+
+| Limit | What the build does |
+| --- | --- |
+| A table's frame is numbered by a count of tables, apart from the other shapes. The first table on a slide gets id 2, the id of the first shape, and PowerPoint offers to repair the deck | Step 4 renumbers the frame. `slide.addTable` and `deck.table` are both safe |
+| `slideNumber` writes PowerPoint's slide-number field with shape id 25 on every slide, the id of the 24th shape | The build draws its own text box. Never set `slideNumber` |
+| No group shapes | A drawing made of many shapes stays loose shapes |
+| A video or a sound is numbered apart from the other shapes, as a table is | The build refuses a slide where two shapes share an id |
+| A chart or a slide master adds parts that differ from slide to slide | The merge does not carry them, and the build refuses the slide. Show a chart as a picture |
+
+## Where PptxGenJS comes from
+
+`pptxgenjs` is a conda-forge package in the plugin's pixi environment. No `npm install` runs
+anywhere. The package lands in `lib/node_modules` under the environment's prefix, and Node
+does not search that folder by itself. `lab-deck build` sets `NODE_PATH` to it for the one
+Node process it starts. Run a slide source only through `lab-deck build`: plain `node` cannot
+find the library.

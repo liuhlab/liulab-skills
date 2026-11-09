@@ -1,9 +1,9 @@
 """Build the deck: hand the folder to Node, and replace the deck file in one step.
 
 Python reads the deck folder and writes one JSON job. `runner.js`, beside this file, runs each
-slide source against PptxGenJS and writes the deck into a scratch folder inside the deck
-folder. Only a finished file is moved over the last built deck, so a failed build leaves that
-deck as it was.
+slide source against PptxGenJS and writes one file per slide into a scratch folder inside the
+deck folder. `merge.py` puts those files together and checks the result. Only a finished,
+checked file is moved over the last built deck, so a failed build leaves that deck as it was.
 
 PptxGenJS is a conda-forge package in the pixi environment, at `lib/node_modules` under the
 environment's prefix. Node does not search that folder by itself, so `NODE_PATH` names it for
@@ -20,6 +20,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from lab_deck import merge
 from lab_deck.folder import ROOMS, Folder, Refusal
 
 RUNNER = Path(__file__).with_name("runner.js")
@@ -45,15 +46,26 @@ def node() -> str:
     return found
 
 
-def job(folder: Folder, output: Path) -> dict[str, object]:
-    """Describe one build for `runner.js`: what to draw, how it looks, where to write it."""
+def job(folder: Folder, scratch: Path) -> dict[str, object]:
+    """Describe one build for `runner.js`: what to draw, how it looks, where to write it.
+
+    Each slide is written to a file of its own in `scratch`. The page number is the slide's
+    place in the deck; the first slide is the title and carries none.
+    """
     return {
         "title": folder.title,
-        "output": str(output),
         "pictures": str(folder.path / "pictures"),
         "theme": {"font": folder.font, "accent": folder.accent},
         "size": {"title": TITLE, "citation": CITATION, **ROOMS[folder.room]},
-        "slides": [{"id": s, "source": str(folder.source(s))} for s in folder.slides],
+        "slides": [
+            {
+                "id": slide,
+                "source": str(folder.source(slide)),
+                "output": str(scratch / f"{slide}.pptx"),
+                "page": None if place == 1 else place,
+            }
+            for place, slide in enumerate(folder.slides, 1)
+        ],
     }
 
 
@@ -63,15 +75,16 @@ def build(folder: Folder) -> Path:
     Raises
     ------
     Refusal
-        When a slide source fails or Node writes no deck. The last built deck is untouched.
+        When a slide source fails, a slide cannot be merged, or the merged deck is not sound.
+        The last built deck is untouched.
     """
     if not (NODE_MODULES / "pptxgenjs").is_dir():
         raise Refusal(f"PptxGenJS is not installed at {NODE_MODULES}; run `pixi install`.")
     # Inside the deck folder, so the final move stays on one filesystem and is one step.
     with tempfile.TemporaryDirectory(prefix=".lab-deck-", dir=folder.path) as scratch:
-        written = Path(scratch) / folder.output.name
-        spec = Path(scratch) / "job.json"
-        spec.write_text(json.dumps(job(folder, written)), encoding="utf-8")
+        work = Path(scratch)
+        spec = work / "job.json"
+        spec.write_text(json.dumps(job(folder, work)), encoding="utf-8")
         done = subprocess.run(
             [node(), str(RUNNER), str(spec)],
             cwd=folder.path,
@@ -80,10 +93,19 @@ def build(folder: Folder) -> Path:
             text=True,
             check=False,
         )
-        if done.returncode != 0 or not written.is_file():
-            reason = done.stderr.strip() or done.stdout.strip() or "Node wrote no deck"
+        slides = [work / f"{slide}.pptx" for slide in folder.slides]
+        try:
+            if done.returncode != 0 or not all(slide.is_file() for slide in slides):
+                raise Refusal(done.stderr.strip() or done.stdout.strip() or "Node wrote no deck")
+            for name, slide in zip(folder.slides, slides, strict=True):
+                merge.repair(slide, name)
+            # A name no slide can have, so the merged file never lands on a slide's own.
+            written = work / "merged deck.pptx"
+            merge.merge(slides, written)
+            merge.check(written, len(slides))
+        except Refusal as error:
             raise Refusal(
-                f"the build failed, and {folder.output.name} was left as it was.\n{reason}"
-            )
+                f"the build failed, and {folder.output.name} was left as it was.\n{error}"
+            ) from None
         written.replace(folder.output)
     return folder.output

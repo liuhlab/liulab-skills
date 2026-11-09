@@ -71,6 +71,7 @@ SLIDE_TEXT = """\
 //   deck.title(slide, text)            the slide's conclusion, in one short sentence
 //   deck.lines(slide, [..], box)       phrases, one per line; an item is a string or
 //                                      { text, accent: true, bold: true }
+//   deck.table(slide, rows, box)       a table; the first row is its header
 //   deck.picture(name)                 the path of a file in pictures/
 //   deck.pres, deck.W, deck.H, deck.margin, deck.font, deck.accent, deck.size
 module.exports = (slide, deck) => {
@@ -194,6 +195,11 @@ def read(path: Path) -> Folder:
     room = brief.get("room") or "meeting room"
     if room not in ROOMS:
         raise Refusal(f"{BRIEF}: `room` is {room!r}; it must be one of {', '.join(ROOMS)}.")
+    other = sorted(set(theme) - {"font", "accent"})
+    if other:
+        raise Refusal(
+            f"{THEME}: {', '.join(other)} cannot be set; a theme changes `font` and `accent` only."
+        )
     accent = str(theme.get("accent") or ACCENT).lstrip("#").upper()
     if not re.fullmatch(r"[0-9A-F]{6}", accent):
         raise Refusal(f"{THEME}: `accent` must be six hex digits, such as {ACCENT}.")

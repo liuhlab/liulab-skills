@@ -24,22 +24,22 @@ Open a page in full at the step that needs it, not before.
 | --- | --- |
 | [references/slide-rules.md](references/slide-rules.md) | Before the outline, and before any edit to a slide |
 | [references/practice.md](references/practice.md) | When you plan the outline or the notes, or when the user questions a rule |
-| The build and round-trip page | At step 3. It arrives with the `lab-deck` command |
+| [references/build.md](references/build.md) | At step 3, before you write a slide source or run `lab-deck` |
 | The images page | When a slide needs a drawn picture. It arrives with the image recipe |
 
 ## 1. The audience brief
 
-The brief is a small file in the deck folder. Every later check reads it.
+The brief is `brief.toml` in the deck folder. Every later check reads it.
 
 | Field | Holds | When missing |
 | --- | --- | --- |
-| Audience | Who is listening | Ask |
-| Knows | What they already know | Ask |
-| Length | Minutes | Ask |
-| Language | The language of the slides | Ask |
-| Known terms | Terms and abbreviations they need no help with | Ask |
-| Room | Meeting room or hall | Meeting room |
-| Use | Presented or read alone | Presented |
+| `audience` | Who is listening | Ask |
+| `knows` | What they already know | Ask |
+| `minutes` | The length of the talk, as a number | Ask |
+| `language` | The language of the slides, such as `"en"` or `"zh"` | Ask |
+| `known_terms` | A list of the terms and abbreviations they need no help with | Ask |
+| `room` | `"meeting room"` or `"hall"` | `"meeting room"` |
+| `use` | `"presented"` or `"read alone"` | `"presented"` |
 
 Read the brief when the deck folder has one. Fill every line the request and the source text
 already answer. Then ask only for the lines still missing, in one message, and say how many

@@ -28,7 +28,16 @@ class Deck:
     def __init__(self, path: Path) -> None:
         with zipfile.ZipFile(path) as archive:
             assert archive.testzip() is None
-            self.parts = {name: archive.read(name).decode("utf-8") for name in archive.namelist()}
+            self.names = archive.namelist()
+            # The XML parts as text. A picture stays out: it is bytes, read with `media`.
+            self.parts = {
+                name: archive.read(name).decode("utf-8")
+                for name in self.names
+                if name.endswith((".xml", ".rels"))
+            }
+            self.media = {
+                name: archive.read(name) for name in self.names if name.startswith("ppt/media/")
+            }
 
     @property
     def size(self) -> tuple[int, int]:
@@ -46,6 +55,24 @@ class Deck:
     def text(self, slide: int) -> list[str]:
         """Every run of text on one slide, counted from 1."""
         return re.findall(r"<a:t>([^<]*)</a:t>", self.slides[slide - 1])
+
+    @property
+    def ids(self) -> list[str]:
+        """Each slide's id, the name of its source file, in the order the deck shows them."""
+        return [re.search(r'<p:cSld name="([^"]*)"', slide)[1] for slide in self.slides]  # type: ignore[index]
+
+    def shapes(self, slide: int) -> list[tuple[str, str]]:
+        """List the (shape id, name) of every object on one slide, in drawing order."""
+        return re.findall(r'<p:cNvPr id="(\d+)" name="([^"]*)"', self.slides[slide - 1])[1:]
+
+    def page(self, slide: int) -> str | None:
+        """Read the page number drawn on one slide, or None when it has none."""
+        box = re.search(
+            r'<p:sp><p:nvSpPr><p:cNvPr id="\d+" name="Page number".*?</p:sp>',
+            self.slides[slide - 1],
+            flags=re.S,
+        )
+        return None if box is None else "".join(re.findall(r"<a:t>([^<]*)</a:t>", box[0]))
 
 
 @pytest.fixture

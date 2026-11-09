@@ -42,7 +42,10 @@ status. The build runs the real Node.js and PptxGenJS from the pixi environment,
 so nothing is stubbed and nothing reaches the network. They pin the folder's
 layout and its git repo, the warning in a synced cloud folder, the 16:9 slide
 size, that the theme and the room change the font, the accent colour and the
-body size, and that a failed build leaves the last built deck untouched.
+body size, and that a failed build leaves the last built deck untouched. For a
+deck of many slides they pin the slide order, the page numbers, the theme,
+unique shape ids on a slide with a table, that inserting a slide changes no
+other slide, and that two builds write the same bytes.
 PowerPoint is never started. Whether it opens a deck with no Repair dialog is
 checked by hand and written in the pull request.
 
