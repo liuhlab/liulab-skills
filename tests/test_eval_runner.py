@@ -7,6 +7,8 @@ import subprocess
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+LOGIN_VARIABLES = ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY")
+STAND_IN = "stand-in-not-a-credential"
 
 
 def test_unknown_agent_never_launches(tmp_path: Path) -> None:
@@ -40,6 +42,8 @@ with open(os.environ['STUB_CALLS'], 'a') as f:
     f.write(json.dumps([pathlib.Path(sys.argv[0]).name, *args]) + '\\n')
 key = 'CODEX_HOME' if pathlib.Path(sys.argv[0]).name == 'codex' else 'CLAUDE_CONFIG_DIR'
 home = pathlib.Path(os.environ[key])
+with open(os.environ['STUB_CALLS'] + '.login', 'a') as f:
+    f.write(('linked' if (home / '.credentials.json').is_symlink() else 'absent') + '\\n')
 if args[:3] == ['plugin', 'marketplace', 'add']:
     (home / 'source').write_text(args[3])
 elif args[:2] == ['plugin', 'add'] or args[:2] == ['plugin', 'install']:
@@ -75,6 +79,9 @@ else:
         "STUB_CALLS": str(calls),
         "TMPDIR": str(tmp_path),
     }
+    # A login in the developer's own shell must not decide a test.
+    for name in LOGIN_VARIABLES:
+        env.pop(name, None)
     return env, calls
 
 
@@ -165,6 +172,7 @@ def test_claude_is_explicit_and_isolated(tmp_path: Path) -> None:
     import json
 
     env, calls = stub_agent(tmp_path)
+    env["CLAUDE_CODE_OAUTH_TOKEN"] = STAND_IN
     result = execute(env, agent="claude")
     assert result.returncode == 0, result.stdout + result.stderr
     invocations = [json.loads(line) for line in calls.read_text().splitlines()]
@@ -177,6 +185,113 @@ def test_claude_is_explicit_and_isolated(tmp_path: Path) -> None:
         regular = tmp_path / "regular-homes" / name
         assert sorted(path.name for path in regular.iterdir()) == ["sentinel"]
         assert (regular / "sentinel").read_text() == "preserve me"
+
+
+def login_file(tmp_path: Path, text: str) -> None:
+    """Write a made-up login file into the stand-in Claude config folder."""
+    (tmp_path / "regular-homes" / "claude" / ".credentials.json").write_text(text)
+
+
+def oauth_login(expires_in_seconds: float) -> str:
+    """Build a made-up login whose expiry is relative to now, in milliseconds."""
+    import json
+    import time
+
+    expiry = int((time.time() + expires_in_seconds) * 1000)
+    return json.dumps({"claudeAiOauth": {"accessToken": STAND_IN, "expiresAt": expiry}})
+
+
+def assert_no_login_refusal(tmp_path: Path, result: subprocess.CompletedProcess[str]) -> None:
+    """Check that a refusal names the cause and the remedy, is recorded and reveals no login."""
+    import json
+
+    assert result.returncode == 1
+    assert "no usable Claude login" in result.stderr
+    assert "claude setup-token" in result.stderr
+    assert "CLAUDE_CODE_OAUTH_TOKEN" in result.stderr
+    evidence_path = next(tmp_path.glob("lab-agent-eval-*/evidence.json"))
+    evidence = json.loads(evidence_path.read_text())
+    assert evidence["stage"] == "setup"
+    assert "no usable Claude login" in evidence["error"]
+    assert STAND_IN not in result.stdout + result.stderr + evidence_path.read_text()
+
+
+def test_expired_claude_login_launches_nothing(tmp_path: Path) -> None:
+    """An expired login file with no login in the environment stops setup."""
+    env, calls = stub_agent(tmp_path)
+    env["LAB_EVAL_PLATFORM"] = "darwin"
+    login_file(tmp_path, oauth_login(-3600))
+    result = execute(env, agent="claude")
+    assert_no_login_refusal(tmp_path, result)
+    assert "expired" in result.stderr
+    assert "Keychain" in result.stderr
+    assert not calls.exists()
+
+
+def test_expired_claude_login_off_macos_is_linked_as_before(tmp_path: Path) -> None:
+    """Off macOS the login file is the live store, so an old expiry does not stop the run."""
+    env, calls = stub_agent(tmp_path)
+    env["LAB_EVAL_PLATFORM"] = "linux"
+    login_file(tmp_path, oauth_login(-3600))
+    result = execute(env, agent="claude")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert Path(f"{calls}.login").read_text().split() == ["linked"] * 3
+
+
+def test_unparsable_claude_login_launches_nothing(tmp_path: Path) -> None:
+    """A login file that is not a login, with no login in the environment, stops setup."""
+    for platform in ("darwin", "linux"):
+        root = tmp_path / platform
+        root.mkdir()
+        env, calls = stub_agent(root)
+        env["LAB_EVAL_PLATFORM"] = platform
+        login_file(root, STAND_IN)
+        result = execute(env, agent="claude")
+        assert_no_login_refusal(root, result)
+        assert not calls.exists()
+
+
+def test_missing_claude_login_launches_nothing(tmp_path: Path) -> None:
+    """No login file and no login in the environment stops setup, on every platform."""
+    for platform in ("darwin", "linux"):
+        root = tmp_path / platform
+        root.mkdir()
+        env, calls = stub_agent(root)
+        env["LAB_EVAL_PLATFORM"] = platform
+        result = execute(env, agent="claude")
+        assert_no_login_refusal(root, result)
+        assert ("Keychain" in result.stderr) == (platform == "darwin")
+        assert not calls.exists()
+
+
+def test_environment_login_runs_without_linking_a_stale_file(tmp_path: Path) -> None:
+    """A login in the environment runs the case, and the agent never sees the expired file."""
+    for number, name in enumerate(LOGIN_VARIABLES):
+        root = tmp_path / str(number)
+        root.mkdir()
+        env, calls = stub_agent(root)
+        env[name] = STAND_IN
+        env["LAB_EVAL_PLATFORM"] = "darwin"
+        login_file(root, oauth_login(-3600))
+        result = execute(env, agent="claude")
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "EVAL PASS" in result.stdout
+        seen = Path(f"{calls}.login").read_text().split()
+        assert seen == ["absent"] * 3
+        assert STAND_IN not in next(root.glob("lab-agent-eval-*/evidence.json")).read_text()
+
+
+def test_fresh_claude_login_is_linked_for_the_run_only(tmp_path: Path) -> None:
+    """A login file that has not expired reaches the agent as a link, removed afterwards."""
+    env, calls = stub_agent(tmp_path)
+    env["LAB_EVAL_PLATFORM"] = "darwin"
+    login_file(tmp_path, oauth_login(3600))
+    result = execute(env, agent="claude")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert Path(f"{calls}.login").read_text().split() == ["linked"] * 3
+    home = next(tmp_path.glob("lab-agent-eval-*/agent-home"))
+    assert not (home / ".credentials.json").exists()
+    assert (tmp_path / "regular-homes/claude/.credentials.json").is_file()
 
 
 def test_progress_without_turn_completion_fails(tmp_path: Path) -> None:

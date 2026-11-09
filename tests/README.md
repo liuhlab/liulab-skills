@@ -153,6 +153,21 @@ installs through that agent's CLI and compares every shipped file before launchi
 setup or a mismatch launches nothing. Normal settings and marketplace checkouts stay intact.
 Authentication links are removed after the run; credentials are never copied into evidence.
 
+A Claude run needs a login the private home can use, and setup checks for one before it
+launches anything. It accepts `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` in the
+environment, or a login file. It reads only the file's expiry, links the file and copies no
+credential anywhere. With no usable login, setup stops and says why. On macOS an expired
+login file is refused and never linked: the live login is in the Keychain, which the
+private home does not read, and the file is a leftover. So a Mac usually needs the token.
+On other platforms the file is the live login, which Claude Code renews, so it is linked
+whatever its expiry.
+Run `claude setup-token` once, keep the token in a private env file outside the repo, and
+export it for the run:
+
+```bash
+set -a; . <private env file>; set +a; bash tests/eval.sh --agent claude --only <case>
+```
+
 Codex currently supports `trigger`, `explicit`, `reject`, `edison-kosmos` and
 `lab-hpc-data-job-planning`. Other Codex cases, including all live cases and the full suite,
 fail before setup. Claude supports the full catalogue. No runner silently falls back.

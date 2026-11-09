@@ -11,10 +11,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
+CLAUDE_LOGIN_VARIABLES = ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY")
 CODEX_CASES = {"lab-hpc-data-job-planning", "explicit", "trigger", "reject", "edison-kosmos"}
 
 
@@ -58,8 +60,51 @@ def installed_root(home: Path, expected: str, paths: list[str]) -> Path:
     return matches[0]
 
 
+def claude_login() -> Path | None:
+    """Return the login file to link, or None when the environment carries the login.
+
+    Reads only the expiry. Nothing from the file reaches a message or the evidence.
+    """
+    original = Path(os.environ.get("CLAUDE_CONFIG_DIR", str(Path.home() / ".claude")))
+    auth = original / ".credentials.json"
+    # The variable exists so a test can state the platform; nothing else sets it.
+    mac = os.environ.get("LAB_EVAL_PLATFORM", sys.platform) == "darwin"
+    cause = "there is no login file"
+    if auth.is_file():
+        try:
+            login = json.loads(auth.read_text())
+            entry = login.get("claudeAiOauth")
+            expiry = entry.get("expiresAt") if isinstance(entry, dict) else None
+            # Only on macOS does an old expiry mean a dead login: the live one is in the
+            # Keychain and the file is a leftover. Elsewhere the file is the live store,
+            # which Claude Code renews, so it is linked as it always was.
+            expired = mac and isinstance(expiry, (int, float)) and expiry <= time.time() * 1000
+            if not expired:
+                return auth
+            cause = "the login file holds an expired login"
+        except (OSError, ValueError, AttributeError):
+            cause = "the login file cannot be read as a login"
+    if any(os.environ.get(name) for name in CLAUDE_LOGIN_VARIABLES):
+        return None
+    keychain = (
+        " On macOS the live login is in the Keychain, which the run's private agent home "
+        "does not read."
+        if mac
+        else ""
+    )
+    raise RuntimeError(
+        f"setup failed: no usable Claude login: {cause}, and neither "
+        f"{' nor '.join(CLAUDE_LOGIN_VARIABLES)} is set.{keychain} Remedy: run "
+        "`claude setup-token` once, keep the token in a private env file outside the repo, "
+        "and export CLAUDE_CODE_OAUTH_TOKEN for the run, for example: "
+        "set -a; . <private env file>; set +a; "
+        "bash tests/eval.sh --agent claude --only <case>. Nothing was launched."
+    )
+
+
 def setup(agent: str, directory: Path) -> dict[str, Any]:
     """Create only run-owned agent state and verify the installed snapshot."""
+    login = claude_login() if agent == "claude" else None
     snapshot = directory / "source"
     snapshot.mkdir()
     paths = (
@@ -99,10 +144,8 @@ def setup(agent: str, directory: Path) -> dict[str, Any]:
             ["codex", "plugin", "add", "lab@liulab", "--json"],
         ]
     else:
-        original = Path(os.environ.get("CLAUDE_CONFIG_DIR", str(Path.home() / ".claude")))
-        auth = original / ".credentials.json"
-        if auth.is_file():
-            (home / ".credentials.json").symlink_to(auth)
+        if login is not None:
+            (home / ".credentials.json").symlink_to(login)
         env["CLAUDE_CONFIG_DIR"] = str(home)
         commands = [
             ["claude", "plugin", "marketplace", "add", str(snapshot)],
