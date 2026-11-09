@@ -33,6 +33,19 @@ did arrive, and appears in no argument, no output and no file under `src/`; and
 `project delete` removes nothing without `--yes` and a stated disposition for the
 run history.
 
+## Unit tests — the deck build: `tests/lab_deck/`
+
+Free, seconds, in the same `pixi run test`. They run `lab-deck` at its command
+line on a small deck folder in a temporary directory and read what a person
+would: the folder `new` made, the deck `build` wrote, the message and the exit
+status. The build runs the real Node.js and PptxGenJS from the pixi environment,
+so nothing is stubbed and nothing reaches the network. They pin the folder's
+layout and its git repo, the warning in a synced cloud folder, the 16:9 slide
+size, that the theme and the room change the font, the accent colour and the
+body size, and that a failed build leaves the last built deck untouched.
+PowerPoint is never started. Whether it opens a deck with no Repair dialog is
+checked by hand and written in the pull request.
+
 ## Unit tests — the upstream sync: `tests/upstream_sync/`
 
 Free, seconds, in the same `pixi run test`. Tests `scripts/upstream_sync.py`, the
