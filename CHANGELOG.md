@@ -5,7 +5,7 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
-## 2026.11.0 — 2026-11-09
+## 2026.11.1 — 2026-11-09
 
 ### Added
 
@@ -51,6 +51,19 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
 - The `talk` playbook in `hq-mode` is now a short entry that points to `lab-presentation`.
   Its recorded-talk step stays.
+
+## 2026.11.0 — 2026-11-09
+
+### Fixed
+
+- A Claude eval on a Mac no longer fails as "Not logged in" with no reason given. Before it
+  launches anything, the eval runner checks for a login it can use: `CLAUDE_CODE_OAUTH_TOKEN`
+  or `ANTHROPIC_API_KEY` in the environment, or a login file. With none, it stops, says why
+  and tells you the fix: run `claude setup-token` once, keep the token in a private file
+  outside the repo, and export it for the run. On a Mac an expired login file counts as no
+  login and is no longer linked into the run, because the live login is in the Keychain.
+  On other systems the login file is linked as before. The runner still copies no
+  credential anywhere. `tests/README.md` has the steps.
 
 ## 2026.10.23 — 2026-10-30
 
