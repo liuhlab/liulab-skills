@@ -56,11 +56,26 @@ and commit it was taken from, and optionally what the lab changed. Records live 
 upstream's license sits in `upstream/<upstream>/LICENSE`. A tracked skill needs no record,
 because its pin maps it. Format: `upstream/README.md`.
 
+### Audience brief
+
+The small file in a deck folder that says who the deck is for. Seven fields: the audience,
+what they already know, the length in minutes, the language, the terms they need no help
+with, the room (meeting room or hall) and the use (presented or read alone). A missing room
+means meeting room, and a missing use means presented. `lab-presentation` asks only for the
+missing lines before it outlines. The jargon rule, the size floor and the deck lint's
+abbreviation, sentence and word checks all read it.
+
 ### CalVer
 
 The versioning scheme of `.claude-plugin/plugin.json`: `YYYY.M.PATCH` — year, month with
 no leading zero, then a counter that increments per release within the month and resets
 when the month changes. See `docs/adr/0004-calver-and-manual-updates.md`.
+
+### Click state
+
+What the audience sees on one slide after a given number of clicks. A slide with two reveals
+has three click states. The check in `lab-presentation` renders every click state to a
+picture, hidden slides included, because a fault can show in one state and not in the next.
 
 ### Compute node
 
@@ -91,6 +106,25 @@ multiplies whichever was picked; a Kosmos run pays for every task it fans out to
 anywhere in this repo. The platform's own billing page is the only current source, and a
 price written into a skill goes stale in silence — so send the user to their balance
 instead of quoting one.
+
+### Deck
+
+One PowerPoint file and the content it is built from. The file is an output: the `lab-deck`
+command writes it from the deck folder, and the user may then edit it by hand in PowerPoint.
+"Slides", "a talk" and "a presentation" in a request all mean a deck here.
+
+### Deck folder
+
+The folder that holds one deck's content and nothing else: the audience brief, the slide
+order, one source file per slide, the pictures with their prompts, the notes, the theme and
+the built deck. It is a local git repo, so every hand edit and every build is in history. It
+holds no build code and records no build version; the build code ships with the plugin.
+
+### Deck lint
+
+The check `lab-deck` runs on a built deck, in plain code: no model and no tokens. A blocking
+check stops the build. A warning raises a judgment call, and the agent fixes it or explains
+it in the reply. A slide rule that the lint checks names its lint check.
 
 ### Derived skill
 
@@ -358,6 +392,12 @@ property — never delete or overwrite another person's image without asking.
 A Singularity image file: one file holding a whole environment. On ircbc every real job
 runs inside one, because the host OS is far too old to run modern binaries; on arc the same
 environments run natively under pixi.
+
+### Slide rule
+
+One numbered rule in `lab-presentation`'s slide-rules reference page, on what a slide says or
+how it looks. The number is a stable id that the skill and the deck lint cite, so a removed
+rule leaves a gap and no rule is renumbered.
 
 ### Task-recipe skill
 

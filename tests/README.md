@@ -200,6 +200,7 @@ separately from tool calls and escalation requests when reporting approval burde
 | `unslop-zh-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
 | `unslop-zh-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
 | `unslop-zh-polish-keep` | Already-natural Traditional Chinese stays on one exact line without rewriting, script conversion or process notes |
+| `lab-presentation-trigger` | A request for slides that never names the skill invokes `lab-presentation` through the Skill tool, and the first step asks for the missing lines of the audience brief before any outline or deck |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 

@@ -45,6 +45,12 @@ Current skills:
   talk, landing tickets, and more). Its always-pause list, which outranks "land it"
   and "going to bed", keeps it from submitting Slurm work, spending Edison
   credits or merging an unreviewed pull request without your yes.
+- **`lab-presentation`** — loads when you ask for slides, a deck, a talk or a
+  PowerPoint file. The agent asks who the audience is, agrees a text outline
+  with you, and only then builds slides. It checks every slide against a
+  short list of numbered rules: phrases in the body, a title that states the
+  conclusion, text large enough for the room, and colour only where it
+  means something.
 
 - **`unslop-zh`** — Chinese writing, strict translation and polishing. It loads
   when the deliverable contains Chinese, including mixed and bilingual documents.

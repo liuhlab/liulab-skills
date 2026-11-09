@@ -9,6 +9,22 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
 ### Added
 
+- `lab-presentation`, a skill that loads when you ask for slides, a deck, a talk or a
+  PowerPoint file. The agent asks for the missing lines of an audience brief, agrees a text
+  outline with you, builds the slides, and looks at every click before it reports. Speaker
+  notes come last, when you ask or for a formal talk.
+- Numbered slide rules: phrases in the body, a title that states the conclusion, text sized
+  for the room (24 pt body and a 20 pt floor in a meeting room, 28 pt and 24 pt in a hall),
+  colour only where it means something, a white background, and edits that change only what
+  you named.
+- A practice page that lists what published work says about talks and slides, each item with
+  its source and how well tested it is.
+
+### Changed
+
+- The `talk` playbook in `hq-mode` is now a short entry that points to `lab-presentation`.
+  Its recorded-talk step stays.
+
 ## 2026.10.23 — 2026-10-30
 
 ### Changed
