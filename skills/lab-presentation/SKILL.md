@@ -25,6 +25,7 @@ Open a page in full at the step that needs it, not before.
 | [references/slide-rules.md](references/slide-rules.md) | Before the outline, and before any edit to a slide |
 | [references/practice.md](references/practice.md) | When you plan the outline or the notes, or when the user questions a rule |
 | [references/build.md](references/build.md) | At step 3, before you write a slide source or run `lab-deck` |
+| [references/round-trip.md](references/round-trip.md) | When the user has edited the built deck by hand, before you rebuild it |
 | [references/images.md](references/images.md) | When a slide needs a picture: a real figure panel, or one drawn with Codex |
 
 ## 1. The audience brief

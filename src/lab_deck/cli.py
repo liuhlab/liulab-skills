@@ -13,6 +13,7 @@ from typing import Annotated
 import typer
 
 from lab_deck import build as builder
+from lab_deck import compare as comparer
 from lab_deck import folder as folders
 from lab_deck.folder import Refusal
 
@@ -72,6 +73,23 @@ def build(
         raise _refuse(error) from None
     count = len(read.slides)
     print(f"built {written}: {count} slide{'' if count == 1 else 's'}")
+
+
+@app.command()
+def compare(
+    folder: Annotated[Path, typer.Argument(help="the deck folder (default: this one)")] = Path(),
+    since: Annotated[
+        str | None,
+        typer.Option("--since", help="the commit of the last build, when it is not found"),
+    ] = None,
+) -> None:
+    """List the hand edits in the deck since its last build. Reports only; changes no file."""
+    try:
+        read = folders.read(folder)
+        report = comparer.compare(read, since)
+    except Refusal as error:
+        raise _refuse(error) from None
+    print(comparer.render(report, read.output.name))
 
 
 def main() -> None:

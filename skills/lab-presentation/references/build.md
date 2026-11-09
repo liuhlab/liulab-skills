@@ -12,6 +12,7 @@ in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-
 | --- | --- |
 | `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
 | `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
+| `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and changes no file: [round-trip.md](round-trip.md) |
 
 Exit codes: 0 fine, 1 refused with the reason on stderr, 2 wrong usage.
 
