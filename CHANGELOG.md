@@ -5,6 +5,10 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.0 — 2026-11-09
+
+### Added
+
 ## 2026.10.23 — 2026-10-30
 
 ### Changed
