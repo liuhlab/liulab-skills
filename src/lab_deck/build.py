@@ -2,7 +2,9 @@
 
 Python reads the deck folder and writes one JSON job. `runner.js`, beside this file, runs each
 slide source against PptxGenJS and writes one file per slide into a scratch folder inside the
-deck folder. `merge.py` puts those files together and checks the result. Only a finished,
+deck folder, with the slide's notes in it and a plan of its groups and clicks beside it.
+`stage.py` writes each plan into its slide. `merge.py` puts the files together and checks the
+result. Only a finished,
 checked file is moved over the last built deck, so a failed build leaves that deck as it was.
 
 PptxGenJS is a conda-forge package in the pixi environment, at `lib/node_modules` under the
@@ -20,7 +22,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from lab_deck import merge
+from lab_deck import merge, stage
 from lab_deck.folder import ROOMS, Folder, Refusal
 
 RUNNER = Path(__file__).with_name("runner.js")
@@ -49,9 +51,11 @@ def node() -> str:
 def job(folder: Folder, scratch: Path) -> dict[str, object]:
     """Describe one build for `runner.js`: what to draw, how it looks, where to write it.
 
-    Each slide is written to a file of its own in `scratch`. The page number is the slide's
-    place in the deck; the first slide is the title and carries none.
+    Each slide is written to a file of its own in `scratch`, and its plan beside it. The page
+    number is the slide's place in the deck; the first slide is the title and carries none.
+    A slide's notes are the file of its name in `notes/`, when there is one.
     """
+    notes = {slide: folder.path / "notes" / f"{slide}.md" for slide in folder.slides}
     return {
         "title": folder.title,
         "pictures": str(folder.path / "pictures"),
@@ -62,11 +66,18 @@ def job(folder: Folder, scratch: Path) -> dict[str, object]:
                 "id": slide,
                 "source": str(folder.source(slide)),
                 "output": str(scratch / f"{slide}.pptx"),
+                "plan": str(_plan(scratch, slide)),
+                "notes": str(notes[slide]) if notes[slide].is_file() else None,
                 "page": None if place == 1 else place,
             }
             for place, slide in enumerate(folder.slides, 1)
         ],
     }
+
+
+def _plan(scratch: Path, slide: str) -> Path:
+    """Name the file `runner.js` writes a slide's groups, sections and clicks to."""
+    return scratch / f"{slide}.plan.json"
 
 
 def build(folder: Folder) -> Path:
@@ -99,6 +110,8 @@ def build(folder: Folder) -> Path:
                 raise Refusal(done.stderr.strip() or done.stdout.strip() or "Node wrote no deck")
             for name, slide in zip(folder.slides, slides, strict=True):
                 merge.repair(slide, name)
+                plan = json.loads(_plan(work, name).read_text(encoding="utf-8"))
+                stage.stage(slide, name, plan)
             # A name no slide can have, so the merged file never lands on a slide's own.
             written = work / "merged deck.pptx"
             merge.merge(slides, written)

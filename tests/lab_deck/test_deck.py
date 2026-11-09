@@ -203,6 +203,22 @@ def test_a_picture_used_on_two_slides_is_stored_once(folder: Path) -> None:
         assert f'Target="../media/{Path(name).name}"' in rels
 
 
+def test_no_path_of_this_machine_is_in_the_built_deck(folder: Path) -> None:
+    """PptxGenJS writes a picture's whole path as its alt text; the build writes its name."""
+    (folder / "pictures" / "dot.png").write_bytes(DOT)
+    described = PICTURE.replace("x: 1,", 'altText: "A dot", x: 1,')
+    write(folder, {"title": PLAIN, "first": PICTURE, "second": described})
+
+    deck = built(folder)
+
+    assert 'descr="dot.png"' in deck.slides[1]
+    assert 'descr="A dot"' in deck.slides[2]
+    for name, part in deck.parts.items():
+        assert str(folder.parent) not in part, name
+        assert str(Path.home()) not in part, name
+        assert not re.search(r'(descr|name|title)="(/|[A-Za-z]:\\)', part), name
+
+
 def test_every_part_the_deck_names_is_in_the_file(folder: Path) -> None:
     """PowerPoint offers to repair a deck whose list of parts and whose parts disagree."""
     (folder / "pictures" / "dot.png").write_bytes(DOT)

@@ -5,10 +5,16 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
 import pytest
+
+NS = {
+    "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
+    "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
+}
 
 
 def lab_deck(*args: str | Path, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -73,6 +79,53 @@ class Deck:
             flags=re.S,
         )
         return None if box is None else "".join(re.findall(r"<a:t>([^<]*)</a:t>", box[0]))
+
+    def top(self, slide: int) -> list[tuple[str, str, list[str]]]:
+        """List the objects at the top of one slide's shape tree, in drawing order.
+
+        Each is (shape id, name, the names of the shapes inside it); only a group holds any.
+        """
+        tree = ET.fromstring(self.slides[slide - 1]).find("p:cSld/p:spTree", NS)
+        assert tree is not None
+        found = []
+        for child in list(tree)[2:]:
+            own, *inside = child.iter(f"{{{NS['p']}}}cNvPr")
+            is_group = child.tag == f"{{{NS['p']}}}grpSp"
+            members = [node.get("name", "") for node in inside] if is_group else []
+            found.append((own.get("id", ""), own.get("name", ""), members))
+        return found
+
+    def clicks(self, slide: int) -> list[list[tuple[str, str]]]:
+        """Read one slide's clicks from its timing: per click, each (object name, effect).
+
+        The effect is PowerPoint's own name for it: `entr` or `exit`.
+        """
+        root = ET.fromstring(self.slides[slide - 1])
+        names = {node.get("id"): node.get("name") for node in root.iter(f"{{{NS['p']}}}cNvPr")}
+        steps = root.find(".//p:cTn[@nodeType='mainSeq']/p:childTnLst", NS)
+        found = []
+        for step in [] if steps is None else steps:
+            effects = [node for node in step.iter(f"{{{NS['p']}}}cTn") if node.get("presetID")]
+            found.append(
+                [
+                    (
+                        names[effect.find(".//p:spTgt", NS).get("spid")],  # type: ignore[union-attr]
+                        effect.get("presetClass", ""),
+                    )
+                    for effect in effects
+                ]
+            )
+        return found
+
+    def notes(self, slide: int) -> str:
+        """Read the speaker notes of one slide: the text of its notes placeholder."""
+        root = ET.fromstring(self.parts[f"ppt/notesSlides/notesSlide{slide}.xml"])
+        body = next(
+            shape
+            for shape in root.iter(f"{{{NS['p']}}}sp")
+            if shape.find("p:nvSpPr/p:nvPr/p:ph[@type='body']", NS) is not None
+        )
+        return "".join(node.text or "" for node in body.iter(f"{{{NS['a']}}}t"))
 
 
 @pytest.fixture

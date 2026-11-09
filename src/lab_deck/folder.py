@@ -7,7 +7,7 @@ The layout, all of it content and none of it build code::
     theme.toml       the font and the accent colour
     slides/<id>.js   one source file per slide; the file name is the slide's id
     pictures/        pictures, each with the prompt that made it beside it
-    notes/<id>.md    speaker notes
+    notes/<id>.md    speaker notes, one file per slide, named as the slide is
     <output>.pptx    the built deck
 
 A slide's id is a name, never a number, so inserting a slide renames nothing.
@@ -73,6 +73,9 @@ SLIDE_TEXT = """\
 //                                      { text, accent: true, bold: true }
 //   deck.table(slide, rows, box)       a table; the first row is its header
 //   deck.picture(name)                 the path of a file in pictures/
+//   deck.group(slide, name, draw)      what draw() draws becomes one group
+//   deck.section(slide, name, draw)    what draw() draws shows and hides together
+//   deck.click(slide, { appear, disappear })   one click; each names sections
 //   deck.pres, deck.W, deck.H, deck.margin, deck.font, deck.accent, deck.size
 module.exports = (slide, deck) => {
   deck.title(slide, {title});
