@@ -37,6 +37,13 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   background is made pure white, so the picture hides no text. The prompt is kept beside the
   picture, so it can be made again. Where a real figure panel exists, the agent uses that
   instead, made simpler for the slide.
+- `lab-deck compare` lists the edits you made to a deck by hand in PowerPoint since the last
+  build: changed words, moved or resized shapes, changed style, added and deleted shapes,
+  and slides in a new order. It names each slide by its id and page. It changes no file.
+  The agent copies each edit into the slide source, so a rebuild keeps it. The report also
+  says what it cannot see yet, such as animations.
+- A round trip page in `lab-presentation` with the steps: commit the deck you edited,
+  compare, copy each edit into the slide source, rebuild, check, commit.
 - `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
   Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
 

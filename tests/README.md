@@ -45,7 +45,10 @@ size, that the theme and the room change the font, the accent colour and the
 body size, and that a failed build leaves the last built deck untouched. For a
 deck of many slides they pin the slide order, the page numbers, the theme,
 unique shape ids on a slide with a table, that inserting a slide changes no
-other slide, and that two builds write the same bytes.
+other slide, and that two builds write the same bytes. For `compare` they edit
+the XML of a built, committed deck, one known edit to a test, and pin that the
+report lists that edit and nothing else, that a save with no edit lists
+nothing, and that no file changes.
 PowerPoint is never started. Whether it opens a deck with no Repair dialog is
 checked by hand and written in the pull request.
 
