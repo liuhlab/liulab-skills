@@ -30,6 +30,24 @@ def test_new_makes_the_deck_folder_with_a_git_repo(tmp_path: Path) -> None:
     assert "warning" not in made.stdout + made.stderr
 
 
+def test_new_leaves_every_brief_line_the_agent_asks_for_empty(tmp_path: Path) -> None:
+    """Only the room and the use have a default; a filled line would read as agreed."""
+    path = tmp_path / "talk"
+    assert lab_deck("new", path).returncode == 0
+
+    brief = tomllib.loads((path / "brief.toml").read_text(encoding="utf-8"))
+
+    assert brief == {
+        "audience": "",
+        "knows": "",
+        "language": "",
+        "known_terms": [],
+        "room": "meeting room",
+        "use": "presented",
+    }
+    assert "# minutes =" in (path / "brief.toml").read_text(encoding="utf-8")
+
+
 def test_new_inside_a_synced_cloud_folder_warns_and_still_makes_it(tmp_path: Path) -> None:
     """The member decides whether to move it; the tool only says so."""
     path = tmp_path / "Library" / "CloudStorage" / "GoogleDrive-someone" / "My Drive" / "talk"

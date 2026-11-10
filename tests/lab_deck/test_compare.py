@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.lab_deck.conftest import lab_deck
+from tests.lab_deck.conftest import Deck, lab_deck
 from tests.lab_deck.test_deck import DOT, PLAIN, TABLE, write
 
 SHAPES = """\
@@ -419,3 +419,143 @@ def test_a_deck_with_no_committed_build_is_refused(folder: Path) -> None:
 
     assert done.returncode == 1
     assert "Commit after every build" in done.stderr
+
+
+# A build over a deck that was saved by hand.
+
+
+@pytest.mark.parametrize("state", ["modified", "untracked"])
+def test_build_refuses_a_hand_edited_deck_that_is_not_committed(folder: Path, state: str) -> None:
+    """The file is the only copy of the hand edits, so a build would lose them for good."""
+    if state == "untracked":
+        git(folder, "rm", "-q", "--cached", "talk.pptx")
+        git(folder, "commit", "-q", "-m", "Stop tracking the deck")
+    save(folder, on("question", "First phrase", swap("First phrase", "A better phrase")))
+    before = (folder / "talk.pptx").read_bytes()
+
+    done = lab_deck("build", folder)
+
+    assert done.returncode == 1
+    assert "hand edits" in done.stderr
+    assert "Nothing was written" in done.stderr
+    assert "Commit the deck" in done.stderr
+    assert "lab-deck compare" in done.stderr
+    assert done.stdout == ""
+    assert (folder / "talk.pptx").read_bytes() == before
+    assert not list(folder.glob(".lab-deck-*"))
+
+
+def test_build_goes_on_over_committed_hand_edits_and_names_the_commit(folder: Path) -> None:
+    """The edits are safe in history, so the build writes, and says how to check the port."""
+    save(folder, on("question", "First phrase", swap("First phrase", "A better phrase")))
+    git(folder, "commit", "-q", "-am", "The deck as edited by hand")
+    commit = git(folder, "rev-parse", "--short", "HEAD").strip()
+
+    done = lab_deck("build", folder)
+
+    assert done.returncode == 0, done.stdout + done.stderr
+    told = [line for line in done.stdout.splitlines() if "hand edits" in line]
+    assert len(told) == 1
+    assert f"hand edits committed in {commit}" in told[0]
+    assert f"`lab-deck compare --since {commit}` after this build should list nothing" in told[0]
+    assert "A better phrase" not in "".join(Deck(folder / "talk.pptx").slides)
+
+
+def test_a_rebuild_of_a_build_says_nothing_of_hand_edits(folder: Path) -> None:
+    """A deck the build wrote holds nothing to lose, committed or not."""
+    source = folder / "slides" / "end.js"
+    source.write_text(source.read_text().replace("About end", "The end"), encoding="utf-8")
+    assert lab_deck("build", folder).returncode == 0
+
+    done = lab_deck("build", folder)
+
+    assert done.returncode == 0, done.stdout + done.stderr
+    assert "hand edits" not in done.stdout + done.stderr
+
+
+# A text that was replaced whole, and a slide hidden by hand.
+
+
+def test_a_replaced_text_reports_no_style_change_on_stray_letters(folder: Path) -> None:
+    """New words in black where a blue phrase stood: letters the two share are not restyled."""
+
+    def replace(xml: str) -> str:
+        head, tail = xml.split("<a:t>Second phrase", 1)
+        at = head.rindex("<a:rPr")
+        run = head[at:].replace('val="0072B2"', 'val="000000"')
+        xml = head[:at] + run + "<a:t>more" + tail
+        return xml.replace("First phrase", "A round of reads and")
+
+    save(folder, on("question", "First phrase", replace))
+
+    assert found(report(folder)) == [
+        "slide question (page 2)",
+        'shape 3 "Text 1" (shape): text changed',
+        'was "First phrase\\nSecond phrase"',
+        'now "A round of reads and\\nmore"',
+        "1 edit on 1 slide.",
+    ]
+
+
+def test_a_replaced_text_in_a_new_colour_reports_the_style_once(folder: Path) -> None:
+    """One style before and one after: the change is told once, for the whole text."""
+
+    def replace(xml: str) -> str:
+        assert xml.count('val="000000"') == 1
+        return xml.replace("About question", "A question about").replace(
+            'val="000000"', 'val="D55E00"'
+        )
+
+    save(folder, on("question", "About question", replace))
+
+    assert found(report(folder)) == [
+        "slide question (page 2)",
+        'shape 2 "Slide title" (shape): text changed',
+        'was "About question"',
+        'now "A question about"',
+        'shape 2 "Slide title" (shape): style changed',
+        "colour 000000 -> D55E00, on the whole text",
+        "2 edits on 1 slide.",
+    ]
+
+
+def test_a_slide_hidden_by_hand_is_reported(folder: Path) -> None:
+    """Hide Slide in PowerPoint changes one attribute of the slide and no shape."""
+
+    def hide(text: dict[str, str]) -> None:
+        name = part(text, "question")
+        assert "<p:sld " in text[name]
+        text[name] = text[name].replace("<p:sld ", '<p:sld show="0" ', 1)
+
+    save(folder, hide)
+
+    assert found(report(folder)) == [
+        "slide question (page 2)",
+        "the slide: hidden",
+        "1 edit on 1 slide.",
+    ]
+
+
+def test_a_hidden_slide_shown_again_by_hand_is_reported(folder: Path) -> None:
+    """A source hides its slide with `slide.hidden = true`; a hand edit may show it again."""
+    source = folder / "slides" / "end.js"
+    source.write_text(
+        source.read_text().replace("deck.title(", "slide.hidden = true;\n  deck.title("),
+        encoding="utf-8",
+    )
+    assert lab_deck("build", folder).returncode == 0
+    assert '<p:sld show="0"' not in Deck(folder / "talk.pptx").slides[0]
+    assert ' show="0"' in Deck(folder / "talk.pptx").slides[4][:600]
+    git(folder, "commit", "-q", "-am", "Build with the last slide hidden")
+
+    def show(text: dict[str, str]) -> None:
+        name = part(text, "end")
+        text[name] = text[name].replace(' show="0"', "", 1)
+
+    save(folder, show)
+
+    assert found(report(folder)) == [
+        "slide end (page 5)",
+        "the slide: shown again",
+        "1 edit on 1 slide.",
+    ]

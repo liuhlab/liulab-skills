@@ -268,6 +268,8 @@ def test_abbreviations_are_words_mostly_in_capitals() -> None:
         "AAV",
     ]
     assert lint.abbreviations("BACKGROUND\nTHE OPEN QUESTION\nUse PCR") == ["PCR"]
+    # A long word in capitals is a heading only when it is all letters.
+    assert lint.abbreviations("OVERVIEW of HEK293T cells") == ["HEK293T"]
     assert lint.spelled_out("polymerase chain reaction (PCR); AAV (a virus); DNA") == {
         "PCR",
         "AAV",
@@ -276,11 +278,14 @@ def test_abbreviations_are_words_mostly_in_capitals() -> None:
 
 
 def test_the_slide_rules_give_the_limits_the_lint_uses() -> None:
-    """The measured limits are written in the slide rules, and the lint holds the same ones."""
+    """The limits are written in the slide rules, and the lint holds the same ones."""
     page = Path(__file__).parents[2] / "skills/lab-presentation/references/slide-rules.md"
     text = " ".join(page.read_text("utf-8").split())
+    rules, limits = text.split("## Warning limits", 1)
 
-    assert f"{lint.WORDS} words" in text
+    assert f"{lint.WORDS} words" in rules
+    assert f"{lint.WORDS} words" in limits
+    assert {1: "one line", 2: "two lines"}[lint.TITLE_LINES] in limits
     assert "One Chinese character counts as one word" in text
     for check in lint.CHECKS:
         if check.severity == lint.WARNING:

@@ -23,6 +23,7 @@ import hashlib
 import io
 import json
 import posixpath
+import re
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
@@ -44,6 +45,8 @@ DEPTH = 200
 
 # The page number is the slide's place in the deck, and the build writes it again.
 PAGE = "Page number"
+# A word, or the gap between two words: the unit two texts are lined up by.
+WORD = re.compile(r"\s+|\S+")
 
 SEEN = (
     "the words of a text box and of a table cell",
@@ -55,6 +58,7 @@ SEEN = (
     "the rows, columns and column widths of a table",
     "the name of a shape",
     "added and deleted shapes and slides, and the order of the slides",
+    "a slide hidden or shown again",
 )
 UNSEEN = (
     "animations and slide transitions",
@@ -134,6 +138,8 @@ class Slide:
     ident: str
     page: int
     shapes: list[Shape]
+    hidden: bool = False
+    """Whether the slide is hidden in the deck: `show="0"` on the slide."""
 
 
 @dataclass
@@ -424,11 +430,12 @@ def read(payload: bytes, what: str = "the deck") -> Deck:
                     return "missing"
                 return hashlib.sha256(archive.read(part)).hexdigest()[:12]
 
-            inside = ET.fromstring(archive.read(part)).find(f"{{{P}}}cSld")
+            root = ET.fromstring(archive.read(part))
+            inside = root.find(f"{{{P}}}cSld")
             tree = None if inside is None else inside.find(f"{{{P}}}spTree")
             shapes = [] if tree is None else list(_walk(tree, (1, 1, 0, 0), None, picture))
             ident = "" if inside is None else inside.get("name", "")
-            slides.append(Slide(ident, page, shapes))
+            slides.append(Slide(ident, page, shapes, root.get("show") in ("0", "false")))
         core = archive.read("docProps/core.xml") if "docProps/core.xml" in names else b""
     return Deck(slides, f">{CORE_TIME}</dcterms:modified>".encode() in core)
 
@@ -449,31 +456,72 @@ def _value(name: str, value: object) -> str:
     return f"{value:g} pt" if name == "size" else str(value)
 
 
+def _change(was: Style, now: Style) -> str:
+    """Spell how one style became another, field by field."""
+    return "; ".join(
+        f"{name} {_value(name, a)} -> {_value(name, b)}"
+        for (name, a), (_, b) in zip(was, now, strict=True)
+        if a != b
+    )
+
+
+def _one(text: Text) -> Style | None:
+    """Give the one style all of a text is set in, or None when it holds several or no words."""
+    styles = {style for style in text.styles if style is not None}
+    return next(iter(styles)) if len(styles) == 1 else None
+
+
 def _styles(old: Text, new: Text) -> list[str]:
-    """Describe where the style differs on words that both texts hold."""
+    """Describe where the style differs on words that both texts hold.
+
+    The two texts are lined up word by word, never letter by letter: a letter that new words
+    happen to share with the old ones was not restyled. When the words changed and each text
+    is in one style, the change is told once, for the whole text. When most of the words are
+    new and the styles are mixed, there is no stretch to pin a change on, and none is told.
+    """
+    changed = old.chars != new.chars
+    if changed and (was := _one(old)) and (now := _one(new)):
+        return [] if was == now else [f"{_change(was, now)}, on the whole text"]
+    # Words and the gaps between them, each with the place of its first character.
+    a, b = (
+        [(found[0], found.start()) for found in WORD.finditer(text.chars)] for text in (old, new)
+    )
+    matcher = difflib.SequenceMatcher(
+        None, [word for word, _ in a], [word for word, _ in b], autojunk=False
+    )
     spans: list[tuple[str, str]] = []
-    matcher = difflib.SequenceMatcher(None, old.chars, new.chars, autojunk=False)
+    kept = 0
+    start, change = 0, None
+
+    def close(stop: int) -> None:
+        words = new.chars[start:stop].strip()
+        if change is not None and words:
+            spans.append((words, change))
+
     for i, j, size in matcher.get_matching_blocks():
-        start, change = 0, None
-        for k in range(size + 1):
-            was = old.styles[i + k] if k < size else None
-            now = new.styles[j + k] if k < size else None
-            here = None
-            if was is not None and now is not None and was != now:
-                here = "; ".join(
-                    f"{name} {_value(name, a)} -> {_value(name, b)}"
-                    for (name, a), (_, b) in zip(was, now, strict=True)
-                    if a != b
-                )
-            if here != change:
-                if change is not None:
-                    spans.append((new.chars[j + start : j + k], change))
-                start, change = k, here
+        for k in range(size):
+            word, at = b[j + k]
+            kept += 0 if word.isspace() else len(word)
+            for n in range(len(word)):
+                was, now = old.styles[a[i + k][1] + n], new.styles[at + n]
+                here = None
+                if was is not None and now is not None and was != now:
+                    here = _change(was, now)
+                if here != change:
+                    close(at + n)
+                    start, change = at + n, here
+        # A stretch never runs on across words that are new.
+        if size:
+            word, at = b[j + size - 1]
+            close(at + len(word))
+            change = None
+    if changed and kept * 2 < sum(not char.isspace() for char in new.chars):
+        return []
     # One line per change, naming every stretch of words it was made to.
     lines: dict[str, list[str]] = {}
-    for words, change in spans:
-        lines.setdefault(change, []).append(_show(words))
-    return [f"{change}, on {', '.join(where)}" for change, where in lines.items()]
+    for words, what in spans:
+        lines.setdefault(what, []).append(_show(words))
+    return [f"{what}, on {', '.join(where)}" for what, where in lines.items()]
 
 
 def _moved(old: Shape, new: Shape, groups: dict[str, tuple[Shape, Shape]]) -> tuple[bool, bool]:
@@ -630,6 +678,8 @@ def diff(old: Deck, new: Deck, commit: str = "") -> Report:
             continue
         seen.append(slide.ident)
         edits = _slide(was, slide)
+        if was.hidden != slide.hidden:
+            edits.insert(0, Edit("the slide", "hidden" if slide.hidden else "shown again"))
         if edits:
             sections.append((f"slide {slide.ident} (page {slide.page})", edits))
     for slide in old.slides:
@@ -701,6 +751,46 @@ def last_build(folder: Folder, since: str | None = None) -> tuple[str, bytes]:
     raise Refusal(
         f"no commit holds a build of {name}: each one holds a deck saved by hand. "
         "Name the commit of the last build with --since."
+    )
+
+
+def _is_build(payload: bytes) -> bool:
+    """Tell whether these bytes are a deck the build wrote, with nothing saving it since."""
+    try:
+        with ZipFile(io.BytesIO(payload)) as archive:
+            core = archive.read("docProps/core.xml")
+    except (BadZipFile, KeyError):
+        return False
+    return f">{CORE_TIME}</dcterms:modified>".encode() in core
+
+
+def hand_edits(folder: Folder) -> str | None:
+    """Before a build replaces the deck file: find hand edits in it that the build would lose.
+
+    Returns None when there is no deck file or the build wrote it. Returns the commit that
+    holds the file when it was saved by hand and is committed as it is: the edits are safe in
+    history, and the build may go on.
+
+    Raises
+    ------
+    Refusal
+        When the deck was saved by hand and its bytes are in no commit: untracked, or changed
+        since the last commit.
+    """
+    deck = folder.output
+    if not deck.is_file() or _is_build(deck.read_bytes()):
+        return None
+    name = deck.name
+    tracked = _git(folder, "ls-files", "--error-unmatch", "--", name).returncode == 0
+    if tracked and _git(folder, "diff", "--quiet", "HEAD", "--", name).returncode == 0:
+        found = _git(folder, "log", "--max-count=1", "--format=%h", "--", name)
+        commit = found.stdout.decode().strip()
+        if found.returncode == 0 and commit:
+            return commit
+    raise Refusal(
+        f"{name} holds hand edits: it was saved outside the build, and the file as it is now "
+        "is not committed, so a build would lose them.\nNothing was written. Commit the deck, "
+        "then run `lab-deck compare` and copy the edits into the slide sources."
     )
 
 

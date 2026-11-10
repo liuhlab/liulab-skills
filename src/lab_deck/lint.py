@@ -60,7 +60,7 @@ SLACK = 1.05
 BOLD = 1.07
 CUE = re.compile(r"\[Click\]")
 
-# The limits of the warning checks. The slide-rules page says how each was measured.
+# The limits of the warning checks. The slide-rules page says how each was chosen.
 # The most words a slide carries beside its title, its citation and its page number.
 WORDS = 100
 # The most lines a title takes.
@@ -71,7 +71,7 @@ SENTENCE_WORDS = 4
 SUBJECT = re.compile(r"(We|I|It|They|There|He|She|You)\s")
 # A short form whose full stop ends no sentence.
 SHORT_FORM = re.compile(r"\b(e\.g|i\.e|etc|et al|vs|cf|Fig|approx)\.")
-# The longest word in capitals the lint reads as an abbreviation, in letters and digits.
+# The longest word of capital letters alone the lint reads as an abbreviation.
 ABBREVIATION = 6
 # A word of letters and digits, and a Roman numeral, which is no abbreviation.
 TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9]*")
@@ -863,13 +863,15 @@ def abbreviations(text: str) -> list[str]:
 
     An abbreviation is a word with two capitals or more, where at least half of its letters
     are capitals: DNA, mRNA, CpG. A plural loses its s. A Roman numeral is not one. Nor is
-    a word of a heading set in capitals: a word all in capitals that is longer than six
-    characters, or any word of a line of two words or more that is all in capitals.
+    a word of a heading set in capitals: a word of capital letters only that is longer than
+    six characters, or any word of a line of two words or more that is all in capitals. A
+    word with a digit in it, such as the name of a cell line, is an abbreviation at any
+    length.
     """
     found: list[str] = []
     lines = [line for line in text.splitlines() if not _capitals(line)]
     for word in TOKEN.findall("\n".join(lines)):
-        if word.isupper() and len(word) > ABBREVIATION:
+        if word.isalpha() and word.isupper() and len(word) > ABBREVIATION:
             continue
         if len(word) > 3 and word.endswith("s") and word[-2].isupper():
             word = word[:-1]

@@ -119,6 +119,17 @@ def test_a_table_keeps_every_shape_id_on_its_slide_unique(folder: Path) -> None:
     ]
 
 
+def test_a_table_is_drawn_at_the_body_size_of_the_room(folder: Path) -> None:
+    """24 pt in a meeting room, as the body text is: the floor is a limit, not a default."""
+    write(folder, FOUR)
+
+    deck = built(folder)
+
+    table = re.search(r"<a:tbl>.*?</a:tbl>", deck.slides[2], flags=re.S)
+    assert table is not None
+    assert set(re.findall(r'sz="(\d+)"', table[0])) == {"2400"}
+
+
 def test_inserting_a_slide_in_the_middle_changes_no_other_slide(folder: Path) -> None:
     """One new name in the order and one new file: no rename, no new shape id elsewhere."""
     write(folder, FOUR)

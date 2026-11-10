@@ -62,7 +62,7 @@ style. A source requires nothing: no `require("pptxgenjs")`, no path to the buil
 | --- | --- |
 | `title(slide, text)` | The slide's conclusion, top left, bold |
 | `lines(slide, items, box)` | Phrases, one per line. An item is a string or `{ text, accent, bold }` |
-| `table(slide, rows, box)` | A table. The first row is the header. A cell is a string or `{ text, accent, bold }` |
+| `table(slide, rows, box)` | A table, at the body size. The first row is the header. A cell is a string or `{ text, accent, bold }` |
 | `citation(slide, text, box)` | The slide's one citation line, bottom left, at 12 pt, named `Citation` |
 | `picture(name)` | The path of a file in `pictures/`, for `slide.addImage({ path })` |
 | `group(slide, name, draw)` | What `draw()` draws becomes one group named `name` |
@@ -76,6 +76,9 @@ style. A source requires nothing: no `require("pptxgenjs")`, no path to the buil
 `box` overrides the place: `{ x, y, w, h, fontSize }`, in inches and points. Pass `fontFace:
 deck.font` on every raw `addText` and `addTable`. Give a shape that a later step must find an
 `objectName`.
+
+To hide a slide, such as a backup slide, write `slide.hidden = true;` in its source. It keeps
+its place and its page number, and `lab-deck render` still makes its pictures.
 
 ## Groups, sections and clicks
 
@@ -151,6 +154,30 @@ folder builds to the same bytes, so a rebuild that changes nothing shows no chan
 For that, the times inside the file are fixed at 1980-01-01.
 
 Inserting a slide changes one thing on the slides after it: the digits of the page number.
+
+## Options for one slide
+
+When the user asks for options for a slide, or has rejected it, show 2 to 4. Build them in a
+scratch copy, so that the deck never holds an option slide:
+
+1. Copy the deck folder to a scratch folder outside it.
+2. In the copy, write one source per option, `slides/<id>-a.js`, `slides/<id>-b.js` and so
+   on, and list only those ids under `slides` in its `deck.toml`.
+3. Run `lab-deck build` and `lab-deck render` in the copy. Show the user the pictures.
+4. Copy the chosen source over `slides/<id>.js` in the deck folder, and build there.
+5. Delete the scratch copy.
+
+The deck folder still has one deck file and one source per slide. The scratch copy is not a
+second deck beside the main one: nobody edits it, and it is gone once the user has chosen.
+
+## An old deck that no longer builds
+
+A deck folder holds no build code, so every deck builds with the `lab-deck` of today. No old
+version of the build is kept, and none is installed for one deck. When an old deck fails to
+build, migrate it: commit, change its slide sources until the build and the lint pass,
+compare the new pictures with the last built deck, and commit. A deck that has its own build
+scripts gets a new folder from `lab-deck new`: write one source per slide there, then delete
+the old scripts.
 
 ## Known PptxGenJS limits
 

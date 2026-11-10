@@ -30,6 +30,8 @@ How it works, and its limits:
   state, LibreOffice converts the copy to a PDF, and Poppler's `pdftoppm` makes the PNGs.
 - LibreOffice is the system's app, found as `soffice` on PATH or inside the Mac app. Poppler
   comes with the plugin's pixi environment. Run `lab-deck preflight` when either is missing.
+- `LAB_DECK_SOFFICE` in the environment names a LibreOffice in an unusual place: the full
+  path of its `soffice` program.
 - On a Mac, LibreOffice has aborted inside a command sandbox. When the render fails that
   way, run it again outside the sandbox.
 - LibreOffice draws a missing font with another one, and the text then wraps elsewhere.
@@ -78,7 +80,7 @@ slide results (page 3), shape "Text 1": size-floor (rule 8): "Too small" is 16 p
 ### Warnings
 
 A warning is a judgment call. Fix the slide, or explain in the reply why it stays. The
-limits and how they were measured are in [slide-rules.md](slide-rules.md#measured-limits).
+limits and how they were chosen are in [slide-rules.md](slide-rules.md#warning-limits).
 
 | Warning check | Slide rule | Warns when |
 | --- | --- | --- |
@@ -101,7 +103,8 @@ limits and how they were measured are in [slide-rules.md](slide-rules.md#measure
 - **A deck read alone**, `use = "read alone"` in the brief, gets no `slide-words` and no
   `body-sentence` warning.
 - **An abbreviation** is a word with two capitals or more, at least half of its letters:
-  DNA, mRNA, CpG. A heading in capitals is not one. It is spelled out by
+  DNA, mRNA, CpG. A heading in capitals is not one: a line all in capitals, or a word of
+  more than six capital letters. A word with a digit, such as a cell line's name, is one. It is spelled out by
   "long name (DNA)" or "DNA (long name)", on that slide or an earlier one. A known term
   covers each word in it: `"RNA-seq"` covers RNA. The citation line is not read. The lint
   warns once per abbreviation, at its first use.

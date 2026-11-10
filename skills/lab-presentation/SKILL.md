@@ -48,6 +48,9 @@ already answer. Then ask only for the lines still missing, in one message, and s
 there are. Never ask for the room or the use: take the default and say so. Write no outline
 while one of the first five lines is empty.
 
+For a new deck, agree the lines first. Then run `lab-deck new`, which makes the deck folder
+with every asked-for line empty, and write the agreed lines into its `brief.toml`.
+
 ## 2. The text outline
 
 Write the outline as text, before any slide exists. For each slide give the title, as the
@@ -65,7 +68,7 @@ For an edit to a deck that exists, slide rules 14 and 15 come first: say the sli
 exact change in one line, then change only that.
 
 Show 2 to 4 rendered options for a slide only when the user asks, or after the user rejects
-the slide. Otherwise build one.
+the slide, as "Options for one slide" on the build page says. Otherwise build one.
 
 ## 4. The check
 

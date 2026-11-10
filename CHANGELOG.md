@@ -51,8 +51,10 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   abbreviation that is not in the brief's known terms and not spelled out by its first
   use, and text in more than one accent colour. The agent fixes each warning or explains
   it in its reply. One Chinese character counts as one word.
-- The word and title limits come from the accepted slides of two finished lab decks. The
-  slide rules give the numbers and say how each limit was chosen.
+- The word and title limits come from the accepted slides of finished lab decks. The slide
+  rules give the limits and say how they were chosen.
+- A word in capitals with a digit in it, such as the name of a cell line, counts as an
+  abbreviation at any length.
 - `{ sentence: true }` on a box of `deck.lines` marks a sentence that is meant, such as a
   quote, and it stops warning. A brief with `use = "read alone"` turns off the word and
   sentence warnings. The brief's `known_terms` and `use` are now read and checked.
@@ -69,7 +71,9 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   instead, made simpler for the slide.
 - `lab-deck compare` lists the edits you made to a deck by hand in PowerPoint since the last
   build: changed words, moved or resized shapes, changed style, added and deleted shapes,
-  and slides in a new order. It names each slide by its id and page. It changes no file.
+  slides in a new order, and a slide hidden or shown again. It names each slide by its id
+  and page. It changes no file. When you replace a whole text, it reports a style change
+  once for the whole text, or not at all.
   The agent copies each edit into the slide source, so a rebuild keeps it. The report also
   says what it cannot see yet, such as animations.
 - A round trip page in `lab-presentation` with the steps: commit the deck you edited,
@@ -80,6 +84,18 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   changes. Each tells you what it did. The first time, macOS asks once whether the agent may
   control PowerPoint: click OK. Off a Mac, or when PowerPoint cannot be asked, the command
   stops and asks you to save and close the deck; `--closed` then takes your word for it.
+- `lab-deck build` refuses to replace a deck that you saved by hand and that is not
+  committed in the deck folder, because the file is the only copy of your edits. It tells
+  the agent to commit the deck and run `lab-deck compare`. Over a committed deck it builds,
+  and names the commit to check the new build against.
+- `lab-deck new` leaves the lines of the audience brief empty until you have answered them.
+  Only the room and the use start with a default.
+- `deck.table` draws a table at the body size of the room: 24 pt, or 28 pt in a hall.
+- A slide source can hide its slide with `slide.hidden = true`.
+- The build page says how the agent shows 2 to 4 options for one slide without leaving an
+  extra slide in your deck, and that an old deck that no longer builds is updated to the
+  current build. No old version of the build is kept.
+- `LAB_DECK_SOFFICE` names a LibreOffice that is in an unusual place.
 - `lab-deck render` makes one picture of every slide after every click, hidden slides
   included, so the agent sees what the audience sees. It lists the pictures that changed
   since the last render, and the agent looks at those after each build. It needs LibreOffice

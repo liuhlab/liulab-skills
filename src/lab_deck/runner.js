@@ -120,7 +120,7 @@ function helpers(pres, plan) {
     },
 
     // A table: rows of cells, the first row its header. A cell is a string or
-    // { text, accent, bold }. Hairlines between rows only, and no fill.
+    // { text, accent, bold }. Body size, hairlines between rows only, and no fill.
     table(slide, rows, box = {}) {
       const { fontSize, ...place } = box;
       const cells = rows.map((row, r) => row.map((cell) => {
@@ -134,7 +134,7 @@ function helpers(pres, plan) {
       const none = { type: "none" };
       slide.addTable(cells, {
         x: MARGIN, y: 1.9, w: W - 2 * MARGIN, ...place,
-        fontFace: deck.font, fontSize: fontSize || deck.size.floor, color: BLACK,
+        fontFace: deck.font, fontSize: fontSize || deck.size.body, color: BLACK,
         border: [none, none, line, none], valign: "middle", objectName: "Table",
       });
     },

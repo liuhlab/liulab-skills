@@ -99,20 +99,10 @@ warning in the reply. A check is blocking unless its rule calls it a warning.
     for each click of the slide, and none on a slide with no click. A slide with no notes is
     not checked. Lint: `click-cues`.
 
-## Measured limits
+## Warning limits
 
-The word and title limits were measured on the accepted slides of two finished lab decks, on
-2026-11-09: 26 slides after the title slides, 25 of them with a title.
-
-| Measure | Median | 90th percentile | Most | Limit |
-| --- | --- | --- | --- | --- |
-| Words on a slide, beside its title, citation and page number | 60 | 104 | 125 | 100 |
-| Lines the title takes, estimated | 1 | 1.6 | 2 | 2 |
-| Characters in the title | 52 | 57 | 74 | none |
-| Words in the title | 7 | 9 | 10 | none |
-
-- **Words.** The limit is the 90th percentile, rounded to 100. A slide past it carries more
-  words than nine in ten of the accepted slides.
-- **Title.** The limit is the most lines an accepted title took. 22 of the 25 took one line.
-- **Chinese.** Neither deck is in Chinese, so the equivalence is a decision, not a
-  measurement: one character, one word.
+The lint warns at more than 100 words on a slide, beside its title, citation and page number,
+and at a title of more than two lines. Both limits were chosen from the accepted slides of
+finished lab decks: nine in ten of those slides carry fewer words than the word limit, and
+none of their titles takes more lines than the title limit. One Chinese character counts as
+one word, which is a decision, not a measurement.

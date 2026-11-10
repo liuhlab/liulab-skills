@@ -74,11 +74,14 @@ def build(
 ) -> None:
     """Build the deck folder into its PowerPoint file, replacing the last build in one step.
 
-    A deck open in PowerPoint is closed for the build and reopened at the same slide.
+    A deck open in PowerPoint is closed for the build and reopened at the same slide. A deck
+    saved by hand since its last build is replaced only when it is committed as it is.
     """
     held = None
     try:
         read = folders.read(folder)
+        # Before PowerPoint is asked to close anything: a refusal here leaves the deck open.
+        kept = comparer.hand_edits(read)
         held = powerpoint.close_for_build(read.output, closed)
         report = builder.build(read)
     except Refusal as error:
@@ -88,6 +91,11 @@ def build(
         raise _refuse(error) from None
     count = len(read.slides)
     print(f"built {read.output}: {count} slide{'' if count == 1 else 's'}")
+    if kept is not None:
+        print(
+            f"{read.output.name} held hand edits committed in {kept}: `lab-deck compare "
+            f"--since {kept}` after this build should list nothing."
+        )
     if report.warnings:
         # A warning stops no build, and none passes in silence.
         print(linter.render(report, read.output.name))

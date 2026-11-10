@@ -45,11 +45,11 @@ SYNCED = re.compile(
 )
 
 BRIEF_TEXT = """\
-# The audience brief. The build and every check read it. Fill in what you know.
+# The audience brief. The build and every check read it. An empty line is not agreed yet.
 audience = ""            # who will listen
 knows = ""               # what they already know
-minutes = 0              # the length of the talk
-language = "en"
+# minutes =              # the length of the talk, as a number
+language = ""            # the language of the slides, such as "en" or "zh"
 known_terms = []         # terms and abbreviations they need no help with
 room = "meeting room"    # or "hall"
 use = "presented"        # or "read alone"

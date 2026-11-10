@@ -21,7 +21,11 @@ into the source.
    gets a new source and a new id; a deleted slide loses its id in `deck.toml`. Tell the user
    about any edit you cannot write in a source. Never drop one in silence.
 4. **Rebuild over the main deck.** Run `lab-deck build`. There is one deck file: never build
-   to a second name beside it. If it says it closed and reopened the deck, tell the user.
+   to a second name beside it. Options for a slide are built in a scratch copy outside the
+   deck folder, which is then deleted: [build.md](build.md#options-for-one-slide). If it says it closed and reopened the deck, tell the user.
+   `build` refuses to replace a deck that was saved by hand and is not committed as it is:
+   commit it, and start again at step 2. Over a committed one it builds, and prints the
+   commit that step 5 names.
 5. **Check the rebuild kept the edits.** Run `lab-deck compare --since <commit of step 1>`.
    It compares the new build with the hand-edited deck, and should list nothing. What it
    lists is an edit the sources still lack, read backwards: "was" is the user's deck.
@@ -78,10 +82,11 @@ source gives them. An added shape is described in full, to write it from.
 | --- | --- |
 | `text changed` | The words of a text box or of a table cell, named by row and column |
 | `moved`, `resized`, `rotated` | The place, the size, the rotation or a flip |
-| `style changed` | Font, size, bold, italic, underline, colour, alignment, bullet, level and vertical anchor of text; fill, outline and preset geometry of a shape; the file and crop of a picture; the rows, columns and column widths of a table |
+| `style changed` | Words that both texts hold are compared, word by word. Font, size, bold, italic, underline, colour, alignment, bullet, level and vertical anchor of text; fill, outline and preset geometry of a shape; the file and crop of a picture; the rows, columns and column widths of a table |
 | `renamed` | The shape's name in the selection pane |
 | `added`, `deleted` | A shape, a group or a slide. A group made by hand is `added`, and the shapes inside it are not moved |
 | `reordered` | The order of the slides |
+| `hidden`, `shown again` | A slide hidden in PowerPoint, or a hidden slide shown |
 
 ## What compare cannot see yet
 
