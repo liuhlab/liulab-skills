@@ -5,6 +5,16 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.3 — 2026-11-10
+
+### Changed
+
+- `pixi run check` takes about 40 seconds on a lab Mac, down from about 78. `tests/lint.sh`
+  now starts beside the other steps, so the gate takes as long as its slowest step. The tests
+  of the eval runner run it in a small copy of the tree, and one test worker imports the real
+  Edison client. No test and no lint check was dropped. The target, 40 seconds or less, is
+  written in `tests/README.md` and in the glossary.
+
 ## 2026.11.2 — 2026-11-10
 
 ### Added

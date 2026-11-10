@@ -8,6 +8,9 @@ described first.
 
 `pixi run check` runs everything cheap and safe: the static linters, the unit
 tests and layer 1, all started at once, every failure reported in one run.
+**The target is 40 s or less** on a developer Mac: the gate's own closing line,
+warm environment, median of three runs. The gate takes as long as its slowest
+step, which is the unit tests, so a slow new test is what breaks the target.
 `.github/workflows/ci.yml` runs the same tasks on every pull request. **Only the
 unit tests and layer 1 run in CI** — the other two are local-only, for the reasons
 below.
@@ -32,6 +35,11 @@ client nor typer installed; the key reaches the client through the environment,
 did arrive, and appears in no argument, no output and no file under `src/`; and
 `project delete` removes nothing without `--yes` and a stated disposition for the
 run history.
+
+One file reads the real client: `test_client_surface.py`. Importing it takes
+seconds, so the file carries one `xdist_group` mark and `pixi run test` passes
+`--dist loadgroup`: one worker pays the import, not each worker that draws one of
+its tests.
 
 ## Unit tests — the deck build: `tests/lab_deck/`
 
@@ -110,6 +118,17 @@ the path to its plan file, so `eval.sh` adds that file to the transcript before 
 checks anything. These run the shared case catalogue against a stub `claude` and a fake home,
 and check that a plan named from `~` or by its full path is added. The stub is first
 on PATH, so no session starts.
+
+## Unit tests — the eval runner: `tests/test_eval_runner.py`
+
+Free, seconds, in the same `pixi run test`. They run `tests/eval.sh` at its command
+line against stub agents and a fake home, and pin what a run must never get wrong:
+a bad selection launches nothing, a failed install or an installed copy with
+different bytes launches no case, a runner that fails cannot pass, the regular
+agent homes stay untouched, and a Claude login is linked for the run only. The
+runner snapshots and hashes the whole tree it sits in, so the tests copy the seven
+files a run reads into a small git repo and run that copy. The runner is this
+checkout's own, unchanged; it has no test mode. No session starts.
 
 ## Unit tests — shared eval assertions: `tests/test_eval_assert_sh.py`
 
