@@ -15,7 +15,10 @@ import typer
 from lab_deck import build as builder
 from lab_deck import compare as comparer
 from lab_deck import folder as folders
+from lab_deck import powerpoint
 from lab_deck.folder import Refusal
+
+CLOSED = "the user has saved and closed the deck; believe it when PowerPoint cannot be asked"
 
 HELP = """\
 Build a slide deck from a deck folder. The folder holds content only: the audience brief, the
@@ -64,15 +67,26 @@ def new(
 @app.command()
 def build(
     folder: Annotated[Path, typer.Argument(help="the deck folder (default: this one)")] = Path(),
+    closed: Annotated[bool, typer.Option("--closed", help=CLOSED)] = False,
 ) -> None:
-    """Build the deck folder into its PowerPoint file, replacing the last build in one step."""
+    """Build the deck folder into its PowerPoint file, replacing the last build in one step.
+
+    A deck open in PowerPoint is closed for the build and reopened at the same slide.
+    """
+    held = None
     try:
         read = folders.read(folder)
+        held = powerpoint.close_for_build(read.output, closed)
         written = builder.build(read)
     except Refusal as error:
+        if held is not None:
+            # The build failed after the close: show the last built deck again.
+            print(powerpoint.reopen(held))
         raise _refuse(error) from None
     count = len(read.slides)
     print(f"built {written}: {count} slide{'' if count == 1 else 's'}")
+    if held is not None:
+        print(powerpoint.reopen(held, count))
 
 
 @app.command()
@@ -82,13 +96,21 @@ def compare(
         str | None,
         typer.Option("--since", help="the commit of the last build, when it is not found"),
     ] = None,
+    closed: Annotated[bool, typer.Option("--closed", help=CLOSED)] = False,
 ) -> None:
-    """List the hand edits in the deck since its last build. Reports only; changes no file."""
+    """List the hand edits in the deck since its last build. Reports only.
+
+    It writes no file itself. A deck open in PowerPoint with unsaved changes is saved there
+    first, so that the report reads them.
+    """
     try:
         read = folders.read(folder)
+        saved = powerpoint.save_if_unsaved(read.output, closed)
         report = comparer.compare(read, since)
     except Refusal as error:
         raise _refuse(error) from None
+    if saved is not None:
+        print(saved + "\n")
     print(comparer.render(report, read.output.name))
 
 

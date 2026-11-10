@@ -12,7 +12,11 @@ in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-
 | --- | --- |
 | `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
 | `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
-| `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and changes no file: [round-trip.md](round-trip.md) |
+| `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and writes no file itself: [round-trip.md](round-trip.md) |
+
+A deck left open in PowerPoint is handled by both `build` and `compare`, and both take
+`--closed`: see "A deck left open in PowerPoint" in [round-trip.md](round-trip.md). Off a
+Mac, a rebuild over an existing deck stops until the user has saved and closed it.
 
 Exit codes: 0 fine, 1 refused with the reason on stderr, 2 wrong usage.
 

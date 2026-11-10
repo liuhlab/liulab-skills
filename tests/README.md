@@ -49,8 +49,15 @@ other slide, and that two builds write the same bytes. For `compare` they edit
 the XML of a built, committed deck, one known edit to a test, and pin that the
 report lists that edit and nothing else, that a save with no edit lists
 nothing, and that no file changes.
-PowerPoint is never started. Whether it opens a deck with no Repair dialog is
-checked by hand and written in the pull request.
+PowerPoint is never started, and never asked anything: `conftest.py` puts a
+stand-in named `osascript` and `open` (`standin.py`) first on the PATH of every
+`lab-deck` run, on a Mac and off one. The stand-in keeps the open decks in a
+JSON file a test sets and reads back. With it the tests pin that an unsaved
+deck is saved before `compare` reads it, that `build` closes, writes and reopens
+at the same slide in that order, that a build over unsaved changes is refused,
+and that off a Mac or on any refusal the deck file is not touched. Whether the
+real PowerPoint takes the scripts, and whether it opens a deck with no Repair
+dialog, is checked by hand and written in the pull request.
 
 ## Unit tests — the upstream sync: `tests/upstream_sync/`
 

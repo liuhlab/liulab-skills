@@ -44,6 +44,12 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   says what it cannot see yet, such as animations.
 - A round trip page in `lab-presentation` with the steps: commit the deck you edited,
   compare, copy each edit into the slide source, rebuild, check, commit.
+- You can leave the deck open in PowerPoint on a Mac. `lab-deck compare` has PowerPoint save
+  a deck with unsaved changes before it reads your edits. `lab-deck build` closes the deck,
+  writes it and reopens it at the slide you were on, and refuses to build over unsaved
+  changes. Each tells you what it did. The first time, macOS asks once whether the agent may
+  control PowerPoint: click OK. Off a Mac, or when PowerPoint cannot be asked, the command
+  stops and asks you to save and close the deck; `--closed` then takes your word for it.
 - `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
   Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
 

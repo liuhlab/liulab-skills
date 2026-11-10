@@ -2,20 +2,58 @@
 
 from __future__ import annotations
 
+import atexit
+import functools
+import json
+import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
 import pytest
 
+STANDIN = Path(__file__).with_name("standin.py")
 
-def lab_deck(*args: str | Path, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
-    """Run `lab-deck` with these arguments through the module the PATH wrapper execs."""
+
+@functools.cache
+def programs(mac: bool = True) -> str:
+    """Make the PATH `lab-deck` runs with: the stand-in for PowerPoint first, or no Mac at all.
+
+    On a Mac the folder holds `osascript` and `open`, each running the stand-in, before
+    everything else on PATH. Off a Mac it holds git and nothing else, so neither is found.
+    """
+    path = Path(tempfile.mkdtemp(prefix="lab-deck-programs-"))
+    atexit.register(shutil.rmtree, path, ignore_errors=True)
+    if not mac:
+        git = shutil.which("git")
+        assert git, "the tests need git"
+        (path / "git").symlink_to(git)
+        return str(path)
+    python, standin = shlex.quote(sys.executable), shlex.quote(str(STANDIN))
+    for name in ("osascript", "open"):
+        program = path / name
+        program.write_text(f'#!/bin/sh\nexec {python} {standin} {name} "$@"\n', encoding="utf-8")
+        program.chmod(0o755)
+    return f"{path}{os.pathsep}{os.environ['PATH']}"
+
+
+def lab_deck(
+    *args: str | Path, cwd: Path | None = None, mac: bool = True
+) -> subprocess.CompletedProcess[str]:
+    """Run `lab-deck` with these arguments through the module the PATH wrapper execs.
+
+    Every run has the stand-in for PowerPoint on its PATH, whatever fixture started it, so
+    no test reaches the real one. `mac=False` runs it where there is no `osascript`.
+    """
     return subprocess.run(
         [sys.executable, "-m", "lab_deck", *map(str, args)],
         cwd=cwd,
+        env={**os.environ, "PATH": programs(mac)},
         capture_output=True,
         text=True,
         check=False,
@@ -73,6 +111,44 @@ class Deck:
             flags=re.S,
         )
         return None if box is None else "".join(re.findall(r"<a:t>([^<]*)</a:t>", box[0]))
+
+
+class PowerPoint:
+    """The stand-in's state, as a test sets it and reads it back."""
+
+    def __init__(self, kept: Path) -> None:
+        self.kept = kept
+
+    def start(self, *decks: dict[str, object], refuse: tuple[str, ...] = ()) -> None:
+        """Have PowerPoint running, with these decks open and these commands refused."""
+        state = {"running": True, "decks": list(decks), "refuse": list(refuse), "log": []}
+        self.kept.write_text(json.dumps(state), encoding="utf-8")
+
+    @property
+    def state(self) -> dict[str, list[dict[str, object]]]:
+        """Read what PowerPoint holds now."""
+        return json.loads(self.kept.read_text(encoding="utf-8"))
+
+    @property
+    def log(self) -> list[list[str]]:
+        """List every command PowerPoint got after the running check, in order."""
+        return self.state["log"] if self.kept.is_file() else []  # type: ignore[return-value]
+
+    @property
+    def commands(self) -> list[str]:
+        """Name the commands PowerPoint got, in order."""
+        return [entry[0] for entry in self.log]
+
+
+@pytest.fixture(autouse=True)
+def powerpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> PowerPoint:
+    """Give each test a PowerPoint of its own, which the stand-in on PATH answers for.
+
+    Until a test calls `start`, PowerPoint is not running, as on a machine with no deck open.
+    """
+    kept = tmp_path / "powerpoint.json"
+    monkeypatch.setenv("LAB_DECK_STANDIN", str(kept))
+    return PowerPoint(kept)
 
 
 @pytest.fixture
