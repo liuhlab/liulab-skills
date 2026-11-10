@@ -5,6 +5,20 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.2 — 2026-11-10
+
+### Added
+
+- `/roadmap` plans a goal too big for one wayfinder map. It writes the goal down, charts a map
+  whose last ticket drafts the roadmap, asks which of 1%, 10% or 100% the roadmap covers when the
+  goal runs over a large set, and shows the draft on a review page before filing it. The roadmap
+  is one issue with the final deliverable, numbered done-when checks and a stage table, in a
+  GitHub milestone. Each stage then gets its own wayfinder map, hung under the roadmap. The skill
+  also starts and ends stages and closes the roadmap when every check passes. You call it by
+  name; it never loads on its own.
+- `roadmap` is the third lab-owned skill with a bare name, after `hq-mode` and `unslop-zh`
+  (ADR 0019). `hq-mode` points a goal bigger than one map at it.
+
 ## 2026.11.1 — 2026-11-09
 
 ### Added

@@ -70,10 +70,10 @@ done
 ok "descriptions total ${total_desc} chars across ${n_skills} skills (informational)"
 
 echo "== adopted skill names =="
-# ADRs 0013 and 0016. A skill the lab wrote or derived is named `lab-*`, apart from hq-mode
-# and unslop-zh. An adopted skill keeps its upstream name, and passes only when `upstream/`
-# records it: in a merged upstream's pin (tracked) or in an attribution record (forked). The
-# record formats are in upstream/README.md.
+# ADRs 0013, 0016 and 0019. A skill the lab wrote or derived is named `lab-*`, apart from
+# hq-mode, unslop-zh and roadmap. An adopted skill keeps its upstream name, and passes only
+# when `upstream/` records it: in a merged upstream's pin (tracked) or in an attribution record
+# (forked). The record formats are in upstream/README.md.
 adopted_check() { # <root>: prints ok/FAIL lines, exits 1 on any FAIL
   python3 - "$1" <<'EOF'
 import json
@@ -83,7 +83,8 @@ import sys
 
 root = sys.argv[1]
 oks, problems = [], []
-HOW = ("a skill the lab wrote or derived is named lab-* (apart from hq-mode and unslop-zh); "
+HOW = ("a skill the lab wrote or derived is named lab-* (apart from hq-mode, unslop-zh and "
+       "roadmap); "
        "a skill taken from an upstream is recorded in upstream/: tracked, under `items` in "
        "upstream/<upstream>/pin.json; forked, as a record in upstream/attribution.json. "
        "Formats: upstream/README.md")
@@ -190,7 +191,7 @@ for name in sorted(os.listdir(skills_dir)):
         continue
     if name.startswith("lab-"):
         oks.append(f"skill '{name}' is lab-written or derived (lab-*)")
-    elif name in ("hq-mode", "unslop-zh"):
+    elif name in ("hq-mode", "unslop-zh", "roadmap"):
         oks.append(f"skill '{name}' is a lab-written or derived naming exception")
     elif name in tracked:
         oks.append(f"skill '{name}' is tracked from {tracked[name]} "
@@ -895,7 +896,7 @@ if rule == "frontload":
         print(f"FAIL\ttriggers are recorded for {name}, which is not a skill. Drop its row")
     for name, skill in skills.items():
         if name not in triggers:
-            if name.startswith("lab-") or name in ("hq-mode", "unslop-zh") or name in forked:
+            if name.startswith("lab-") or name in ("hq-mode", "unslop-zh", "roadmap") or name in forked:
                 print(f"FAIL\t{name} is lab-owned and has no triggers recorded. Add a row"
                       " naming the words a request uses when it wants this skill")
             continue
@@ -977,8 +978,8 @@ echo "== front-loaded descriptions =="
 # change nothing: Kimi's cut is silent, and a skill it cannot find just never loads. The rows
 # restate part of each description on purpose, so dropping a trigger takes a visible edit here.
 #
-# Lab-owned means every `lab-*` skill, `hq-mode`, `unslop-zh`, and each skill forked in
-# `upstream/attribution.json`; all four fail without a row. A tracked skill gets none: its
+# Lab-owned means every `lab-*` skill, `hq-mode`, `unslop-zh`, `roadmap`, and each skill forked
+# in `upstream/attribution.json`; all of them fail without a row. A tracked skill gets none: its
 # description is upstream text, merged at each sync and never edited here. A trigger matches
 # from a word start, ignoring case.
 LAB_TRIGGERS='
@@ -993,6 +994,7 @@ bro: restate, last message, plain, jargon
 ketchup: ketchup, catch, last message, action item, summary
 technical-writing: technical, docs, README, RFC, protocol, PR description, commit message
 unslop: AI tells, writing
+roadmap: roadmap, goal, wayfinder, map, done-when, stages, milestone
 unslop-zh: 中文写作, 中文原创, 根据资料写中文, 中文润色, 中文翻译, 英译中, 技术文档翻译, write in Chinese, translate to Chinese, Chinese deliverable, 翻译腔, AI 味
 '
 fx_fill() { printf '%*s' "$1" '' | tr ' ' w; } # <n>: one filler word, n characters long
