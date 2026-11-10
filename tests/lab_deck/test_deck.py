@@ -21,7 +21,9 @@ module.exports = (slide, deck) => {
   deck.title(slide, "TITLE");
   deck.table(slide, [["Sample", "Reads"], ["A", "12 M"], ["B", "9 M"]]);
   deck.lines(slide, ["Below the table"], { y: 5.5, h: 1 });
-  slide.addTable([["x", "y"]], { x: 8, y: 5.5, w: 4, objectName: "Second table" });
+  slide.addTable([["x", "y"]], {
+    x: 8, y: 5.5, w: 4, fontSize: deck.size.floor, objectName: "Second table",
+  });
 };
 """
 

@@ -112,6 +112,10 @@ pptxgenjs = "==4.0.1"
 # machine. LibreOffice itself is the system's app and is not installed from here.
 poppler = "*"
 fontconfig = "*"
+# The one font-measuring library: `src/lab_deck/lint.py` reads glyph widths from the theme
+# font's file with it, to estimate whether text fits its box. From conda-forge, as every
+# runtime dependency of `lab-deck` is.
+fonttools = ">=4.50"
 
 # The package itself, editable, so `pyright` and `pytest` read the working tree rather than
 # a copy — and so `edison-cli` lands on the environment's PATH. This is what pulls

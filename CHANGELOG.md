@@ -38,6 +38,16 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   one thing.
 - Speaker notes come from the deck folder, one file per slide. Mark each click in them with
   `[Click]`.
+- `lab-deck lint` checks a built deck in plain code, in about a second, with no model.
+  `lab-deck build` runs the same checks and refuses to replace the deck when one fails:
+  text under the size floor of the room, text that overflows its box, a picture over text,
+  a shape with a negative size, and notes whose `[Click]` cues do not match the slide's
+  clicks. Each failure names the slide, the shape and the slide rule. Whether text fits is
+  an estimate from font widths, and the report says so. Chinese text keeps the same floor.
+- `deck.citation` draws a slide's one citation line at 12 pt, the only text allowed under
+  the floor beside the page number.
+- Slide rules 16 to 18: no picture over text, no negative size, one `[Click]` cue per click.
+  Each rule that the lint checks names its check.
 - A built deck no longer holds the folder path of a picture on your machine. A picture's alt
   text is its file name, or the text the slide source gives.
 - A build page in `lab-presentation` that describes the deck folder, the slide helpers, the

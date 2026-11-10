@@ -12,8 +12,9 @@ in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-
 | --- | --- |
 | `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
 | `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
+| `lab-deck lint [<folder>]` | Checks the built deck in plain code, with no model: [the lint](checks.md#the-lint). Exit 1 on a blocking failure |
 | `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and writes no file itself: [round-trip.md](round-trip.md) |
-| `lab-deck render [<folder>]` | Makes one picture per click state of the built deck, and lists the pictures that changed since the last render: [Render](#render) |
+| `lab-deck render [<folder>]` | Makes one picture per click state of the built deck, and lists the pictures that changed since the last render: [Render](checks.md#render) |
 | `lab-deck preflight [<folder>]` | Reports LibreOffice, Poppler and the theme's font, each as present or missing, and how to get a missing one. Exits 1 when one is missing |
 
 A deck left open in PowerPoint is handled by both `build` and `compare`, and both take
@@ -62,6 +63,7 @@ style. A source requires nothing: no `require("pptxgenjs")`, no path to the buil
 | `title(slide, text)` | The slide's conclusion, top left, bold |
 | `lines(slide, items, box)` | Phrases, one per line. An item is a string or `{ text, accent, bold }` |
 | `table(slide, rows, box)` | A table. The first row is the header. A cell is a string or `{ text, accent, bold }` |
+| `citation(slide, text, box)` | The slide's one citation line, bottom left, at 12 pt, named `Citation` |
 | `picture(name)` | The path of a file in `pictures/`, for `slide.addImage({ path })` |
 | `group(slide, name, draw)` | What `draw()` draws becomes one group named `name` |
 | `section(slide, name, draw)` | What `draw()` draws is one section: a click shows or hides all of it |
@@ -119,6 +121,7 @@ hand in PowerPoint.
 `notes/<id>.md` holds the notes of slide `<id>` as plain text. The build puts the text into
 the slide's notes as written, with no Markdown turned into formatting. Start the line the
 speaker says after a click with `[Click]`: one cue per click, none on a slide with no click.
+The lint check `click-cues` stops a build whose notes break this.
 A slide with no notes file gets empty notes. Never call `slide.addNotes`: the build refuses
 it, because PptxGenJS counts notes as a thing drawn and every later shape id would move.
 
@@ -140,48 +143,14 @@ it, because PptxGenJS counts notes as a thing drawn and every later shape id wou
    byte. A picture used on several slides is stored once.
 8. Reads the merged file back: every part present and declared, slides in order, no two
    shapes with one id, no negative size.
-9. Moves the checked file over the last built deck in one step.
+9. Runs [the lint](checks.md#the-lint) on the merged file, and stops on a blocking failure.
+10. Moves the checked file over the last built deck in one step.
 
 A failure at any step leaves the last built deck as it was and names the slide. The same deck
 folder builds to the same bytes, so a rebuild that changes nothing shows no change in git.
 For that, the times inside the file are fixed at 1980-01-01.
 
 Inserting a slide changes one thing on the slides after it: the digits of the page number.
-
-## Render
-
-`lab-deck render` writes one PNG per click state into `renders/` in the deck folder, hidden
-slides included. Git ignores that folder. Run it after every build.
-
-A picture's name is `<slide id>.click<n>.png`: `click0` is the slide as it opens, and
-`click<n>` is the slide after n clicks. The name holds no page number, so each picture is
-compared with the last picture of the same slide and click state.
-
-The command prints one line per picture to look at:
-
-| Line | Means |
-| --- | --- |
-| `new: renders/<name>` | The click state had no picture before |
-| `changed: renders/<name>` | The picture differs from the last render's |
-| `gone: renders/<name>` | No slide has this click state now. The picture was deleted |
-
-Look at each `new` and `changed` picture. A slide that moves to another page is listed as
-changed, because its page number changed.
-
-How it works, and its limits:
-
-- The deck is only read. The command writes a scratch copy with one plain slide per click
-  state, LibreOffice converts the copy to a PDF, and Poppler's `pdftoppm` makes the PNGs.
-- LibreOffice is the system's app, found as `soffice` on PATH or inside the Mac app. Poppler
-  comes with the plugin's pixi environment. Run `lab-deck preflight` when either is missing.
-- On a Mac, LibreOffice has aborted inside a command sandbox. When the render fails that
-  way, run it again outside the sandbox.
-- LibreOffice draws a missing font with another one, and the text then wraps elsewhere.
-  `lab-deck preflight` says whether the theme's font is installed.
-- A picture shows Appear and Disappear only. For any other effect, such as one added by hand
-  in PowerPoint, the command warns and names the slide.
-- LibreOffice is not PowerPoint. It accepts a file that PowerPoint offers to repair, so the
-  user still opens the deck in PowerPoint once at the end.
 
 ## Known PptxGenJS limits
 

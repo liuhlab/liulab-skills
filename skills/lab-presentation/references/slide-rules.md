@@ -4,7 +4,8 @@ Every slide of every deck keeps these rules. Read the audience brief first: rule
 depend on it. [practice.md](practice.md) gives the evidence behind them.
 
 Rule numbers are stable ids that the skill, the deck lint and other pages cite. A removed rule
-leaves a gap.
+leaves a gap. A rule that the deck lint checks ends with the name of its check, as `Lint:`.
+Every check named on this page is blocking: it stops the build.
 
 <!-- The list numbers are the rule ids: they run on across the headings. -->
 <!-- markdownlint-disable MD029 -->
@@ -43,6 +44,11 @@ leaves a gap.
    | Meeting room, or no room given | 24 pt | 20 pt | 12 pt, one line |
    | Hall | 28 pt | 24 pt | 12 pt, one line |
 
+   The citation line is the shape `deck.citation` draws, named `Citation`: one per slide, on
+   one line. The page number is not counted. Lint: `size-floor` for text under the floor,
+   `text-overflow` for text that takes more height than its box has. The overflow is an
+   estimate from font widths.
+
 ## Look
 
 9. **Colour only with meaning.** Text is black. One accent colour marks the element the slide
@@ -72,3 +78,14 @@ leaves a gap.
 15. **Change only what was named.** Add, cut, move and restyle nothing else, on that slide or
     any other. List every change in the reply. An improvement you noticed is a proposal, not
     an edit.
+
+## Soundness
+
+16. **A picture never covers text.** Put a picture beside the text, or draw the text after
+    the picture so that it sits on top as a label. A picture may take the place of text that
+    a click hides first. Lint: `picture-over-text`.
+17. **Every shape has a real size.** No width or height under zero. Draw a line that runs
+    up or to the left with a flip, not a negative size. Lint: `negative-size`.
+18. **One `[Click]` cue per click.** Where a slide has notes, they carry one `[Click]` cue
+    for each click of the slide, and none on a slide with no click. A slide with no notes is
+    not checked. Lint: `click-cues`.

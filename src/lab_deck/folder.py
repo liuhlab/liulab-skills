@@ -72,6 +72,7 @@ SLIDE_TEXT = """\
 //   deck.lines(slide, [..], box)       phrases, one per line; an item is a string or
 //                                      { text, accent: true, bold: true }
 //   deck.table(slide, rows, box)       a table; the first row is its header
+//   deck.citation(slide, text)         the one citation line, at 12 pt
 //   deck.picture(name)                 the path of a file in pictures/
 //   deck.group(slide, name, draw)      what draw() draws becomes one group
 //   deck.section(slide, name, draw)    what draw() draws shows and hides together
