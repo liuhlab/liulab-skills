@@ -40,18 +40,18 @@ what each proves. That list is the repo's map of what can be checked.
 
 ## A check over many records
 
-A check that opens every record of a large store is never the default. The sample is often
-the stronger test too: it can read each file in full where a full pass can only glance.
+A check that opens every record of a large store is never the default. A sample read in
+full often tests more than a full pass that only glances at each record.
 
 1. **List the questions first.** Before writing the check, write down what it answers.
 2. **Answer each from the cheapest source that can.** Table metadata first: duplicate keys,
    counts, sizes. Then one directory listing against the table: every listed file on disk,
    no strays, sizes match. Then a random sample of records, each read in full and compared
-   by checksum. Records written by the same code share their faults, so a sample shows them.
+   by checksum. A fault in the shared write code shows up in a sample.
 3. **A full pass needs the user's yes,** and a stated repair or format change to justify it.
    In a session the user has left, run the sampled check and end on that question.
-4. **State the expected cost** in the brief or the reply, and time a few iterations before
-   the loop runs at full scale.
+4. **State the expected cost before the check runs,** in the brief or the reply, and time a
+   few iterations before the loop runs at full scale.
 5. **Probe a long check in its first minutes,** like any job: CPU time, bytes read, the
    rate. A rate far below the estimate is a finding. Find its cause; don't wait it out.
 

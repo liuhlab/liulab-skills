@@ -13,9 +13,8 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   questions the check answers, then answers each from the cheapest source: the tables, then
   one directory listing, then a random sample of records read in full. A check that opens
   every record needs the user's yes, and a repair or a format change that calls for it. The
-  agent also says what the check will cost, times a few rounds before the full loop, and
-  looks at a long check in its first minutes. The rule comes from a check that opened every
-  paper in a store and was heading for seven hours when it was stopped.
+  agent also says what the check will cost before it runs, times a few records before the
+  full loop, and looks at a long check in its first minutes.
 
 ## 2026.11.5 — 2026-11-10
 

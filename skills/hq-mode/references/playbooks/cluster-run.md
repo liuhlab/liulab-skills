@@ -69,8 +69,8 @@ requirements in implementer briefs, with the planned units and how each is verif
 12. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
     one unit), and wait for a yes unless the plan covers it. Cancelling a job the plan did
     not start needs a yes.
-13. Verify outputs, not exit codes: sizes, counts, a spot check against the pilot,
-    [sampled](../verification.md#a-check-over-many-records).
+13. Verify outputs, not exit codes: sizes, counts, a
+    [sampled check](../verification.md#a-check-over-many-records) against the pilot.
 
 ## Pilot design
 
