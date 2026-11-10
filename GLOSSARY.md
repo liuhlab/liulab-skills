@@ -58,11 +58,13 @@ because its pin maps it. Format: `upstream/README.md`.
 
 ### Audience brief
 
-The small file in a deck folder that says who the deck is for. Seven fields: the audience,
+The small file in a deck folder that says who the deck is for. Eight fields: the audience,
 what they already know, the length in minutes, the language, the terms they need no help
-with, the room (meeting room or hall) and the use (presented or read alone). A missing room
-means meeting room, and a missing use means presented. `lab-presentation` asks only for the
-missing lines before it outlines. The jargon rule, the size floor and the deck lint's
+with, the room (meeting room or hall), the use (presented or read alone) and the level the
+talk reports at (high-level or technical). A missing room means meeting room, a missing use
+means presented, and a missing level means high-level: what was built, how the work proceeds
+and why it matters. `lab-presentation` asks only for the missing lines among the first five
+before it outlines, and never for the last three. The jargon rule, the size floor and the deck lint's
 abbreviation, sentence and word checks all read it.
 
 ### CalVer
@@ -116,7 +118,7 @@ command writes it from the deck folder, and the user may then edit it by hand in
 ### Deck folder
 
 The folder that holds one deck's content and nothing else: the audience brief, the slide
-order, one source file per slide, the pictures with their prompts, the notes, the theme and
+plan, the slide order, one source file per slide, the pictures with their prompts, the notes, the theme and
 the built deck. It is a local git repo, so every hand edit and every build is in history. It
 holds no build code and records no build version; the build code ships with the plugin.
 
@@ -395,6 +397,16 @@ property — never delete or overwrite another person's image without asking.
 A Singularity image file: one file holding a whole environment. On ircbc every real job
 runs inside one, because the host OS is far too old to run modern binaries; on arc the same
 environments run natively under pixi.
+
+### Slide plan
+
+One HTML page, `plan.html` in the deck folder, that the user approves after the text outline
+and before any slide is built. Each slide is a mock-up holding only what the slide will show,
+beside a side panel with the planned picture, what the presenter says and the evidence.
+Approval covers which slides exist and each slide's title and picture, by slide id; a later
+change to one of those goes back to the plan. The plan lint, `lab-deck plan-lint`, checks the page in plain
+code and holds the mock-up to the deck lint's word limit. A deck of one or two slides on
+material the audience has seen skips it.
 
 ### Slide rule
 

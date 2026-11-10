@@ -2,6 +2,14 @@
 
 Open this page when a slide needs a picture.
 
+## Reuse first
+
+Before you design a picture, look in the user's earlier decks for a slide that already draws
+it: the deck folders beside this one, and any deck the request or the source text names. Reuse
+that slide's drawing code or its picture file with its prompt. The audience has seen the
+style, and the design work is done. Say in the slide plan's side panel which slide it comes
+from.
+
 ## A real figure first
 
 Slide rule 6 in [slide-rules.md](slide-rules.md) decides: where a figure panel exists, use

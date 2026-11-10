@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slide plan</title>
+<!--
+  The slide plan: one page the user approves before any slide is built.
+  Copy this file to plan.html in the deck folder. Change the content only: the page title,
+  the header, and one <section class="plan-slide"> per slide. Leave the styles alone.
+
+  `lab-deck plan-lint` reads these names, so keep them:
+    data-slide       the slide's id, the name its source file will have
+    on-slide         the mock-up: only what will be on the slide, at about the real word count
+    slide-title      the slide's conclusion, inside the mock-up
+    slide-figure     where the picture goes, inside the mock-up; keep its label to a few words
+    planned-picture  what the picture is, or "text only", in the side panel
+  Everything else in a section is the side panel. The lint never counts it.
+-->
+<style>
+  :root {
+    --page: #f4f5f7;
+    --card: #ffffff;
+    --ink: #1b1f24;
+    --quiet: #5b6470;
+    --line: #d6dae0;
+    --accent: #0072b2;
+    --slide: #ffffff;
+    --slide-ink: #000000;
+    --figure: #eef1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --page: #14171b;
+      --card: #1d2126;
+      --ink: #e7eaee;
+      --quiet: #9aa4b1;
+      --line: #343b44;
+      --accent: #56b4e9;
+      --figure: #eef1f4;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page: #14171b;
+    --card: #1d2126;
+    --ink: #e7eaee;
+    --quiet: #9aa4b1;
+    --line: #343b44;
+    --accent: #56b4e9;
+    --figure: #eef1f4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--page);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", "PingFang SC", sans-serif;
+  }
+  header, main { max-width: 1120px; margin: 0 auto; }
+  header h1 { margin: 0 0 4px; font-size: 1.5rem; line-height: 1.25; text-wrap: balance; }
+  header p { margin: 0 0 24px; color: var(--quiet); }
+
+  .plan-slide {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 20px;
+    margin: 0 0 20px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .plan-slide::before {
+    content: attr(data-slide);
+    grid-column: 1 / -1;
+    color: var(--quiet);
+    font: 600 0.8rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.04em;
+  }
+
+  /* The mock-up. Sizes are in shares of its width, so they keep a slide's proportions:
+     a 24 pt body on a 13.33 inch slide is 2.5% of the width. The box grows past 16:9 when
+     it holds more than a slide can. */
+  .on-slide {
+    container-type: inline-size;
+    aspect-ratio: 16 / 9;
+    align-self: start;
+    background: var(--slide);
+    color: var(--slide-ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-family: Arial, Helvetica, "PingFang SC", sans-serif;
+  }
+  .on-slide > * { margin: 0 4.5cqw; }
+  .slide-title { padding-top: 3.5cqw; font-size: 3.3cqw; line-height: 1.2; font-weight: 700; }
+  .on-slide ul { padding: 2.5cqw 0 0 3cqw; font-size: 2.5cqw; line-height: 1.3; }
+  .on-slide li + li { margin-top: 1cqw; }
+  .on-slide p { padding-top: 2.5cqw; font-size: 2.5cqw; line-height: 1.3; }
+  .slide-figure {
+    display: grid;
+    place-items: center;
+    min-height: 22cqw;
+    margin-top: 2.5cqw;
+    padding: 1cqw;
+    background: var(--figure);
+    border: 1px dashed #9aa4b1;
+    color: #5b6470;
+    font-size: 1.8cqw;
+    text-align: center;
+  }
+
+  .side-panel h3 {
+    margin: 0 0 2px;
+    color: var(--accent);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .side-panel p { margin: 0 0 14px; }
+  .side-panel p:last-child { margin-bottom: 0; }
+
+  @media (max-width: 760px) {
+    .plan-slide { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Deck title</h1>
+  <p>Slide plan. Audience, minutes, level.</p>
+</header>
+<main>
+
+<section class="plan-slide" data-slide="why">
+  <div class="on-slide">
+    <h2 class="slide-title">The conclusion of this slide, as one short sentence</h2>
+    <ul>
+      <li>First phrase</li>
+      <li>Second phrase</li>
+    </ul>
+    <div class="slide-figure">Picture: what it shows, in a few words</div>
+  </div>
+  <aside class="side-panel">
+    <h3>Picture</h3>
+    <p class="planned-picture">What the picture is and where it comes from: a figure panel, a
+      slide of an earlier deck to reuse, or a new drawing.</p>
+    <h3>Says</h3>
+    <p>What the presenter says on this slide, in a sentence or two.</p>
+    <h3>Evidence</h3>
+    <p>The source of each number on the slide, and any caveat the slide leaves out.</p>
+  </aside>
+</section>
+
+<section class="plan-slide" data-slide="next">
+  <div class="on-slide">
+    <h2 class="slide-title">A slide with no picture says so in its side panel</h2>
+    <ul>
+      <li>First phrase</li>
+      <li>Second phrase</li>
+      <li>Third phrase</li>
+    </ul>
+  </div>
+  <aside class="side-panel">
+    <h3>Picture</h3>
+    <p class="planned-picture">text only</p>
+    <h3>Says</h3>
+    <p>What the presenter says on this slide.</p>
+    <h3>Evidence</h3>
+    <p>The source of each number on the slide.</p>
+  </aside>
+</section>
+
+</main>
+</body>
+</html>
