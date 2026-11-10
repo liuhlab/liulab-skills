@@ -20,20 +20,21 @@ requirements in implementer briefs, with the planned units and how each is verif
 
 ## Plan and run
 
-1. `lab-hpc` step 0. Work happens on a compute node, never the login node, and the host rule
+1. [Develop on a small example](../small-example.md) first.
+2. `lab-hpc` step 0. Work happens on a compute node, never the login node, and the host rule
    goes into every subagent brief.
-2. Agree the target before building anything: the measure that counts (items fetched per
+3. Agree the target before building anything: the measure that counts (items fetched per
    hour, wall time to the full set, cost per sample) and its acceptable range. Ask the user
    when no source settles it.
-3. Ask for one work folder for the run, suggesting one under the project's output root.
+4. Ask for one work folder for the run, suggesting one under the project's output root.
    Every script, log, temp file and output of the run lives there, never in the home
    directory or the reference data root. See [Work folder](#work-folder).
-4. Check for prepared inputs: registered genomes and indexes, the shared data root, the lab's
+5. Check for prepared inputs: registered genomes and indexes, the shared data root, the lab's
    data packages. Don't re-download what is there.
-5. Write the sbatch scripts: one unit as a pilot (see [Pilot design](#pilot-design)), then
+6. Write the sbatch scripts: one unit as a pilot (see [Pilot design](#pilot-design)), then
    the full set. Ask Slurm for generous memory when `sinfo` shows the nodes have it free: a
    job that fails on a tight request costs more than idle headroom.
-6. Propose the run plan, with the exact scripts in the reply, and wait for the user's yes
+7. Propose the run plan, with the exact scripts in the reply, and wait for the user's yes
    before any `sbatch` or `srun`, the pilot's included. The plan states the work folder, the
    partitions, the most CPU, memory and wall time per job, the most jobs at once, and the
    target measure with its acceptable range. Size it for the full run, so one yes covers the
@@ -45,12 +46,12 @@ requirements in implementer briefs, with the planned units and how each is verif
    revised plan, or a yes for that step. The plan ends with the run. With no plan, "land it"
    and "going to bed" change nothing: prepare everything else, then end the turn on the
    question.
-7. Run the pilot. Time each phase, observe CPU use and I/O, and identify the dominant cost
+8. Run the pilot. Time each phase, observe CPU use and I/O, and identify the dominant cost
    with [`explain-the-number`](../principles/explain-the-number.md). Use those measurements
    to choose what to parallelize. Keep fast steps simple. Report the full-run estimate to
    the user and scale within the plan; only an estimate past a plan limit goes back for a
    revised plan.
-8. Before starting long work, compare expected workers and threads with allocated CPUs,
+9. Before starting long work, compare expected workers and threads with allocated CPUs,
    memory and current free capacity from Slurm. A pass taking more than a few minutes on
    one core in a multicore allocation needs a measured justification or a revised plan.
    Budget workers times threads per worker, memory per worker and shared I/O. Consider
@@ -60,15 +61,15 @@ requirements in implementer briefs, with the planned units and how each is verif
    Fan out separate units as jobs or an array, with concurrency bounded by those budgets.
    Check each unit as it finishes. If I/O or another measured limit favors serial work,
    record that reason and size the allocation accordingly.
-9. Scale up in rounds sized to the question. See [Rounds](#rounds).
-10. Check each new job in its first minutes: state, node, the first output lines and the rate
+10. Scale up in rounds sized to the question. See [Rounds](#rounds).
+11. Check each new job in its first minutes: state, node, the first output lines and the rate
     against the pilot's. Run `lab-hpc`'s `scripts/watch-job.sh` in the background to watch it
     after that. A job slower than the pilot predicts gets its cause found at once, before it
     burns its time budget.
-11. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
+12. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
     one unit), and wait for a yes unless the plan covers it. Cancelling a job the plan did
     not start needs a yes.
-12. Verify outputs, not exit codes: sizes, counts, a spot check against the pilot.
+13. Verify outputs, not exit codes: sizes, counts, a spot check against the pilot.
 
 ## Pilot design
 
