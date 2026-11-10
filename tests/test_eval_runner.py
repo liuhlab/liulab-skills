@@ -30,7 +30,7 @@ def tree(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
     The runner snapshots, installs and hashes the whole tree it sits in. That is the
     behaviour under test, and its cost grows with the tree: in this repo it was most of
-    each test's seven seconds. The copy is this checkout's own runner, unchanged, in a
+    each test's time. The copy is this checkout's own runner, unchanged, in a
     tree of seven files, so the same snapshot, content check and isolation are proved on a
     tree small enough to hash at once. Nothing in the runner knows it is under test.
     """

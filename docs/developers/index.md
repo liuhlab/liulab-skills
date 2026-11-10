@@ -103,8 +103,7 @@ choices](design.md#a-version-names-one-tree) says why every change bumps one.
 ## Checking a change
 
 `pixi run check` is the one command that must pass. It starts every check at once and reports
-every failure in a single run, so read the output to the bottom. It should take 40 seconds or
-less on a lab Mac.
+every failure in a single run, so read the output to the bottom.
 
 ```mermaid
 flowchart LR

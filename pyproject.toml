@@ -207,11 +207,11 @@ test = "pytest -n auto --dist loadgroup"
 # The static step list lives here and nowhere else; `check.sh` takes it as arguments, and
 # `ci.yml` invokes this task by name, so the local gate and CI cannot drift.
 #
-# `also` is how `check` adds the bash suite to the same list, so the suite starts beside the
+# `extra_steps` is how `check` adds the bash suite to the same list, so the suite starts beside the
 # other steps and the gate takes as long as its slowest step, not the sum. CI passes
 # nothing: there the suite is a job of its own, and it runs once.
-check-static = { cmd = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance {{ also }}", args = [
-    { arg = "also", default = "" },
+check-static = { cmd = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance {{ extra_steps }}", args = [
+    { arg = "extra_steps", default = "" },
 ] }
 # The gate. The target is 40 s or less on a developer Mac: the closing line of a warm run,
 # median of three. `tests/README.md` says how it is kept.
