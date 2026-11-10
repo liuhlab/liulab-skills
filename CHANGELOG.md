@@ -5,6 +5,16 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.4 — 2026-11-10
+
+### Added
+
+- `hq-mode` has a new rule: develop on a small example first. An agent writes and fixes the
+  code for a large or slow job on a test fixture or a seeded sample, in a loop of seconds to
+  minutes. It runs the full data only for what the small input cannot answer. The rule has its
+  own page, and it is now the first step of the cluster-run playbook and a step of the
+  long-run playbook.
+
 ## 2026.11.3 — 2026-11-10
 
 ### Changed

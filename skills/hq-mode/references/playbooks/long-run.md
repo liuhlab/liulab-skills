@@ -7,10 +7,12 @@
    fallback.
 3. Each step makes the smallest change the evidence justifies, checks it against the predicate,
    and keeps or reverts it.
-4. Log every step per `references/show-me-your-work.md`.
-5. Mid-run problems are yours: fix them in their own change. Surface only an always-pause item,
+4. Code for a slow step is written and fixed on a small example first:
+   `references/small-example.md`.
+5. Log every step per `references/show-me-your-work.md`.
+6. Mid-run problems are yours: fix them in their own change. Surface only an always-pause item,
    a real preference call, or a dead end.
-6. Pausing: a `wip:` commit and a handoff note written by following the
+7. Pausing: a `wip:` commit and a handoff note written by following the
    [`handoff`](../../../handoff/SKILL.md) skill's file, then stop. A subagent pauses after
    each unit, and when the orchestrator asks it to wrap up at its deadline or around half its
    context. Picking up: read the trail and redo nothing.
