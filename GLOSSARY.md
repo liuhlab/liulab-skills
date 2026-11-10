@@ -203,7 +203,8 @@ Contrast a tracked skill. See `docs/adr/0012-upstream-skills-merge-from-a-pin.md
 
 `pixi run check`: the one command that must be green before a commit, and what CI runs on
 every pull request. The steps start together and every failure is reported in one run, so
-read to the bottom. A cap or rule inside the gate is a dial, not a law — raise one
+read to the bottom. The target is 40 s or less on a developer Mac; `tests/README.md` says how
+it is measured. A cap or rule inside the gate is a dial, not a law — raise one
 deliberately, in its own commit, with the reason in the message.
 
 ### Idle interactive job

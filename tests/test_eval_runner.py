@@ -3,10 +3,56 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
 REPO = Path(__file__).resolve().parents[1]
+# Everything a run of one case reads: the entry point, the runner, the catalogue and its two
+# helpers, the plugin manifest the evidence quotes, and one skill for the mismatch test to
+# change in the installed copy.
+RUN_FILES = (
+    "tests/eval.sh",
+    "tests/eval_runner.py",
+    "tests/eval_cases.sh",
+    "tests/eval_assert.sh",
+    "tests/eval_stream.py",
+    ".claude-plugin/plugin.json",
+    "skills/lab-hpc/SKILL.md",
+)
+
+
+@pytest.fixture(scope="module")
+def tree(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Copy the files a run reads into a small git repo, and run the runner from there.
+
+    The runner snapshots, installs and hashes the whole tree it sits in. That is the
+    behaviour under test, and its cost grows with the tree: in this repo it was most of
+    each test's time. The copy is this checkout's own runner, unchanged, in a
+    tree of seven files, so the same snapshot, content check and isolation are proved on a
+    tree small enough to hash at once. Nothing in the runner knows it is under test.
+    """
+    root = tmp_path_factory.mktemp("eval-tree")
+    for name in RUN_FILES:
+        target = root / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO / name, target)
+    git = {
+        **os.environ,
+        "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_AUTHOR_NAME": "A Test",
+        "GIT_AUTHOR_EMAIL": "test@example.invalid",
+        "GIT_COMMITTER_NAME": "A Test",
+        "GIT_COMMITTER_EMAIL": "test@example.invalid",
+    }
+    for command in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "the files a run reads"]):
+        subprocess.run(["git", *command], cwd=root, env=git, check=True, capture_output=True)
+    return root
+
+
 LOGIN_VARIABLES = ("CLAUDE_CODE_OAUTH_TOKEN", "ANTHROPIC_API_KEY")
 STAND_IN = "stand-in-not-a-credential"
 
@@ -86,12 +132,12 @@ else:
 
 
 def execute(
-    env: dict[str, str], agent: str = "codex", case: str = "explicit"
+    tree: Path, env: dict[str, str], agent: str = "codex", case: str = "explicit"
 ) -> subprocess.CompletedProcess[str]:
-    """Run the public command with a selected agent and one case."""
+    """Run the public command in the small tree, with a selected agent and one case."""
     return subprocess.run(
         ["bash", "tests/eval.sh", "--agent", agent, "--only", case],
-        cwd=REPO,
+        cwd=tree,
         env=env,
         capture_output=True,
         text=True,
@@ -100,12 +146,12 @@ def execute(
     )
 
 
-def test_codex_setup_and_eval_use_only_codex(tmp_path: Path) -> None:
+def test_codex_setup_and_eval_use_only_codex(tmp_path: Path, tree: Path) -> None:
     """The verified Codex path never invokes another agent or uses the regular home."""
     import json
 
     env, calls = stub_agent(tmp_path)
-    result = execute(env)
+    result = execute(tree, env)
     assert result.returncode == 0, result.stdout + result.stderr
     invocations = [json.loads(line) for line in calls.read_text().splitlines()]
     assert len(invocations) == 3
@@ -119,61 +165,61 @@ def test_codex_setup_and_eval_use_only_codex(tmp_path: Path) -> None:
     assert evidence["transcripts"]
 
 
-def test_failed_setup_launches_no_eval(tmp_path: Path) -> None:
+def test_failed_setup_launches_no_eval(tmp_path: Path, tree: Path) -> None:
     """A failed installation stops before the paid command."""
     env, calls = stub_agent(tmp_path)
     env["STUB_SETUP_FAIL"] = "1"
-    result = execute(env)
+    result = execute(tree, env)
     assert result.returncode == 1
     assert "setup failed" in result.stderr
     assert len(calls.read_text().splitlines()) == 2
 
 
-def test_content_mismatch_launches_no_eval(tmp_path: Path) -> None:
+def test_content_mismatch_launches_no_eval(tmp_path: Path, tree: Path) -> None:
     """An installed plugin with different bytes is rejected before launch."""
     env, calls = stub_agent(tmp_path)
     env["STUB_MISMATCH"] = "1"
-    result = execute(env)
+    result = execute(tree, env)
     assert result.returncode == 1
     assert "content verification failed" in result.stderr
     assert len(calls.read_text().splitlines()) == 2
 
 
-def test_runner_failure_cannot_pass_matching_output(tmp_path: Path) -> None:
+def test_runner_failure_cannot_pass_matching_output(tmp_path: Path, tree: Path) -> None:
     """Matching final output cannot hide a nonzero runner status."""
     env, _ = stub_agent(tmp_path)
     env["STUB_RUN_EXIT"] = "17"
-    result = execute(env)
+    result = execute(tree, env)
     assert result.returncode == 1
     assert "runner exited 17" in result.stdout
     assert "EVAL PASS" not in result.stdout
 
 
-def test_missing_final_answer_cannot_pass_command_output(tmp_path: Path) -> None:
+def test_missing_final_answer_cannot_pass_command_output(tmp_path: Path, tree: Path) -> None:
     """A tool's matching output is not the agent's final answer."""
     env, _ = stub_agent(tmp_path)
     env["STUB_EMPTY"] = "1"
-    result = execute(env)
+    result = execute(tree, env)
     assert result.returncode == 1
     assert "no final answer" in result.stdout
 
 
-def test_unsupported_codex_case_has_no_setup(tmp_path: Path) -> None:
+def test_unsupported_codex_case_has_no_setup(tmp_path: Path, tree: Path) -> None:
     """An unsupported case fails before changing an installation."""
     env, calls = stub_agent(tmp_path)
-    result = execute(env, case="unslop-zh-original")
+    result = execute(tree, env, case="unslop-zh-original")
     assert result.returncode == 2
     assert "unsupported Codex case" in result.stderr
     assert not calls.exists()
 
 
-def test_claude_is_explicit_and_isolated(tmp_path: Path) -> None:
+def test_claude_is_explicit_and_isolated(tmp_path: Path, tree: Path) -> None:
     """An explicitly selected Claude run uses only its private installation."""
     import json
 
     env, calls = stub_agent(tmp_path)
     env["CLAUDE_CODE_OAUTH_TOKEN"] = STAND_IN
-    result = execute(env, agent="claude")
+    result = execute(tree, env, agent="claude")
     assert result.returncode == 0, result.stdout + result.stderr
     invocations = [json.loads(line) for line in calls.read_text().splitlines()]
     assert all(call[0] == "claude" for call in invocations)
@@ -216,29 +262,29 @@ def assert_no_login_refusal(tmp_path: Path, result: subprocess.CompletedProcess[
     assert STAND_IN not in result.stdout + result.stderr + evidence_path.read_text()
 
 
-def test_expired_claude_login_launches_nothing(tmp_path: Path) -> None:
+def test_expired_claude_login_launches_nothing(tmp_path: Path, tree: Path) -> None:
     """An expired login file with no login in the environment stops setup."""
     env, calls = stub_agent(tmp_path)
     env["LAB_EVAL_PLATFORM"] = "darwin"
     login_file(tmp_path, oauth_login(-3600))
-    result = execute(env, agent="claude")
+    result = execute(tree, env, agent="claude")
     assert_no_login_refusal(tmp_path, result)
     assert "expired" in result.stderr
     assert "Keychain" in result.stderr
     assert not calls.exists()
 
 
-def test_expired_claude_login_off_macos_is_linked_as_before(tmp_path: Path) -> None:
+def test_expired_claude_login_off_macos_is_linked_as_before(tmp_path: Path, tree: Path) -> None:
     """Off macOS the login file is the live store, so an old expiry does not stop the run."""
     env, calls = stub_agent(tmp_path)
     env["LAB_EVAL_PLATFORM"] = "linux"
     login_file(tmp_path, oauth_login(-3600))
-    result = execute(env, agent="claude")
+    result = execute(tree, env, agent="claude")
     assert result.returncode == 0, result.stdout + result.stderr
     assert Path(f"{calls}.login").read_text().split() == ["linked"] * 3
 
 
-def test_unparsable_claude_login_launches_nothing(tmp_path: Path) -> None:
+def test_unparsable_claude_login_launches_nothing(tmp_path: Path, tree: Path) -> None:
     """A login file that is not a login, with no login in the environment, stops setup."""
     for platform in ("darwin", "linux"):
         root = tmp_path / platform
@@ -246,25 +292,25 @@ def test_unparsable_claude_login_launches_nothing(tmp_path: Path) -> None:
         env, calls = stub_agent(root)
         env["LAB_EVAL_PLATFORM"] = platform
         login_file(root, STAND_IN)
-        result = execute(env, agent="claude")
+        result = execute(tree, env, agent="claude")
         assert_no_login_refusal(root, result)
         assert not calls.exists()
 
 
-def test_missing_claude_login_launches_nothing(tmp_path: Path) -> None:
+def test_missing_claude_login_launches_nothing(tmp_path: Path, tree: Path) -> None:
     """No login file and no login in the environment stops setup, on every platform."""
     for platform in ("darwin", "linux"):
         root = tmp_path / platform
         root.mkdir()
         env, calls = stub_agent(root)
         env["LAB_EVAL_PLATFORM"] = platform
-        result = execute(env, agent="claude")
+        result = execute(tree, env, agent="claude")
         assert_no_login_refusal(root, result)
         assert ("Keychain" in result.stderr) == (platform == "darwin")
         assert not calls.exists()
 
 
-def test_environment_login_runs_without_linking_a_stale_file(tmp_path: Path) -> None:
+def test_environment_login_runs_without_linking_a_stale_file(tmp_path: Path, tree: Path) -> None:
     """A login in the environment runs the case, and the agent never sees the expired file."""
     for number, name in enumerate(LOGIN_VARIABLES):
         root = tmp_path / str(number)
@@ -273,7 +319,7 @@ def test_environment_login_runs_without_linking_a_stale_file(tmp_path: Path) -> 
         env[name] = STAND_IN
         env["LAB_EVAL_PLATFORM"] = "darwin"
         login_file(root, oauth_login(-3600))
-        result = execute(env, agent="claude")
+        result = execute(tree, env, agent="claude")
         assert result.returncode == 0, result.stdout + result.stderr
         assert "EVAL PASS" in result.stdout
         seen = Path(f"{calls}.login").read_text().split()
@@ -281,12 +327,12 @@ def test_environment_login_runs_without_linking_a_stale_file(tmp_path: Path) -> 
         assert STAND_IN not in next(root.glob("lab-agent-eval-*/evidence.json")).read_text()
 
 
-def test_fresh_claude_login_is_linked_for_the_run_only(tmp_path: Path) -> None:
+def test_fresh_claude_login_is_linked_for_the_run_only(tmp_path: Path, tree: Path) -> None:
     """A login file that has not expired reaches the agent as a link, removed afterwards."""
     env, calls = stub_agent(tmp_path)
     env["LAB_EVAL_PLATFORM"] = "darwin"
     login_file(tmp_path, oauth_login(3600))
-    result = execute(env, agent="claude")
+    result = execute(tree, env, agent="claude")
     assert result.returncode == 0, result.stdout + result.stderr
     assert Path(f"{calls}.login").read_text().split() == ["linked"] * 3
     home = next(tmp_path.glob("lab-agent-eval-*/agent-home"))
@@ -294,20 +340,20 @@ def test_fresh_claude_login_is_linked_for_the_run_only(tmp_path: Path) -> None:
     assert (tmp_path / "regular-homes/claude/.credentials.json").is_file()
 
 
-def test_progress_without_turn_completion_fails(tmp_path: Path) -> None:
+def test_progress_without_turn_completion_fails(tmp_path: Path, tree: Path) -> None:
     """Matching progress output cannot substitute for a completed Codex turn."""
     env, _ = stub_agent(tmp_path)
     env["STUB_TRUNCATED"] = "1"
-    result = execute(env)
+    result = execute(tree, env)
     assert result.returncode == 1
     assert "no final answer" in result.stdout
 
 
-def test_empty_case_never_becomes_a_full_suite(tmp_path: Path) -> None:
+def test_empty_case_never_becomes_a_full_suite(tmp_path: Path, tree: Path) -> None:
     """An empty --only argument launches neither installation nor the full paid suite."""
     env, calls = stub_agent(tmp_path)
     for agent in ("codex", "claude"):
-        result = execute(env, agent=agent, case="")
+        result = execute(tree, env, agent=agent, case="")
         assert result.returncode == 2
         assert "unsupported case" in result.stderr
         assert not calls.exists()

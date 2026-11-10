@@ -8,14 +8,13 @@ one build, and lint the built deck again under another brief.
 from __future__ import annotations
 
 import re
-import shutil
 import subprocess
 from pathlib import Path
 
 import pytest
 
 from lab_deck import lint
-from tests.lab_deck.conftest import Deck, lab_deck
+from tests.lab_deck.conftest import Deck, build_once, copy_deck, lab_deck
 from tests.lab_deck.test_lint import deck_with, failures
 
 SLIDE = """\
@@ -91,27 +90,33 @@ def built(
     tmp_path_factory: pytest.TempPathFactory,
 ) -> tuple[Path, subprocess.CompletedProcess[str]]:
     """Build the deck of warning slides once: its folder, and what the build said."""
-    folder = tmp_path_factory.mktemp("warnings") / "talk"
-    made = lab_deck("new", folder)
-    assert made.returncode == 0, made.stdout + made.stderr
-    deck_with(folder)
-    for name, source in SLIDES.items():
-        (folder / "slides" / f"{name}.js").write_text(
-            source.replace("TITLE", f"About {name}"), encoding="utf-8"
+
+    def build(folder: Path) -> list[object]:
+        made = lab_deck("new", folder)
+        assert made.returncode == 0, made.stdout + made.stderr
+        deck_with(folder)
+        for name, source in SLIDES.items():
+            (folder / "slides" / f"{name}.js").write_text(
+                source.replace("TITLE", f"About {name}"), encoding="utf-8"
+            )
+        order = folder / "deck.toml"
+        listed = ", ".join(f'"{name}"' for name in ("title", "full", *SLIDES))
+        order.write_text(
+            re.sub(r"slides = \[.*\]", f"slides = [{listed}]", order.read_text("utf-8")), "utf-8"
         )
-    order = folder / "deck.toml"
-    listed = ", ".join(f'"{name}"' for name in ("title", "full", *SLIDES))
-    order.write_text(
-        re.sub(r"slides = \[.*\]", f"slides = [{listed}]", order.read_text("utf-8")), "utf-8"
-    )
-    set_brief(folder, "known_terms", '["RNA-seq"]')
-    return folder, lab_deck("build", folder)
+        set_brief(folder, "known_terms", '["RNA-seq"]')
+        done = lab_deck("build", folder)
+        return [done.args, done.returncode, done.stdout, done.stderr]
+
+    folder, said = build_once(tmp_path_factory, "warnings", build)
+    assert isinstance(said, list)
+    return folder, subprocess.CompletedProcess(*said)
 
 
 @pytest.fixture
 def copy(built: tuple[Path, subprocess.CompletedProcess[str]], tmp_path: Path) -> Path:
     """Give a test its own copy of the built deck folder, to change the brief of."""
-    return Path(shutil.copytree(built[0], tmp_path / "talk"))
+    return copy_deck(built[0], tmp_path / "talk")
 
 
 def test_a_warning_stops_no_build_and_the_build_prints_each_one(

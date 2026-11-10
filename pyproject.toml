@@ -198,11 +198,24 @@ conformance = "python scripts/conformance.py"
 # the real Node build on a small deck folder. For the first, every test that would
 # otherwise reach the Edison platform is answered by a stub the test writes itself, so the
 # suite is safe on the day the spend path is broken — which is the day it matters.
-test = "pytest -n auto"
+#
+# `--dist loadgroup` keeps the tests that carry one `xdist_group` mark on one worker and
+# spreads every other test as before. `tests/edison_cli/test_client_surface.py` uses it: the
+# real client takes seconds to import, and one worker pays that, not every worker that
+# happens to draw one of its tests.
+test = "pytest -n auto --dist loadgroup"
 # The static step list lives here and nowhere else; `check.sh` takes it as arguments, and
 # `ci.yml` invokes this task by name, so the local gate and CI cannot drift.
-check-static = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance"
-check = { depends-on = ["check-static", "skill-lint"] }
+#
+# `extra_steps` is how `check` adds the bash suite to the same list, so the suite starts beside the
+# other steps and the gate takes as long as its slowest step, not the sum. CI passes
+# nothing: there the suite is a job of its own, and it runs once.
+check-static = { cmd = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance {{ extra_steps }}", args = [
+    { arg = "extra_steps", default = "" },
+] }
+# The gate. The target is 40 s or less on a developer Mac: the closing line of a warm run,
+# median of three. `tests/README.md` says how it is kept.
+check = { depends-on = [{ task = "check-static", args = ["skill-lint"] }] }
 
 # ============================== pytest ==============================
 
