@@ -2,7 +2,7 @@
 
 How a hand edit made in PowerPoint gets into the slide sources, so that the next build keeps
 it. Open this page when the user has edited the built deck, or before you rebuild a deck the
-user may have opened.
+user may have opened or still has open.
 
 The built deck is an output. A rebuild writes it again from the slide sources, so an edit
 that lives only in the deck file is lost at the next build. Never revert a hand edit: copy it
@@ -13,13 +13,15 @@ into the source.
 1. **Commit before you touch the deck.** In the deck folder, commit the deck file as the user
    handed it back. The hand edits are then in history whatever happens next.
 2. **Compare.** Run `lab-deck compare [<folder>]`. It lists every edit since the last build,
-   slide by slide and shape by shape. It reports only: it changes no file.
+   slide by slide and shape by shape. It reports only, and writes no file itself. If it says
+   it saved the deck in PowerPoint, tell the user and commit the deck again: that commit is
+   the one step 5 names.
 3. **Copy each edit into the slide source.** One edit at a time, in `slides/<id>.js` for the
    slide the report names. A reorder goes in `slides` in `deck.toml`. A slide added by hand
    gets a new source and a new id; a deleted slide loses its id in `deck.toml`. Tell the user
    about any edit you cannot write in a source. Never drop one in silence.
 4. **Rebuild over the main deck.** Run `lab-deck build`. There is one deck file: never build
-   to a second name beside it.
+   to a second name beside it. If it says it closed and reopened the deck, tell the user.
 5. **Check the rebuild kept the edits.** Run `lab-deck compare --since <commit of step 1>`.
    It compares the new build with the hand-edited deck, and should list nothing. What it
    lists is an edit the sources still lack, read backwards: "was" is the user's deck.
@@ -27,6 +29,36 @@ into the source.
 
 If the deck folder has a build README, it holds the current state only: what the deck is and
 how to build it. The history of builds and hand edits is in git, never in a log in that file.
+
+## A deck left open in PowerPoint
+
+The user need not close the deck first. On a Mac, `compare` and `build` ask PowerPoint
+whether it has the deck open. They never look for a lock file.
+
+| The deck is | `lab-deck compare` | `lab-deck build` |
+| --- | --- | --- |
+| Not open, or PowerPoint is not running | Reads the file | Writes the file |
+| Open and saved | Reads the file | Closes the deck, writes it, reopens it at the slide that was showing, and says so |
+| Open with unsaved changes | Has PowerPoint save it, says so, then reads the file | Refuses, because a build would lose those changes. Run `compare` first |
+| Not shown to be closed | Stops | Stops |
+
+PowerPoint is never started to be asked. It saves the deck in place only. The other decks
+open in it are left alone. If the build fails after the close, the last built deck is
+reopened. Pass on to the user every line that says what was saved, closed or reopened.
+
+**The stop.** Off a Mac, when macOS denies permission, or when PowerPoint refuses or does
+not answer in 30 seconds, the command stops and has read and written nothing. Ask the user
+to save the deck and close it in PowerPoint. When they say it is done, run the command again
+with `--closed`. `--closed` is the user's word and covers only a PowerPoint that cannot be
+asked: if PowerPoint answers that the deck is open, its answer wins. Never pass `--closed`
+before the user has said so. A dialog left open in PowerPoint also blocks it: ask the user
+to answer the dialog.
+
+**The permission prompt.** The first time an agent program runs either command with
+PowerPoint running, macOS asks once whether that program may control Microsoft PowerPoint.
+Tell the user to expect it and to click OK. Each agent program gets its own prompt. After a
+"Don't Allow", the commands stop as above; the user turns the permission back on in System
+Settings, under Privacy & Security, Automation.
 
 ## The report
 
