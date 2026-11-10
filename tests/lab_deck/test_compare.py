@@ -16,6 +16,8 @@ import pytest
 from tests.lab_deck.conftest import (
     PLAIN,
     Deck,
+    build_once,
+    copy_deck,
     found,
     git,
     lab_deck,
@@ -44,21 +46,24 @@ module.exports = (slide, deck) => {
 @pytest.fixture(scope="module")
 def committed(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Build a deck of five slides once, and commit the build."""
-    path = tmp_path_factory.mktemp("compare") / "talk"
-    assert lab_deck("new", path).returncode == 0
-    (path / "pictures" / "dot.png").write_bytes(DOT)
-    write(path, {"title": PLAIN, "question": PLAIN, "data": TABLE, "shapes": SHAPES, "end": PLAIN})
-    done = lab_deck("build", path)
-    assert done.returncode == 0, done.stdout + done.stderr
-    git(path, "add", "-A")
-    git(path, "commit", "-q", "-m", "Build")
-    return path
+
+    def build(path: Path) -> None:
+        assert lab_deck("new", path).returncode == 0
+        (path / "pictures" / "dot.png").write_bytes(DOT)
+        slides = {"title": PLAIN, "question": PLAIN, "data": TABLE, "shapes": SHAPES, "end": PLAIN}
+        write(path, slides)
+        done = lab_deck("build", path)
+        assert done.returncode == 0, done.stdout + done.stderr
+        git(path, "add", "-A")
+        git(path, "commit", "-q", "-m", "Build")
+
+    return build_once(tmp_path_factory, "compare", build)[0]
 
 
 @pytest.fixture
 def folder(committed: Path, tmp_path: Path) -> Path:
     """Give each test its own copy of the built, committed deck folder."""
-    return Path(shutil.copytree(committed, tmp_path / "talk"))
+    return copy_deck(committed, tmp_path / "talk")
 
 
 def report(folder: Path, *args: str) -> str:

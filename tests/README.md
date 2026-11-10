@@ -50,8 +50,9 @@ folder it copies. They run `lab-deck` with a command line on a small deck folder
 in a temporary directory and read what a person would: the folder `new` made,
 the deck `build` wrote, the message and the exit status. The command runs inside
 the test's process, to save the start of a new Python; two tests of `build` start
-`python -m lab_deck` itself. A deck that many tests need is built once and
-copied. The build runs the real Node.js and PptxGenJS from the pixi environment,
+`python -m lab_deck` itself. A deck that many tests need is built once for the
+whole run, by the first worker to ask, and every test copies it
+(`build_once` and `copy_deck` in `conftest.py`). The build runs the real Node.js and PptxGenJS from the pixi environment,
 so nothing is stubbed and nothing reaches the network. They pin the folder's
 layout and its git repo, the warning in a synced cloud folder, the 16:9 slide
 size, that the theme and the room change the font, the accent colour and the
@@ -68,7 +69,9 @@ pin that the build is refused, that the report names that slide, shape, check an
 and no other, and that the last built deck stays.
 PowerPoint is never started, and never asked anything: `conftest.py` puts a
 stand-in named `osascript` and `open` (`stand_in_powerpoint.py`) first on the PATH of every
-`lab-deck` run, on a Mac and off one. The stand-in keeps the open decks in a
+`lab-deck` run, on a Mac and off one. `lab-deck` finds it there; in a run inside
+the test's process it then answers in that process, to save a new Python per
+question. The stand-in keeps the open decks in a
 JSON file a test sets and reads back. With it the tests pin that an unsaved
 deck is saved before `compare` reads it, that `build` closes, writes and reopens
 at the same slide in that order, that a build over unsaved changes is refused,

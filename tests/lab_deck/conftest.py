@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import atexit
 import contextlib
+import fcntl
 import functools
+import io
 import json
 import os
 import re
@@ -22,6 +24,8 @@ import pytest
 from typer.testing import CliRunner
 
 from lab_deck import cli
+from lab_deck import powerpoint as powerpoint_module
+from tests.lab_deck import stand_in_powerpoint
 
 NS = {
     "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
@@ -52,6 +56,19 @@ def programs(mac: bool = True) -> str:
     return f"{path}{os.pathsep}{os.environ['PATH']}"
 
 
+def stand_in(command: list[str]) -> subprocess.CompletedProcess[str]:
+    """Answer one `osascript` or `open` call as the stand-in on PATH would, with no new Python.
+
+    `lab-deck` still finds the program on its PATH, so "there is no `osascript` here" is
+    decided as in a real run. Only the start of the program is saved: a build asks PowerPoint
+    several questions, and each was a shell and a Python of its own.
+    """
+    said, failed = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(said), contextlib.redirect_stderr(failed):
+        status = stand_in_powerpoint.answer(Path(command[0]).name, command[1:])
+    return subprocess.CompletedProcess(command, status, said.getvalue(), failed.getvalue())
+
+
 def lab_deck(
     *args: str | Path, cwd: Path | None = None, mac: bool = True, process: bool = False
 ) -> subprocess.CompletedProcess[str]:
@@ -61,9 +78,11 @@ def lab_deck(
     no test reaches the real one. `mac=False` runs it where there is no `osascript`.
 
     The command runs inside the test's own process: the same typer app, arguments,
-    environment and working folder, without the time a new Python takes to start. Node,
-    git and the stand-ins are still programs of their own. `process=True` starts
-    `python -m lab_deck`, the module the PATH wrapper execs, for the tests of that way in.
+    environment and working folder, without the time a new Python takes to start. Node
+    and git are still programs of their own. The stand-in for PowerPoint is found on PATH
+    and then answers inside this process too (`stand_in`). `process=True` starts
+    `python -m lab_deck`, the module the PATH wrapper execs, for the tests of that way in;
+    there the stand-in runs as the program it is.
     """
     command = [sys.executable, "-m", "lab_deck", *map(str, args)]
     path = programs(mac)
@@ -76,13 +95,17 @@ def lab_deck(
             text=True,
             check=False,
         )
-    before = os.environ["PATH"]
+    before, run = os.environ["PATH"], powerpoint_module.run
+    standins = Path(path.split(os.pathsep)[0])
     os.environ["PATH"] = path
+    powerpoint_module.run = lambda found: (
+        stand_in(found) if Path(found[0]).parent == standins else run(found)
+    )
     try:
         with contextlib.chdir(cwd or Path.cwd()):
             done = CliRunner().invoke(cli.app, command[3:], prog_name="lab-deck")
     finally:
-        os.environ["PATH"] = before
+        os.environ["PATH"], powerpoint_module.run = before, run
     if done.exception is not None and not isinstance(done.exception, SystemExit):
         # A traceback in a real run: let the test fail on it, not on an exit status.
         raise done.exception
@@ -227,19 +250,57 @@ def powerpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> PowerPoint:
     return PowerPoint(kept)
 
 
+def build_once(
+    tmp_path_factory: pytest.TempPathFactory, name: str, build: Callable[[Path], object]
+) -> tuple[Path, object]:
+    """Build a deck folder that many tests copy, once for the whole run; give it and its note.
+
+    `pixi run test` runs on every core, and each worker is a process with fixtures of its
+    own, so a deck "built once" was built once per worker. Here the first worker to ask
+    calls `build` with the folder to make, under a file lock, and keeps what `build` returns
+    as JSON beside it. Every other worker waits and reads. No test writes in the shared
+    folder: each copies it.
+    """
+    base = tmp_path_factory.getbasetemp()
+    # Under xdist each worker's base folder sits inside the run's; with one process it is the run's.
+    shared = (base.parent if os.environ.get("PYTEST_XDIST_WORKER") else base) / "built-once"
+    shared.mkdir(exist_ok=True)
+    folder, note = shared / name / "talk", shared / f"{name}.json"
+    with (shared / f"{name}.lock").open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if not note.is_file():
+            # A build that failed part-way leaves no note, and the next worker starts clean.
+            shutil.rmtree(folder.parent, ignore_errors=True)
+            folder.parent.mkdir()
+            note.write_text(json.dumps(build(folder)), encoding="utf-8")
+    return folder, json.loads(note.read_text(encoding="utf-8"))
+
+
 @pytest.fixture(scope="session")
 def starter(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Make a new deck folder with `lab-deck new` once, for every test to copy."""
-    path = tmp_path_factory.mktemp("starter") / "talk"
-    made = lab_deck("new", path)
-    assert made.returncode == 0, made.stdout + made.stderr
-    return path
+
+    def build(path: Path) -> None:
+        made = lab_deck("new", path)
+        assert made.returncode == 0, made.stdout + made.stderr
+
+    return build_once(tmp_path_factory, "starter", build)[0]
+
+
+def copy_deck(built: Path, to: Path) -> Path:
+    """Copy a deck folder for one test to change, without git's sample hooks.
+
+    `git init` leaves a dozen `*.sample` files in `.git/hooks`. git never runs one, and they
+    are programs, which the virus scanner on a lab Mac reads on every copy: they were most of
+    the time a copy took.
+    """
+    return Path(shutil.copytree(built, to, ignore=shutil.ignore_patterns("*.sample")))
 
 
 @pytest.fixture
 def folder(starter: Path, tmp_path: Path) -> Path:
     """Give each test its own new deck folder, holding the one starter slide."""
-    return Path(shutil.copytree(starter, tmp_path / "talk"))
+    return copy_deck(starter, tmp_path / "talk")
 
 
 # What the tests of more than one file write, edit and read.

@@ -99,17 +99,17 @@ def act(state: dict, program: str, args: list[str]) -> int:
     return 0
 
 
-def main() -> int:
+def answer(program: str, args: list[str]) -> int:
     """Read the state, do the command, and write the state back when there is a file for it."""
     kept = Path(os.environ.get("LAB_DECK_STANDIN", ""))
     state = {"running": False, "decks": [], "refuse": [], "log": []}
     if kept.is_file():
         state |= json.loads(kept.read_text(encoding="utf-8"))
-    status = act(state, sys.argv[1], sys.argv[2:])
+    status = act(state, program, args)
     if kept.is_file():
         kept.write_text(json.dumps(state), encoding="utf-8")
     return status
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(answer(sys.argv[1], sys.argv[2:]))
