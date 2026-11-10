@@ -134,7 +134,16 @@ function helpers(pres, plan) {
       });
     },
 
-    // One drawing made of many shapes: what `draw` draws becomes one group named `name`.
+    // The slide's one citation line, bottom left: author, journal, year. The one text the
+    // lint allows under the size floor, and it finds the line by this name.
+    citation(slide, text, box = {}) {
+      slide.addText(text, {
+        x: MARGIN, y: H - 0.5, w: W - 2 * MARGIN - 1.2, h: 0.3, ...box,
+        fontFace: deck.font, fontSize: deck.size.citation, color: BLACK,
+        margin: 0, valign: "bottom", objectName: "Citation",
+      });
+    },
+
     group(slide, name, draw) {
       named("group", slide, name, draw);
     },

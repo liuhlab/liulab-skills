@@ -12,6 +12,7 @@ in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-
 | --- | --- |
 | `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
 | `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
+| `lab-deck lint [<folder>]` | Checks the built deck in plain code, with no model: [the lint](#the-lint). Exit 1 on a blocking failure |
 | `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and changes no file: [round-trip.md](round-trip.md) |
 
 Exit codes: 0 fine, 1 refused with the reason on stderr, 2 wrong usage.
@@ -55,6 +56,7 @@ style. A source requires nothing: no `require("pptxgenjs")`, no path to the buil
 | `title(slide, text)` | The slide's conclusion, top left, bold |
 | `lines(slide, items, box)` | Phrases, one per line. An item is a string or `{ text, accent, bold }` |
 | `table(slide, rows, box)` | A table. The first row is the header. A cell is a string or `{ text, accent, bold }` |
+| `citation(slide, text, box)` | The slide's one citation line, bottom left, at 12 pt, named `Citation` |
 | `picture(name)` | The path of a file in `pictures/`, for `slide.addImage({ path })` |
 | `group(slide, name, draw)` | What `draw()` draws becomes one group named `name` |
 | `section(slide, name, draw)` | What `draw()` draws is one section: a click shows or hides all of it |
@@ -112,6 +114,7 @@ hand in PowerPoint.
 `notes/<id>.md` holds the notes of slide `<id>` as plain text. The build puts the text into
 the slide's notes as written, with no Markdown turned into formatting. Start the line the
 speaker says after a click with `[Click]`: one cue per click, none on a slide with no click.
+The lint check `click-cues` stops a build whose notes break this.
 A slide with no notes file gets empty notes. Never call `slide.addNotes`: the build refuses
 it, because PptxGenJS counts notes as a thing drawn and every later shape id would move.
 
@@ -133,13 +136,50 @@ it, because PptxGenJS counts notes as a thing drawn and every later shape id wou
    byte. A picture used on several slides is stored once.
 8. Reads the merged file back: every part present and declared, slides in order, no two
    shapes with one id, no negative size.
-9. Moves the checked file over the last built deck in one step.
+9. Runs [the lint](#the-lint) on the merged file, and stops on a blocking failure.
+10. Moves the checked file over the last built deck in one step.
 
 A failure at any step leaves the last built deck as it was and names the slide. The same deck
 folder builds to the same bytes, so a rebuild that changes nothing shows no change in git.
 For that, the times inside the file are fixed at 1980-01-01.
 
 Inserting a slide changes one thing on the slides after it: the digits of the page number.
+
+## The lint
+
+`lab-deck lint` reads the built deck and the brief's room, in about a second, with no model.
+`lab-deck build` runs the same checks on the deck it is about to write. A blocking failure
+stops the build and leaves the last built deck as it was. Fix the slide source, never the
+check.
+
+| Check | Slide rule | Fails when |
+| --- | --- | --- |
+| `size-floor` | 8 | Text is under the room's floor: 20 pt in a meeting room, 24 pt in a hall |
+| `text-overflow` | 8 | Text takes more height than its box has |
+| `picture-over-text` | 16 | A picture is drawn over text, in a click state that shows both |
+| `negative-size` | 17 | A shape's width or height is under zero |
+| `click-cues` | 18 | A slide's notes do not carry one `[Click]` cue per click |
+
+Each failure names the slide by id and page number, the shape, the check and the rule:
+
+```text
+slide results (page 3), shape "Text 1": size-floor (rule 8): "Too small" is 16 pt, under the 20 pt floor
+```
+
+- **The size floor** holds for every run of text, table cells included, Chinese as Latin. The
+  shape named `Page number` is exempt. The shape named `Citation` may be 12 pt: one per
+  slide, on one line. Draw it with `deck.citation(slide, "Author, Journal, year")`. Any other
+  12 pt text fails. A raw `slide.addText` with no `fontSize` is 18 pt and fails: pass
+  `fontSize: deck.size.body`.
+- **Overflow is an estimate.** The lint sums the glyph widths of the deck's font from its
+  font file, wraps the lines and compares the height with the box. With no font file on the
+  machine it uses Helvetica's widths, which Arial shares, and the report says so. A
+  full-width character, Chinese included, counts as wide as the font size, and a line may
+  break beside it. The lint allows 5% over the box before it fails. It does not estimate a
+  table, because a table grows its rows. The pictures of the click states are the final word.
+- **A picture covers text** when it is drawn after the text and over the place the lint
+  estimates for the words, not over the empty part of the text's box.
+- **Click cues** are checked only on a slide whose notes hold text.
 
 ## Known PptxGenJS limits
 

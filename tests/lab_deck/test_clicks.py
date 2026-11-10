@@ -16,7 +16,7 @@ from tests.lab_deck.test_deck import PLAIN, built, write
 STAGED = """\
 module.exports = (slide, deck) => {
   const box = (name, y) => slide.addText(name, {
-    x: 1, y, w: 4, h: 0.5, fontFace: deck.font, objectName: name,
+    x: 1, y, w: 4, h: 0.5, fontFace: deck.font, fontSize: deck.size.body, objectName: name,
   });
   deck.title(slide, "TITLE");
   deck.section(slide, "question", () => {
@@ -65,7 +65,9 @@ module.exports = (slide, deck) => {
       slide.addShape(deck.pres.ShapeType.rect, { x: 2, y: 3, w: 1, h: 1, objectName: "bar" });
       slide.addShape(deck.pres.ShapeType.rect, { x: 3, y: 2, w: 1, h: 2, objectName: "peak" });
     });
-    slide.addText("Signal", { x: 2, y: 5, w: 3, h: 0.5, fontFace: deck.font, objectName: "Label" });
+    slide.addText("Signal", {
+      x: 2, y: 5, w: 3, h: 0.5, fontFace: deck.font, fontSize: deck.size.body, objectName: "Label",
+    });
   });
   deck.click(slide, { appear: "signal" });
 };

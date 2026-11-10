@@ -22,7 +22,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from lab_deck import merge, stage
+from lab_deck import lint, merge, stage
 from lab_deck.folder import ROOMS, Folder, Refusal
 
 RUNNER = Path(__file__).with_name("runner.js")
@@ -86,7 +86,8 @@ def build(folder: Folder) -> Path:
     Raises
     ------
     Refusal
-        When a slide source fails, a slide cannot be merged, or the merged deck is not sound.
+        When a slide source fails, a slide cannot be merged, the merged deck is not sound,
+        or it fails a blocking check of the lint.
         The last built deck is untouched.
     """
     if not (NODE_MODULES / "pptxgenjs").is_dir():
@@ -116,6 +117,9 @@ def build(folder: Folder) -> Path:
             written = work / "merged deck.pptx"
             merge.merge(slides, written)
             merge.check(written, len(slides))
+            report = lint.lint(written, folder.room)
+            if report.blocking:
+                raise Refusal(lint.render(report, folder.output.name))
         except Refusal as error:
             raise Refusal(
                 f"the build failed, and {folder.output.name} was left as it was.\n{error}"

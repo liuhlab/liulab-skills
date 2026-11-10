@@ -15,6 +15,7 @@ import typer
 from lab_deck import build as builder
 from lab_deck import compare as comparer
 from lab_deck import folder as folders
+from lab_deck import lint as linter
 from lab_deck.folder import Refusal
 
 HELP = """\
@@ -73,6 +74,21 @@ def build(
         raise _refuse(error) from None
     count = len(read.slides)
     print(f"built {written}: {count} slide{'' if count == 1 else 's'}")
+
+
+@app.command()
+def lint(
+    folder: Annotated[Path, typer.Argument(help="the deck folder (default: this one)")] = Path(),
+) -> None:
+    """Check the built deck in plain code, with no model. Exit 1 on a blocking failure."""
+    try:
+        read = folders.read(folder)
+        report = linter.lint(read.output, read.room)
+    except Refusal as error:
+        raise _refuse(error) from None
+    print(linter.render(report, read.output.name))
+    if report.blocking:
+        raise typer.Exit(1)
 
 
 @app.command()

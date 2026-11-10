@@ -49,6 +49,10 @@ other slide, and that two builds write the same bytes. For `compare` they edit
 the XML of a built, committed deck, one known edit to a test, and pin that the
 report lists that edit and nothing else, that a save with no edit lists
 nothing, and that no file changes.
+For the lint they build one passing deck that uses
+every feature the lint reads, then add one slide that breaks one blocking check, and
+pin that the build is refused, that the report names that slide, shape, check and rule
+and no other, and that the last built deck stays.
 PowerPoint is never started. Whether it opens a deck with no Repair dialog is
 checked by hand and written in the pull request.
 
