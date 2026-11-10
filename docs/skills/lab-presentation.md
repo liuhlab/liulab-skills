@@ -12,13 +12,19 @@ can also call it directly:
 1. **The audience brief.** The agent needs to know who is listening before it writes a word.
    It asks only for what your request left out.
 2. **A text outline.** You agree the content as plain text first. No slide exists yet.
-3. **The slides.** The agent builds the deck from the outline.
-4. **The check.** The agent looks at a picture of every slide, at every click, before it
+3. **The slide plan.** One web page shows every slide as a small mock-up. Beside each
+   mock-up is the planned picture, what you will say, and where each number comes from. You
+   approve which slides exist, and each slide's title and picture. The page opens on a phone.
+4. **The slides.** Once you approve the plan, the agent builds the deck without asking again.
+5. **The check.** The agent looks at a picture of every slide, at every click, before it
    tells you the deck is done.
-5. **Speaker notes.** Only when you ask, or for a formal talk. They are written last.
+6. **Speaker notes.** Only when you ask, or for a formal talk. They are written last.
 
-A three-slide update gets steps 1, 2 and 4 and stays quick. If you reject a slide, the agent
-shows you 2 to 4 built options to choose from.
+A deck of one or two slides, on material your audience has seen, skips step 3. The plan may
+be wordy beside the mock-up. The mock-up itself holds only what the slide will show. If you
+change the slides, a title or a picture after you approve, the agent updates the plan and
+asks again. If you reject a built slide, the agent shows you 2 to 4 built options to choose
+from.
 
 ## The audience brief
 
@@ -31,6 +37,11 @@ shows you 2 to 4 built options to choose from.
 | Known terms | The short names we use every day | The agent asks |
 | Room | Meeting room or hall | Meeting room |
 | Use | Presented or read alone | Presented |
+| Level | High-level or technical | High-level |
+
+The level line says how deep the talk goes. High-level means what was built, how the work
+proceeds and why it matters. The agent takes that unless you say otherwise, and keeps the
+technical detail for the notes.
 
 The brief decides what counts as jargon. A short name on the known-terms line stays as it
 is. Any other is spelled out the first time it appears.

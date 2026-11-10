@@ -31,7 +31,7 @@ def test_new_makes_the_deck_folder_with_a_git_repo(tmp_path: Path) -> None:
 
 
 def test_new_leaves_every_brief_line_the_agent_asks_for_empty(tmp_path: Path) -> None:
-    """Only the room and the use have a default; a filled line would read as agreed."""
+    """Only the room, the use and the level have a default; a filled line would read as agreed."""
     path = tmp_path / "talk"
     assert lab_deck("new", path).returncode == 0
 
@@ -44,6 +44,7 @@ def test_new_leaves_every_brief_line_the_agent_asks_for_empty(tmp_path: Path) ->
         "known_terms": [],
         "room": "meeting room",
         "use": "presented",
+        "level": "high-level",
     }
     assert "# minutes =" in (path / "brief.toml").read_text(encoding="utf-8")
 
