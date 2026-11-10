@@ -53,7 +53,7 @@ run and wait for the user's yes. In a session the user has left, end the turn on
 - Anything on a live service: propose the commands, the user runs the privileged ones.
 - Making private material public: unpublished results, handbook content, a manuscript.
 - Wet-lab steps that use samples or reagents.
-- Editing the user's own document beyond what they named (see the user's documents, below).
+- Editing the user's own document beyond what they named.
 
 ### Session overrides
 
@@ -68,6 +68,11 @@ never the yes an item on the list needs, nor a run plan. "Just discussing" → c
   subagent would read them again, and one writer keeps one voice and one style. You
   split, brief, monitor, verify their claims on the artifact, and keep merge, close and cleanup
   for yourself. A subagent's report is a claim, not evidence.
+- **Model and effort.** Set both per spawn: this is the explicit ask spawn tools require.
+  Orchestrator work (design, diagnosis, decision, review) gets the best model at `xhigh`, in
+  a subagent too. A routine worker (decided ticket, merge, lookup) may get the second-tier
+  model, one effort level lower. Judge each spawn, ability before saving: a hard ticket gets
+  full model and effort. In doubt, or where a value can't be set, inherit.
 - **Brief with pointers.** The issue, the files, the scope, the host rule from `lab-hpc`, and
   "read `hq-mode`'s working-style page first". A subagent can't type a user-invoked skill such
   as `/implement`: give it the skill file's path to read.
@@ -76,7 +81,7 @@ never the yes an item on the list needs, nor a run plan. "Just discussing" → c
   [`cluster-run`](playbooks/cluster-run.md)'s design and resource checks.
 - **One worktree per parallel worker.** In a shared checkout, forbid repo-wide git (`stash`,
   `reset`, `checkout .`) in every brief, and stage paths explicitly.
-- **Time it.** Give every subagent and long command a deadline; act at the deadline instead of
+- **Time it.** Give every subagent and long command a deadline; act at it instead of
   waiting out a stall. A trivial job stuck in a helper → cancel it and do it yourself.
 - **One unit, then hand off.** A subagent works one unit, writes a handoff note by following
   the [`handoff`](../../handoff/SKILL.md) skill's file, and stops; a fresh subagent takes the
@@ -113,11 +118,3 @@ never the yes an item on the list needs, nor a run plan. "Just discussing" → c
   never revert them.
 - In their own notes, write the decision only, no rationale.
 - Keep the folder clean: one final file, alternatives in `archive/`, no leftovers.
-
-## Lab defaults
-
-When a repo is silent: pixi for every environment and dependency, typer for CLIs, zensical for
-docs, CalVer from the tag, `pixi run check` as the one gate, kept fast. Prefer a maintained
-package to new code, and let the sibling lab package own its mechanism (genomes come from the
-lab's genome package). Record configuration, never measurements. Shared things, the repo
-template above all, stay general and light.

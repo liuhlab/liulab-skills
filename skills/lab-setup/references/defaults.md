@@ -2,8 +2,9 @@
 
 Every lab machine provides these through `/lab-setup`. They are the issue tracker, triage labels
 and domain docs the engineering skills expect to be "provided to you", so a repo needs no setup
-for them and `/setup-matt-pocock-skills` runs only where a repo differs. Each default is one of
-upstream's own seed pages, read as written, plus the lab's lines under it. Every path here is
+for them and `/setup-matt-pocock-skills` runs only where a repo differs. Each of those three is
+one of upstream's own seed pages, read as written, plus the lab's lines under it. The tooling
+and the always-on rules are the lab's own. Every path here is
 in the lab plugin's marketplace clone, `~/.claude/plugins/marketplaces/liulab/`.
 
 **A repo's own `docs/agents/` page overrides only that one default.** A repo with its own
@@ -28,6 +29,14 @@ The five roles, each label named as its role: `skills/setup-matt-pocock-skills/t
 
 Single-context, with `GLOSSARY.md` and `docs/adr/` at the repo root:
 `skills/setup-matt-pocock-skills/domain.md`.
+
+## Tooling
+
+When a repo is silent: pixi for every environment and dependency, typer for CLIs, zensical for
+docs, CalVer from the tag, `pixi run check` as the one gate, kept fast. Prefer a maintained
+package to new code, and let the sibling lab package own its mechanism (genomes come from the
+lab's genome package). Record configuration, never measurements. Shared things, the repo
+template above all, stay general and light.
 
 ## Always on
 
