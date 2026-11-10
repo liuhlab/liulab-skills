@@ -2,7 +2,8 @@
 name: lab-setup
 description: >-
   Set up this machine for the lab plugin, once, after installing it: Claude Code auto-update,
-  the plugin in Codex, Kimi Code reading the marketplace clone, edison-cli on PATH, and lark-cli
+  the plugin in Codex, Kimi Code reading the marketplace clone, edison-cli and lab-deck on PATH,
+  and lark-cli
   logged in to Feishu. Use when the user types /lab-setup, asks to set up Codex or Kimi Code for
   the lab skills, wants the plugin to update by itself, asks to install or log in lark-cli, or
   asks which old skill copies shadow the plugin's. Also points each agent at the lab defaults.
@@ -24,6 +25,7 @@ Feishu's `lark-cli` is the exception: section 4 sets it up by hand.
 | `kimi` | the marketplace clone's `skills/` in `extra_skill_dirs` in `~/.kimi-code/config.toml` |
 | `defaults` | one marked block pointing at [references/defaults.md](references/defaults.md) in `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md` and `~/.kimi-code/AGENTS.md`; a rerun replaces only the block |
 | `edison-cli` | a link to the clone's `bin/edison-cli` in `~/.local/bin` or `~/bin`, whichever is on PATH |
+| `lab-deck` | the same link for `bin/lab-deck` |
 | `clashes` | reports user-level skills that take a name the plugin ships; changes nothing |
 
 ## 1. Pick an interpreter
@@ -45,7 +47,7 @@ Run `<python> <skill dir>/scripts/lab_setup.py --home "$HOME" --dry-run`. If `CO
   - *No user bin folder on PATH*: offer to create `~/.local/bin` and add it to PATH in the
     user's shell profile. With a yes, do both, and run the step with
     `PATH="$HOME/.local/bin:$PATH"` in front of the command.
-  - *`edison-cli` is already something else*: show it with `ls -l`. It stays unless the user
+  - *`edison-cli` or `lab-deck` is something else*: show it with `ls -l`. It stays unless the user
     removes it.
 - **`clash`**: a user-level copy that shadows the plugin's skill of that name, in every
   agent, without a word. Name each path. What happens to it is the user's call; never delete
@@ -89,7 +91,8 @@ Offer them after the script and ask before each. Skip what is done: `command -v 
   `claude plugin marketplace update liulab`, then `claude plugin update lab@liulab`.
 - **Codex** upgrades the marketplace at every startup; restart it once now.
 - **Kimi Code** reads the clone live, so it follows each Claude Code update.
-- **`edison-cli`** works as a bare command in a new shell. `/lab-edison` checks the key.
+- **`edison-cli`** and **`lab-deck`** work as bare commands in a new shell. `/lab-edison`
+  checks the key.
 - **`lark-cli`** keeps its login only while it is used: see
   [references/feishu.md](references/feishu.md).
 - **The lab defaults** load in each new session. An edit to the page reaches every agent with

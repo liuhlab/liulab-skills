@@ -1,0 +1,32 @@
+#!/bin/sh
+# `lab-deck` as a bare command, wherever this plugin is installed.
+#
+# The same wrapper as `bin/edison-cli`, for the deck build; that file's comments give the
+# reasons, and ADR 0014 covers the link `/lab-setup` makes for all three agents. In short:
+# Claude Code puts `<plugin-root>/bin` on PATH, the root is found from this script's own
+# location because `${CLAUDE_PLUGIN_ROOT}` is unset in a tool call, and the exec is
+# `python -m lab_deck`, never the console script of the same name, which would be this file.
+#
+# pixi keeps the caller's working directory, so `lab-deck build` with no folder builds the deck
+# folder it was typed in.
+set -eu
+
+if ! command -v pixi >/dev/null 2>&1; then
+    printf 'lab-deck: pixi is not installed, and this command runs inside a pixi environment.\n' >&2
+    printf 'Install it from https://pixi.sh, then run lab-deck again.\n' >&2
+    exit 127
+fi
+
+# Follow `$0` to the file itself, link by link, with plain `readlink` and `cd -P`:
+# `readlink -f` is GNU's alone. A relative target is read from the link's own directory.
+self=$0
+while [ -L "$self" ]; do
+    target=$(readlink -- "$self")
+    case $target in
+        /*) self=$target ;;
+        *) self=$(dirname -- "$self")/$target ;;
+    esac
+    self=$(CDPATH='' cd -P -- "$(dirname -- "$self")" && pwd)/$(basename -- "$self")
+done
+root=$(CDPATH='' cd -- "$(dirname -- "$self")/.." && pwd)
+exec pixi run --manifest-path "$root/pyproject.toml" python -m lab_deck "$@"

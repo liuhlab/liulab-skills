@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_deck","name":"Skill","input":{"skill":"lab-presentation"}}]}}
+{"type":"result","subtype":"success","result":"I built the deck: fifteen slides, one per minute.\nThe audience brief and the outline are in the folder for you to review afterwards."}

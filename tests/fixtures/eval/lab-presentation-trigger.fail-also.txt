@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_deck","name":"Skill","input":{"skill":"lab-presentation"}}]}}
+{"type":"result","subtype":"success","result":"First step: the audience brief. Tell me what they already know and the language. Then I start on the slides."}

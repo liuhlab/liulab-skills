@@ -987,6 +987,7 @@ lab-jupyter: Jupyter, notebook, tunnel, port forward, reconnect, cluster, comput
 lab-containers: Singularity, container, image, SIF, liulab-runtime, ircbc, pull, build, pixi, Jupyter, LIU_LAB_PACKAGES
 lab-edison: Edison, literature, precedent, molecules, data analysis, Kosmos, dataset, recover, API key
 lab-setup: set up, installing, Claude Code, auto-update, Codex, Kimi Code, marketplace clone, edison-cli, PATH, lark-cli, Feishu
+lab-presentation: slides, deck, presentation, talk, pptx, PowerPoint
 hq-mode: hq-mode, whole task, analysis, cluster run, figure, paper, grant, talk, experiment plan, tickets, working-style, playbook
 bro: restate, last message, plain, jargon
 ketchup: ketchup, catch, last message, action item, summary

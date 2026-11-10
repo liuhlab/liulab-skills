@@ -52,7 +52,7 @@ triage labels and domain docs every lab repo gets, and the lab's always-on rules
 @~/.claude/plugins/marketplaces/{MARKETPLACE}/{DEFAULTS_PAGE}
 {END}
 """
-# The user bin folders the `edison-cli` link may go in, preferred first. Only these: PATH also
+# The user bin folders a launcher's link may go in, preferred first. Only these: PATH also
 # holds folders under the home that belong to a tool, such as this plugin's own `bin/` in Claude
 # Code's cache or Kimi's `~/.kimi-code/bin`, and a link there would vanish with the tool.
 BIN_FOLDERS = (".local/bin", "bin")
@@ -349,12 +349,11 @@ def defaults(machine: Machine) -> list[Line]:
     return lines
 
 
-def edison(machine: Machine) -> list[Line]:
-    """Link the clone's `edison-cli` launcher into a user bin folder already on PATH."""
-    step = "edison-cli"
-    launcher = machine.clone / "bin" / "edison-cli"
+def launcher_link(machine: Machine, step: str) -> list[Line]:
+    """Link the clone's launcher named `step` into a user bin folder already on PATH."""
+    launcher = machine.clone / "bin" / step
     if not launcher.is_file():
-        return [Line("skipped", step, "the marketplace clone has no bin/edison-cli")]
+        return [Line("skipped", step, f"the marketplace clone has no bin/{step}")]
     folders = [machine.home / name for name in BIN_FOLDERS]
     folder = next(
         (f for f in folders if f.is_dir() and any(same(f, Path(p)) for p in machine.path if p)),
@@ -363,7 +362,7 @@ def edison(machine: Machine) -> list[Line]:
     if folder is None:
         names = " nor ".join(machine.show(f) for f in folders)
         return [Line("skipped", step, f"neither {names} is a folder on PATH; no link made")]
-    link = folder / "edison-cli"
+    link = folder / step
     shown = machine.show(link)
     if link.is_symlink() and link.resolve() == launcher.resolve():
         return [Line("ok", step, f"{shown} links to the marketplace clone")]
@@ -373,6 +372,16 @@ def edison(machine: Machine) -> list[Line]:
         return [Line("would change", step, f"link {shown} to the marketplace clone")]
     link.symlink_to(launcher)
     return [Line("changed", step, f"linked {shown} to the marketplace clone")]
+
+
+def edison(machine: Machine) -> list[Line]:
+    """Link the clone's `edison-cli` launcher into a user bin folder already on PATH."""
+    return launcher_link(machine, "edison-cli")
+
+
+def lab_deck(machine: Machine) -> list[Line]:
+    """Link the clone's `lab-deck` launcher into a user bin folder already on PATH."""
+    return launcher_link(machine, "lab-deck")
 
 
 def declared_name(folder: Path) -> str | None:
@@ -432,6 +441,7 @@ STEPS: dict[str, Callable[[Machine], list[Line]]] = {
     "kimi": kimi,
     "defaults": defaults,
     "edison-cli": edison,
+    "lab-deck": lab_deck,
     "clashes": clashes,
 }
 
@@ -454,7 +464,7 @@ def main(argv: list[str] | None = None) -> int:
         dry_run=args.dry_run,
     )
 
-    # Kimi reads its skills from the clone and the `edison-cli` link points into it, so with no
+    # Kimi reads its skills from the clone and the launcher links point into it, so with no
     # clone there is nothing to point anything at. Checked before any step, so nothing changes.
     if not (machine.clone / "skills").is_dir():
         print(f"refused: no marketplace clone at {machine.show(machine.clone)}; nothing changed.")

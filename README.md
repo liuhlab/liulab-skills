@@ -36,7 +36,7 @@ Current skills:
 - **`lab-setup`** — type it once per machine, after installing. It sets
   `autoUpdate` on the `liulab` marketplace in Claude Code, installs the
   plugin in Codex, points Kimi Code's `extra_skill_dirs` at Claude Code's
-  marketplace clone, links `edison-cli` onto your PATH, and lists any skill
+  marketplace clone, links `edison-cli` and `lab-deck` onto your PATH, and lists any skill
   of yours that takes a name the plugin ships. It asks before each change and
   removes nothing; its script (`scripts/lab_setup.py`) is safe to rerun.
 - **`hq-mode`** — type `/hq-mode` with a task to have the agent work the lab's
@@ -45,6 +45,12 @@ Current skills:
   talk, landing tickets, and more). Its always-pause list, which outranks "land it"
   and "going to bed", keeps it from submitting Slurm work, spending Edison
   credits or merging an unreviewed pull request without your yes.
+- **`lab-presentation`** — loads when you ask for slides, a deck, a talk or a
+  PowerPoint file. The agent asks who the audience is, agrees a text outline
+  with you, and only then builds slides. It checks every slide against a
+  short list of numbered rules: phrases in the body, a title that states the
+  conclusion, text large enough for the room, and colour only where it
+  means something.
 
 - **`unslop-zh`** — Chinese writing, strict translation and polishing. It loads
   when the deliverable contains Chinese, including mixed and bilingual documents.
@@ -104,7 +110,7 @@ claude plugin install lab@liulab
 
 Then start Claude Code and type `/lab-setup`. From then on Claude Code,
 Codex and Kimi Code all follow the plugin and update on their own, and
-`edison-cli` works in all three. All three also read the lab's defaults: where
+`edison-cli` and `lab-deck` work in all three. All three also read the lab's defaults: where
 issues go, which labels to use, and the safety rules for the clusters. Its
 [page](https://liuhlab.github.io/liulab-skills/skills/lab-setup/) has the
 details.

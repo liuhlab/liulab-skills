@@ -1,0 +1,2 @@
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"toolu_fixture_deck","name":"Skill","input":{"skill":"lab-presentation"}}]}}
+{"type":"result","subtype":"success","result":"First step: a text outline of fifteen slides, one per minute, sent to you for review."}
