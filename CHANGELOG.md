@@ -60,6 +60,12 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   changes. Each tells you what it did. The first time, macOS asks once whether the agent may
   control PowerPoint: click OK. Off a Mac, or when PowerPoint cannot be asked, the command
   stops and asks you to save and close the deck; `--closed` then takes your word for it.
+- `lab-deck render` makes one picture of every slide after every click, hidden slides
+  included, so the agent sees what the audience sees. It lists the pictures that changed
+  since the last render, and the agent looks at those after each build. It needs LibreOffice
+  on your machine. It never changes the deck.
+- `lab-deck preflight` says whether LibreOffice, Poppler and the deck's font are on your
+  machine, and how to get one that is missing.
 - `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
   Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
 

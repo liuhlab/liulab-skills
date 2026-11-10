@@ -13,6 +13,8 @@ in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-
 | `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
 | `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
 | `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and writes no file itself: [round-trip.md](round-trip.md) |
+| `lab-deck render [<folder>]` | Makes one picture per click state of the built deck, and lists the pictures that changed since the last render: [Render](#render) |
+| `lab-deck preflight [<folder>]` | Reports LibreOffice, Poppler and the theme's font, each as present or missing, and how to get a missing one. Exits 1 when one is missing |
 
 A deck left open in PowerPoint is handled by both `build` and `compare`, and both take
 `--closed`: see "A deck left open in PowerPoint" in [round-trip.md](round-trip.md). Off a
@@ -31,6 +33,7 @@ Exit codes: 0 fine, 1 refused with the reason on stderr, 2 wrong usage.
 | `pictures/` | Pictures, each with the prompt that made it beside it |
 | `notes/<id>.md` | The speaker notes of the slide with that id |
 | `<output>` | The built deck |
+| `renders/` | The last render's pictures, one per click state. Git ignores it |
 
 A slide's id is a name, never a number: letters, digits, `-`, `_` and `.`. To insert a slide,
 write `slides/<new id>.js` and add the id to `slides` in `deck.toml` at its place. Rename
@@ -144,6 +147,41 @@ folder builds to the same bytes, so a rebuild that changes nothing shows no chan
 For that, the times inside the file are fixed at 1980-01-01.
 
 Inserting a slide changes one thing on the slides after it: the digits of the page number.
+
+## Render
+
+`lab-deck render` writes one PNG per click state into `renders/` in the deck folder, hidden
+slides included. Git ignores that folder. Run it after every build.
+
+A picture's name is `<slide id>.click<n>.png`: `click0` is the slide as it opens, and
+`click<n>` is the slide after n clicks. The name holds no page number, so each picture is
+compared with the last picture of the same slide and click state.
+
+The command prints one line per picture to look at:
+
+| Line | Means |
+| --- | --- |
+| `new: renders/<name>` | The click state had no picture before |
+| `changed: renders/<name>` | The picture differs from the last render's |
+| `gone: renders/<name>` | No slide has this click state now. The picture was deleted |
+
+Look at each `new` and `changed` picture. A slide that moves to another page is listed as
+changed, because its page number changed.
+
+How it works, and its limits:
+
+- The deck is only read. The command writes a scratch copy with one plain slide per click
+  state, LibreOffice converts the copy to a PDF, and Poppler's `pdftoppm` makes the PNGs.
+- LibreOffice is the system's app, found as `soffice` on PATH or inside the Mac app. Poppler
+  comes with the plugin's pixi environment. Run `lab-deck preflight` when either is missing.
+- On a Mac, LibreOffice has aborted inside a command sandbox. When the render fails that
+  way, run it again outside the sandbox.
+- LibreOffice draws a missing font with another one, and the text then wraps elsewhere.
+  `lab-deck preflight` says whether the theme's font is installed.
+- A picture shows Appear and Disappear only. For any other effect, such as one added by hand
+  in PowerPoint, the command warns and names the slide.
+- LibreOffice is not PowerPoint. It accepts a file that PowerPoint offers to repair, so the
+  user still opens the deck in PowerPoint once at the end.
 
 ## Known PptxGenJS limits
 
