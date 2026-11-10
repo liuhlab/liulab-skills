@@ -5,6 +5,24 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.5 — 2026-11-10
+
+### Added
+
+- `hq-mode` now says which model and effort a helper agent gets. The main agent keeps the best
+  model and the highest effort, and so does a helper that designs, diagnoses, decides or
+  reviews. A helper on routine work, such as a ticket that is already decided, a merge or a
+  lookup, may run on the next model down, one effort level lower. The main agent chooses each
+  time, and ability comes before saving: a hard ticket gets the full model and effort. Where an
+  agent cannot set a value for one helper, the helper keeps the main agent's value.
+
+### Changed
+
+- The tooling a repo gets when it names none (pixi, typer, zensical, one fast gate) moved from
+  `hq-mode`'s working-style page to the lab defaults page. The words are the same. Every
+  session reads the lab defaults page, so the rule now loads more often, and the move makes
+  room for the new rule under the page's word cap.
+
 ## 2026.11.4 — 2026-11-10
 
 ### Added

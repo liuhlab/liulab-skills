@@ -68,6 +68,11 @@ never the yes an item on the list needs, nor a run plan. "Just discussing" → c
   subagent would read them again, and one writer keeps one voice and one style. You
   split, brief, monitor, verify their claims on the artifact, and keep merge, close and cleanup
   for yourself. A subagent's report is a claim, not evidence.
+- **Subagent model and effort.** You may set both; spawn tools wait for this ask.
+  Orchestrator work (design, diagnosis, decision, review) gets the best model at `xhigh`, in
+  a subagent too. A routine worker (a decided ticket, a merge, a lookup) may get the
+  second-tier model, one effort level lower. Judge each spawn, ability before saving: in
+  doubt, or where a value can't be set, inherit.
 - **Brief with pointers.** The issue, the files, the scope, the host rule from `lab-hpc`, and
   "read `hq-mode`'s working-style page first". A subagent can't type a user-invoked skill such
   as `/implement`: give it the skill file's path to read.
@@ -113,11 +118,3 @@ never the yes an item on the list needs, nor a run plan. "Just discussing" → c
   never revert them.
 - In their own notes, write the decision only, no rationale.
 - Keep the folder clean: one final file, alternatives in `archive/`, no leftovers.
-
-## Lab defaults
-
-When a repo is silent: pixi for every environment and dependency, typer for CLIs, zensical for
-docs, CalVer from the tag, `pixi run check` as the one gate, kept fast. Prefer a maintained
-package to new code, and let the sibling lab package own its mechanism (genomes come from the
-lab's genome package). Record configuration, never measurements. Shared things, the repo
-template above all, stay general and light.
