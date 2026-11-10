@@ -24,7 +24,7 @@ each slide's title and picture. The build then cuts the words and draws the pict
 | --- | --- | --- |
 | The mock-up | `on-slide` | Only what will be on the slide, at about the real word count |
 | Its title | `slide-title` | The slide's conclusion, as slide rule 2 asks |
-| Its picture box | `slide-figure` | A label of a few words where the picture goes. Leave the box out of a slide with no picture |
+| Its picture box | `slide-figure` | A label of a few words where the picture goes; the lint counts it. Leave the box out of a slide with no picture |
 | The planned picture | `planned-picture` | In the side panel. What the picture is and where it comes from, or `text only` |
 | The rest of the side panel | none | What the presenter says, and the evidence: the source of each number and any caveat |
 
@@ -46,7 +46,7 @@ it, or explain it in the reply.
 | `plan-id` | Blocking | A slide has no `data-slide`, the id is not a slide name, or two slides share one |
 | `plan-title` | Blocking | A mock-up has no `slide-title` text |
 | `plan-picture` | Blocking | A slide has no `planned-picture` text: neither a picture nor `text only` |
-| `plan-words` | Warning | A mock-up carries more words than the deck lint's `slide-words` limit, beside its title and its picture label |
+| `plan-words` | Warning | A mock-up carries more words than the deck lint's `slide-words` limit, beside its title |
 
 - The word check counts the mock-up only, never the side panel.
 - It uses the deck lint's own counter and limit, in [checks.md](checks.md#the-lint). The plan

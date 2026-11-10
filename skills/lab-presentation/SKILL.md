@@ -67,8 +67,8 @@ Write at the brief's level. End with the source of every number.
 
 Once the user approves the outline's flow, write `plan.html` as the plan page says and run
 `lab-deck plan-lint`. Then stop: the user approves which slides exist, and each slide's title
-and picture. It is the last stop, so build once the plan is approved. A later change to the
-slide set, a title or a picture goes back to the plan.
+and picture. It is the last stop: build once it is approved. A later change to the
+slide set, a title or a picture goes back to the plan; a cut in words does not.
 
 ## 4. The slides
 
@@ -106,5 +106,5 @@ and in the notes.
 
 ## Reply
 
-The deck path, the plan page's path or link, the slides changed, the pictures you looked at, each lint warning as fixed or
+The deck path, the plan page, the slides changed, the pictures you looked at, each lint warning as fixed or
 explained, and the open choices.

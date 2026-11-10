@@ -30,6 +30,7 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   brief gives.
 - A three-slide update no longer skips straight from the outline to the build. It gets the
   slide plan too.
+- The decision record on the deck build now lists the slide plan among a deck folder's files.
 
 ## 2026.11.5 — 2026-11-10
 

@@ -43,6 +43,9 @@ LEVELS = (HIGH_LEVEL, "technical")
 FONT = "Arial"
 ACCENT = "0072B2"
 
+# A slide's id: a name, which is also the name of its source file.
+SLIDE_NAME = re.compile(r"[\w][\w.-]*")
+
 # Path parts that mean a sync client owns the folder. A match only warns: the sync client and
 # git both rewrite files, and the member decides whether that matters.
 SYNCED = re.compile(
@@ -205,7 +208,7 @@ def read(path: Path) -> Folder:
     if not isinstance(slides, list) or not slides or not all(isinstance(s, str) for s in slides):
         raise Refusal(f"{ORDER}: `slides` must list at least one slide name.")
     for slide in slides:
-        if not re.fullmatch(r"[\w][\w.-]*", slide):
+        if not SLIDE_NAME.fullmatch(slide):
             raise Refusal(f"{ORDER}: {slide!r} is not a slide name; use letters, digits, - and _.")
     if len(set(slides)) != len(slides):
         raise Refusal(f"{ORDER}: a slide is listed twice.")

@@ -27,6 +27,7 @@ def slide(
     panel: str = "What the presenter says",
     picture: str = "A bar chart of the two rates",
     title: str = "Trimming raises the alignment rate",
+    figure: str = "",
 ) -> str:
     """Write one slide of a plan page: the mock-up and its side panel."""
     named = "" if ident is None else f' data-slide="{ident}"'
@@ -35,7 +36,7 @@ def slide(
   <div class="on-slide">
     <h2 class="slide-title">{title}</h2>
     <ul><li>{body}</li></ul>
-    <div class="slide-figure">picture: the bar chart goes here</div>
+    <div class="slide-figure">{figure}</div>
   </div>
   <aside class="side-panel">
     <h3>Picture</h3><p class="planned-picture">{picture}</p>
@@ -72,6 +73,13 @@ def test_a_mock_up_over_the_word_limit_warns_and_the_side_panel_does_not_count(
         "and the limit is 100" in done.stdout
     )
     assert "slide fits" not in done.stdout
+
+
+def test_the_label_in_the_picture_box_counts_as_words_of_the_mock_up(folder: Path) -> None:
+    """Everything inside the mock-up but its title counts, so text cannot hide in the box."""
+    plan(folder, slide("box", body=words(95), figure=words(6)))
+
+    assert "the mock-up carries 101 words" in lab_deck("plan-lint", folder).stdout
 
 
 def test_the_plan_and_the_deck_share_one_word_limit(
@@ -177,3 +185,21 @@ def test_a_brief_with_no_level_is_read_as_high_level_and_another_word_is_refused
     done = lab_deck("plan-lint", folder)
     assert done.returncode == 1
     assert "`level` is 'deep'; it must be one of high-level, technical" in done.stderr
+
+
+def test_a_slide_whose_section_or_paragraph_is_left_open_is_still_read_alone(
+    folder: Path,
+) -> None:
+    """HTML lets `</p>`, `</li>` and a hand-written `</section>` be left out."""
+    opened = slide("first").replace("</section>", "")
+    loose = slide("loose", body=words(101)).replace(
+        '<h2 class="slide-title">Trimming raises the alignment rate</h2>',
+        '<p class="slide-title">Trimming raises the alignment rate',
+    )
+    plan(folder, opened, slide(None), loose)
+
+    done = lab_deck("plan-lint", folder)
+
+    assert "slide 2 (no id): plan-id" in done.stdout
+    assert "slide loose: plan-words (rule 1): the mock-up carries 101 words" in done.stdout
+    assert "plan-title" not in done.stdout

@@ -404,7 +404,7 @@ One HTML page, `plan.html` in the deck folder, that the user approves after the 
 and before any slide is built. Each slide is a mock-up holding only what the slide will show,
 beside a side panel with the planned picture, what the presenter says and the evidence.
 Approval covers which slides exist and each slide's title and picture, by slide id; a later
-change to one of those goes back to the plan. `lab-deck plan-lint` checks the page in plain
+change to one of those goes back to the plan. The plan lint, `lab-deck plan-lint`, checks the page in plain
 code and holds the mock-up to the deck lint's word limit. A deck of one or two slides on
 material the audience has seen skips it.
 

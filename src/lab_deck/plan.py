@@ -6,7 +6,8 @@ with the id the slide will have in the deck. Inside it:
 
 - `on-slide` holds the mock-up: only what will be on the slide.
 - `slide-title`, inside the mock-up, holds the slide's title.
-- `slide-figure`, inside the mock-up, marks where the picture goes. Its words are a label.
+- `slide-figure`, inside the mock-up, marks where the picture goes. Its label is counted
+  with the mock-up's other words, so it stays a few words long.
 - `planned-picture`, in the side panel, says what the picture is, or `text only`.
 
 Everything else in the section is the side panel, which the audience never sees and the
@@ -16,13 +17,12 @@ cannot promise more text than the built slide may carry.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 
 from lab_deck import lint as linter
-from lab_deck.folder import PRESENTED, READ_ALONE, Refusal
+from lab_deck.folder import PRESENTED, READ_ALONE, SLIDE_NAME, Refusal
 from lab_deck.lint import BLOCKING, WARNING
 
 PAGE = "plan.html"
@@ -59,7 +59,8 @@ INLINE = frozenset(
 # Elements whose text is code, not words on the page.
 UNREAD = frozenset(("script", "style", "template"))
 
-NAME = re.compile(r"[\w][\w.-]*")
+# Lists: an open list item is closed by the next item of the same list, not of a list inside it.
+LISTS = frozenset(("ul", "ol"))
 
 
 @dataclass
@@ -71,7 +72,7 @@ class Planned:
     ident: str
     title: str = ""
     body: str = ""
-    """The mock-up's words beside its title and its picture label."""
+    """The mock-up's words beside its title."""
     picture: str = ""
 
 
@@ -128,7 +129,7 @@ class _Reader(HTMLParser):
             return
         if self._inside(TITLE):
             slide.title += text
-        elif not self._inside(FIGURE):
+        else:
             slide.body += text
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -138,16 +139,36 @@ class _Reader(HTMLParser):
             return
         given = dict(attrs)
         classes = frozenset((given.get("class") or "").split())
-        if SLIDE in classes and not self._inside(SLIDE):
+        self._imply(tag)
+        if SLIDE in classes:
+            # A slide never holds a slide: one whose end tag was left out ends here.
+            at = next((at for at, (_, held) in enumerate(self.open) if SLIDE in held), None)
+            if at is not None:
+                del self.open[at:]
             ident = (given.get("data-slide") or "").strip()
             self.slides.append(Planned(len(self.slides) + 1, ident))
         self.open.append((tag, classes))
 
-    def handle_endtag(self, tag: str) -> None:
+    def _close(self, tag: str) -> None:
+        """Close the innermost open element of this tag, and everything inside it."""
         for at in range(len(self.open) - 1, -1, -1):
             if self.open[at][0] == tag:
                 del self.open[at:]
                 break
+
+    def _imply(self, tag: str) -> None:
+        """Close what HTML lets a writer leave open: a paragraph, or the list item before."""
+        tags = [held for held, _ in self.open]
+        if tag not in INLINE and "p" in tags:
+            # A paragraph holds phrases only, so any other element ends it.
+            self._close("p")
+        elif tag == "li" and "li" in tags:
+            item = len(tags) - 1 - tags[::-1].index("li")
+            if not LISTS & set(tags[item:]):
+                self._close("li")
+
+    def handle_endtag(self, tag: str) -> None:
+        self._close(tag)
         if tag not in INLINE:
             self._add(" ")
 
@@ -210,12 +231,12 @@ def lint(page: Path, use: str = PRESENTED) -> Report:
                 None,
                 "the slide has no id; name it with data-slide, as its source file will be named",
             )
-        elif not NAME.fullmatch(slide.ident):
+        elif not SLIDE_NAME.fullmatch(slide.ident):
             found(
                 "plan-id",
                 BLOCKING,
                 None,
-                "the id is not a slide name; use letters, digits, - and _",
+                "the id is not a slide name; use letters, digits, - and _, as deck.toml does",
             )
         elif slide.ident in seen:
             found("plan-id", BLOCKING, None, "another slide of the plan has the same id")

@@ -8,7 +8,7 @@ search:
 The code that turns a deck folder into a PowerPoint file is one package, `src/lab_deck/`,
 beside the Edison one. It runs from the repo's pixi environment as `lab-deck`, through a
 `bin/` wrapper and the PATH link `/lab-setup` makes, exactly as `edison-cli` does (ADR 0014).
-A deck folder holds content only: the brief, the slide order, one source file per slide,
+A deck folder holds content only: the brief, the slide plan, the slide order, one source file per slide,
 pictures, notes, the theme and the built deck. It records no build version.
 
 ## Why
