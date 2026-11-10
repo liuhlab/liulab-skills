@@ -15,6 +15,8 @@ import typer
 from lab_deck import build as builder
 from lab_deck import compare as comparer
 from lab_deck import folder as folders
+from lab_deck import preflight as preflighter
+from lab_deck import render as renderer
 from lab_deck.folder import Refusal
 
 HELP = """\
@@ -90,6 +92,41 @@ def compare(
     except Refusal as error:
         raise _refuse(error) from None
     print(comparer.render(report, read.output.name))
+
+
+@app.command()
+def render(
+    folder: Annotated[Path, typer.Argument(help="the deck folder (default: this one)")] = Path(),
+) -> None:
+    """Render every click state of the built deck to a picture, and list the changed ones."""
+    try:
+        report = renderer.render(folders.read(folder))
+    except Refusal as error:
+        raise _refuse(error) from None
+    print(renderer.text(report))
+    for slide in report.unshown:
+        print(
+            f"lab-deck: warning: slide {slide} has an effect other than Appear and Disappear. "
+            "The pictures show the slide without it.",
+            file=sys.stderr,
+        )
+
+
+@app.command()
+def preflight(
+    folder: Annotated[Path, typer.Argument(help="the deck folder (default: this one)")] = Path(),
+) -> None:
+    """Report LibreOffice, Poppler and the theme's font, each as present or missing."""
+    try:
+        # Outside a deck folder, check the font a new deck would have.
+        inside = (folder / folders.ORDER).is_file()
+        font = folders.read(folder).font if inside else folders.FONT
+    except Refusal as error:
+        raise _refuse(error) from None
+    found = preflighter.checks(font)
+    print(preflighter.text(found))
+    if any(check.found is None for check in found):
+        raise typer.Exit(1)
 
 
 def main() -> None:

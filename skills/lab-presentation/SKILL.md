@@ -70,9 +70,11 @@ the slide. Otherwise build one.
 
 - The deck lint stops the build on a blocking failure. Fix the slide. Never loosen a check.
 - Fix every lint warning, or explain it in the reply. None passes in silence.
-- Render every click state to a picture. After a build, look at each picture that changed.
-  Before you report the deck finished, look at the whole deck once.
-- Ask the user for one last look in PowerPoint itself. A Repair dialog shows only there.
+- Run `lab-deck render` after each build: one picture per click state. Look only at the
+  pictures it lists as new or changed.
+- Before you report the deck finished, look at every picture once.
+- At the end, ask the user to open the deck in PowerPoint once. A Repair dialog shows only
+  there, never in a picture.
 
 ## 5. Speaker notes
 
