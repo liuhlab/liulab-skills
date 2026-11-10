@@ -1,6 +1,6 @@
 """A deck left open or unsaved in PowerPoint: what `compare` and `build` do about it.
 
-PowerPoint here is the stand-in of `standin.py`, which `conftest.py` puts on the PATH of
+PowerPoint here is the stand-in of `stand_in_powerpoint.py`, which `conftest.py` puts on the PATH of
 every `lab-deck` run. A test sets what PowerPoint holds, runs the command as a member would,
 and reads the message, the deck file and the commands PowerPoint got.
 """
@@ -13,9 +13,18 @@ from pathlib import Path
 import pytest
 
 from lab_deck import powerpoint as scripts
-from tests.lab_deck.conftest import Deck, PowerPoint, lab_deck
-from tests.lab_deck.test_compare import found, git, on, save, swap
-from tests.lab_deck.test_deck import PLAIN, write
+from tests.lab_deck.conftest import (
+    PLAIN,
+    Deck,
+    PowerPoint,
+    found,
+    git,
+    lab_deck,
+    on,
+    save,
+    swap,
+    write,
+)
 
 NAMES = ("title", "question", "method", "result", "end")
 

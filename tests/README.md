@@ -35,10 +35,15 @@ run history.
 
 ## Unit tests — the deck build: `tests/lab_deck/`
 
-Free, seconds, in the same `pixi run test`. They run `lab-deck` at its command
-line on a small deck folder in a temporary directory and read what a person
-would: the folder `new` made, the deck `build` wrote, the message and the exit
-status. The build runs the real Node.js and PptxGenJS from the pixi environment,
+Free, in the same `pixi run test`. They are most of that task's time: about half
+a minute, because nearly every test starts Node. `pixi run test` therefore runs
+on every core (`pytest -n auto`); a test shares nothing with another but a deck
+folder it copies. They run `lab-deck` with a command line on a small deck folder
+in a temporary directory and read what a person would: the folder `new` made,
+the deck `build` wrote, the message and the exit status. The command runs inside
+the test's process, to save the start of a new Python; two tests of `build` start
+`python -m lab_deck` itself. A deck that many tests need is built once and
+copied. The build runs the real Node.js and PptxGenJS from the pixi environment,
 so nothing is stubbed and nothing reaches the network. They pin the folder's
 layout and its git repo, the warning in a synced cloud folder, the 16:9 slide
 size, that the theme and the room change the font, the accent colour and the
@@ -54,7 +59,7 @@ every feature the lint reads, then add one slide that breaks one blocking check,
 pin that the build is refused, that the report names that slide, shape, check and rule
 and no other, and that the last built deck stays.
 PowerPoint is never started, and never asked anything: `conftest.py` puts a
-stand-in named `osascript` and `open` (`standin.py`) first on the PATH of every
+stand-in named `osascript` and `open` (`stand_in_powerpoint.py`) first on the PATH of every
 `lab-deck` run, on a Mac and off one. The stand-in keeps the open decks in a
 JSON file a test sets and reads back. With it the tests pin that an unsaved
 deck is saved before `compare` reads it, that `build` closes, writes and reopens

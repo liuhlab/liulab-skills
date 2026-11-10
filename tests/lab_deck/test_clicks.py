@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 
 from lab_deck import stage
-from tests.lab_deck.conftest import Deck, lab_deck
-from tests.lab_deck.test_deck import PLAIN, built, write
+from tests.lab_deck.conftest import PLAIN, Deck, lab_deck, write
+from tests.lab_deck.test_deck import built
 
 # A slide in three sections. The first is up when the slide opens; a click brings the second,
 # and the next click brings the third and takes the first away.

@@ -18,8 +18,11 @@ module.exports = (slide, deck) => {
 
 
 def test_build_writes_a_one_slide_widescreen_deck(folder: Path) -> None:
-    """The starter folder builds as it is, into the file the slide order names."""
-    built = lab_deck("build", folder)
+    """The starter folder builds as it is, into the file the slide order names.
+
+    Run as `python -m lab_deck`, a process of its own, as the PATH wrapper starts it.
+    """
+    built = lab_deck("build", folder, process=True)
 
     assert built.returncode == 0, built.stdout + built.stderr
     deck = Deck(folder / "talk.pptx")
@@ -31,7 +34,7 @@ def test_build_writes_a_one_slide_widescreen_deck(folder: Path) -> None:
 
 def test_build_without_a_folder_builds_the_one_it_is_run_in(folder: Path) -> None:
     """A member inside the deck folder types `lab-deck build` and nothing else."""
-    built = lab_deck("build", cwd=folder)
+    built = lab_deck("build", cwd=folder, process=True)
 
     assert built.returncode == 0, built.stdout + built.stderr
     assert (folder / "talk.pptx").is_file()

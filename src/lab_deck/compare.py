@@ -32,19 +32,18 @@ from dataclasses import dataclass, field
 from zipfile import BadZipFile, ZipFile
 
 from lab_deck.folder import Folder, Refusal
+from lab_deck.house import EMU_PER_INCH as INCH
+from lab_deck.house import EMU_PER_POINT as POINT
+from lab_deck.house import PAGE_NUMBER
 from lab_deck.merge import CORE_TIME, A, P, R
 
 MC = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 
-EMU = 914400  # in one inch
-POINT = 12700  # EMU in one point
 # A place or size must move by more than this to count: a quarter of a point.
 SLACK = POINT / 4
 # How far back to look for a commit that holds a build.
 DEPTH = 200
 
-# The page number is the slide's place in the deck, and the build writes it again.
-PAGE = "Page number"
 # A word, or the gap between two words: the unit two texts are lined up by.
 WORD = re.compile(r"\s+|\S+")
 
@@ -176,7 +175,7 @@ class Report:
 
 
 def _inches(*values: float) -> str:
-    return ", ".join(f"{value / EMU:.2f}" for value in values)
+    return ", ".join(f"{value / INCH:.2f}" for value in values)
 
 
 def _colour(fill: ET.Element) -> str:
@@ -633,7 +632,8 @@ def _slide(old: Slide, new: Slide) -> list[Edit]:
         for where in dict.fromkeys([*was.texts, *now.texts]):
             a, b = was.texts.get(where, Text()), now.texts.get(where, Text())
             of = f"{where}: " if where else ""
-            if a.chars != b.chars and now.name != PAGE:
+            # The page number is the slide's place in the deck, and the build writes it again.
+            if a.chars != b.chars and now.name != PAGE_NUMBER:
                 words += [f"{of}was {_show(a.chars)}", f"{of}now {_show(b.chars)}"]
             style += [of + line for line in _styles(a, b)]
         for name in dict.fromkeys([*was.look, *now.look]):

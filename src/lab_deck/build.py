@@ -22,15 +22,12 @@ import sys
 import tempfile
 from pathlib import Path
 
-from lab_deck import lint, merge, stage
+from lab_deck import house, lint, merge, stage
 from lab_deck.folder import ROOMS, Folder, Refusal
 
 RUNNER = Path(__file__).with_name("runner.js")
 # Where a conda package of a Node library lands, under the environment's prefix.
 NODE_MODULES = Path(sys.prefix) / "lib" / "node_modules"
-# Sizes that do not depend on the room, in points.
-TITLE = 32
-CITATION = 12
 
 
 def node() -> str:
@@ -60,7 +57,18 @@ def job(folder: Folder, scratch: Path) -> dict[str, object]:
         "title": folder.title,
         "pictures": str(folder.path / "pictures"),
         "theme": {"font": folder.font, "accent": folder.accent},
-        "size": {"title": TITLE, "citation": CITATION, **ROOMS[folder.room]},
+        "size": {
+            "title": house.TITLE_SIZE,
+            "citation": house.CITATION_SIZE,
+            **ROOMS[folder.room],
+        },
+        "names": {
+            "title": house.TITLE,
+            "page": house.PAGE_NUMBER,
+            "citation": house.CITATION,
+            "table": house.TABLE,
+            "sentence": house.SENTENCE,
+        },
         "slides": [
             {
                 "id": slide,

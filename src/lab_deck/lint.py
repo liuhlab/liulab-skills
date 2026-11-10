@@ -33,25 +33,18 @@ from fontTools.ttLib import TTFont, TTLibError
 
 from lab_deck import stage
 from lab_deck.folder import PRESENTED, READ_ALONE, ROOMS, Refusal
+from lab_deck.house import CITATION, CITATION_SIZE, PAGE_NUMBER, SENTENCE, TITLE
+from lab_deck.house import EMU_PER_POINT as POINT
 from lab_deck.merge import A, P, R
 
 NS = {"p": P, "a": A}
 BLOCKING = "blocking"
 WARNING = "warning"
 
-# The names the build gives the two shapes the size floor treats apart.
-PAGE_NUMBER = "Page number"
-CITATION = "Citation"
-# The names the build gives the title, and a text box whose sentences are meant.
-TITLE = "Slide title"
-SENTENCE = "Intended sentence"
-# The one size under the floor that a slide may carry, on its citation line, in points.
-CITATION_SIZE = 12
 # What DrawingML gives a run that states no size, and a text box that states no inset.
 DEFAULT_SIZE = 18.0
 INSET_X = 91440
 INSET_Y = 45720
-EMU = 12700  # to the point
 # A line of text is this many times its font size tall, as PowerPoint sets single spacing.
 LINE = 1.2
 # How far past its box the estimate must run before the lint calls it an overflow.
@@ -589,7 +582,7 @@ def _wrap(atoms: list[tuple[str, float]], room: float) -> list[float]:
 
 def layout(shape: Shape, fonts: Fonts) -> Block:
     """Estimate how many lines the shape's text takes, and how wide and tall they are."""
-    room = (shape.w - shape.insets[0] - shape.insets[2]) / EMU if shape.wrap else float("inf")
+    room = (shape.w - shape.insets[0] - shape.insets[2]) / POINT if shape.wrap else float("inf")
     room = max(room, 1.0)
     count, widest, height = 0, 0.0, 0.0
     last = len(shape.paragraphs) - 1
@@ -620,7 +613,7 @@ def _text_box(shape: Shape, fonts: Fonts) -> tuple[float, float, float, float]:
         return (shape.x, shape.y, shape.x + shape.w, shape.y + shape.h)
     block = layout(shape, fonts)
     left, top, right, bottom = shape.insets
-    wide, tall = block.width * EMU, block.height * EMU
+    wide, tall = block.width * POINT, block.height * POINT
     inner_w = shape.w - left - right
     inner_h = shape.h - top - bottom
     align = shape.paragraphs[0].align if shape.paragraphs else "l"
@@ -688,7 +681,7 @@ def text_overflow(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
         if shape.kind != "sp" or not shape.text or shape.w < 0 or shape.h < 0:
             continue
         block = layout(shape, setup.fonts)
-        room = (shape.h - shape.insets[1] - shape.insets[3]) / EMU
+        room = (shape.h - shape.insets[1] - shape.insets[3]) / POINT
         if block.height > room * SLACK:
             yield (
                 shape.name,
@@ -724,10 +717,10 @@ def picture_over_text(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
             for under, (left, top, right, bottom) in texts:
                 # A point of slack on every side: an edge that only touches covers nothing.
                 covers = (
-                    shape.x < right - EMU
-                    and shape.x + shape.w > left + EMU
-                    and shape.y < bottom - EMU
-                    and shape.y + shape.h > top + EMU
+                    shape.x < right - POINT
+                    and shape.x + shape.w > left + POINT
+                    and shape.y < bottom - POINT
+                    and shape.y + shape.h > top + POINT
                 )
                 together = any(
                     not hidden.intersection(shape.owners) and not hidden.intersection(under.owners)
@@ -748,7 +741,7 @@ def negative_size(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
     for shape in slide.shapes:
         for side, value in (("width", shape.w), ("height", shape.h)):
             if value < 0:
-                yield (shape.name, f"its {side} is negative ({value / EMU:.0f} pt)")
+                yield (shape.name, f"its {side} is negative ({value / POINT:.0f} pt)")
 
 
 def click_cues(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:

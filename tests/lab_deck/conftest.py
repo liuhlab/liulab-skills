@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import atexit
+import contextlib
 import functools
 import json
 import os
@@ -14,15 +15,19 @@ import sys
 import tempfile
 import xml.etree.ElementTree as ET
 import zipfile
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
+
+from lab_deck import cli
 
 NS = {
     "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
 }
-STANDIN = Path(__file__).with_name("standin.py")
+STANDIN = Path(__file__).with_name("stand_in_powerpoint.py")
 
 
 @functools.cache
@@ -48,21 +53,40 @@ def programs(mac: bool = True) -> str:
 
 
 def lab_deck(
-    *args: str | Path, cwd: Path | None = None, mac: bool = True
+    *args: str | Path, cwd: Path | None = None, mac: bool = True, process: bool = False
 ) -> subprocess.CompletedProcess[str]:
-    """Run `lab-deck` with these arguments through the module the PATH wrapper execs.
+    """Run `lab-deck` with these arguments, and give its exit status and what it printed.
 
     Every run has the stand-in for PowerPoint on its PATH, whatever fixture started it, so
     no test reaches the real one. `mac=False` runs it where there is no `osascript`.
+
+    The command runs inside the test's own process: the same typer app, arguments,
+    environment and working folder, without the time a new Python takes to start. Node,
+    git and the stand-ins are still programs of their own. `process=True` starts
+    `python -m lab_deck`, the module the PATH wrapper execs, for the tests of that way in.
     """
-    return subprocess.run(
-        [sys.executable, "-m", "lab_deck", *map(str, args)],
-        cwd=cwd,
-        env={**os.environ, "PATH": programs(mac)},
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    command = [sys.executable, "-m", "lab_deck", *map(str, args)]
+    path = programs(mac)
+    if process:
+        return subprocess.run(
+            command,
+            cwd=cwd,
+            env={**os.environ, "PATH": path},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    before = os.environ["PATH"]
+    os.environ["PATH"] = path
+    try:
+        with contextlib.chdir(cwd or Path.cwd()):
+            done = CliRunner().invoke(cli.app, command[3:], prog_name="lab-deck")
+    finally:
+        os.environ["PATH"] = before
+    if done.exception is not None and not isinstance(done.exception, SystemExit):
+        # A traceback in a real run: let the test fail on it, not on an exit status.
+        raise done.exception
+    return subprocess.CompletedProcess(command, done.exit_code, done.stdout, done.stderr)
 
 
 class Deck:
@@ -203,10 +227,103 @@ def powerpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> PowerPoint:
     return PowerPoint(kept)
 
 
-@pytest.fixture
-def folder(tmp_path: Path) -> Path:
-    """Make a new deck folder with `lab-deck new`, holding the one starter slide."""
-    path = tmp_path / "talk"
+@pytest.fixture(scope="session")
+def starter(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Make a new deck folder with `lab-deck new` once, for every test to copy."""
+    path = tmp_path_factory.mktemp("starter") / "talk"
     made = lab_deck("new", path)
     assert made.returncode == 0, made.stdout + made.stderr
     return path
+
+
+@pytest.fixture
+def folder(starter: Path, tmp_path: Path) -> Path:
+    """Give each test its own new deck folder, holding the one starter slide."""
+    return Path(shutil.copytree(starter, tmp_path / "talk"))
+
+
+# What the tests of more than one file write, edit and read.
+
+PLAIN = """\
+module.exports = (slide, deck) => {
+  deck.title(slide, "TITLE");
+  deck.lines(slide, ["First phrase", { text: "Second phrase", accent: true }]);
+};
+"""
+
+OPEN = ("<p:sp>", "<p:pic>", "<p:graphicFrame>")
+SAVED = "2026-11-09T08:00:00Z"
+
+
+def write(folder: Path, slides: dict[str, str]) -> None:
+    """Give the deck folder these slides, in this order; each title is the slide's name."""
+    for name, source in slides.items():
+        (folder / "slides" / f"{name}.js").write_text(
+            source.replace("TITLE", f"About {name}"), encoding="utf-8"
+        )
+    listed = ", ".join(f'"{name}"' for name in slides)
+    order = folder / "deck.toml"
+    order.write_text(
+        re.sub(r"slides = \[.*\]", f"slides = [{listed}]", order.read_text(encoding="utf-8")),
+        encoding="utf-8",
+    )
+
+
+def git(folder: Path, *args: str) -> str:
+    """Run git in the deck folder, as a member with a name would."""
+    done = subprocess.run(
+        ["git", "-c", "user.name=Member", "-c", "user.email=member@example.invalid", *args],
+        cwd=folder,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return done.stdout
+
+
+def save(folder: Path, change: Callable[[dict[str, str]], None]) -> None:
+    """Change the XML parts of the deck, and save it as PowerPoint would: with a new time."""
+    path = folder / "talk.pptx"
+    with zipfile.ZipFile(path) as archive:
+        parts = {name: archive.read(name) for name in archive.namelist()}
+    text = {n: p.decode("utf-8") for n, p in parts.items() if n.endswith((".xml", ".rels"))}
+    change(text)
+    text["docProps/core.xml"] = re.sub(
+        r"(<dcterms:modified[^>]*>)[^<]+", rf"\g<1>{SAVED}", text["docProps/core.xml"]
+    )
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name, payload in parts.items():
+            archive.writestr(name, text.get(name, payload))
+
+
+def part(text: dict[str, str], slide: str) -> str:
+    """Name the part that holds the slide with this id."""
+    return next(n for n, xml in text.items() if f'<p:cSld name="{slide}">' in xml)
+
+
+def on(slide: str, marker: str, change: Callable[[str], str]) -> Callable[[dict[str, str]], None]:
+    """Change the one shape of `slide` whose XML holds `marker`."""
+
+    def apply(text: dict[str, str]) -> None:
+        name = part(text, slide)
+        xml = text[name]
+        at = xml.index(marker)
+        start = max(xml.rfind(tag, 0, at) for tag in OPEN)
+        close = "</" + xml[start + 1 : xml.index(">", start) + 1]
+        end = xml.index(close, at) + len(close)
+        changed = change(xml[start:end])
+        assert changed != xml[start:end], "the edit changed nothing"
+        text[name] = xml[:start] + changed + xml[end:]
+
+    return apply
+
+
+def swap(old: str, new: str, count: int = 1) -> Callable[[str], str]:
+    """Replace `old` with `new` in a shape's XML."""
+    return lambda xml: xml.replace(old, new, count)
+
+
+def found(text: str) -> list[str]:
+    """List the report's headings and edits, down to the summary line."""
+    body = text.split("\n\n", 1)[1].split("\nNothing was copied")[0]
+    return [line.strip() for line in body.splitlines() if line.strip()]

@@ -99,7 +99,8 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 - `lab-deck render` makes one picture of every slide after every click, hidden slides
   included, so the agent sees what the audience sees. It lists the pictures that changed
   since the last render, and the agent looks at those after each build. It needs LibreOffice
-  on your machine. It never changes the deck.
+  on your machine. It never changes the deck. A slide that only moved to another page,
+  because you inserted a slide before it, is not listed as changed.
 - `lab-deck preflight` says whether LibreOffice, Poppler and the deck's font are on your
   machine, and how to get one that is missing.
 - `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
@@ -109,6 +110,8 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
 - The `talk` playbook in `hq-mode` is now a short entry that points to `lab-presentation`.
   Its recorded-talk step stays.
+- `pixi run check` runs the unit tests on every core of the machine, so the gate stays fast
+  with the deck build's tests in it.
 
 ## 2026.11.0 — 2026-11-09
 

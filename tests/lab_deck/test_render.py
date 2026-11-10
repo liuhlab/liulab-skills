@@ -17,9 +17,9 @@ import pytest
 
 from lab_deck import preflight, render
 from lab_deck.merge import write as write_zip
-from tests.lab_deck.conftest import Deck, lab_deck
+from tests.lab_deck.conftest import PLAIN, Deck, lab_deck, write
 from tests.lab_deck.test_clicks import BOTH, STAGED
-from tests.lab_deck.test_deck import PLAIN, built, write
+from tests.lab_deck.test_deck import built
 
 STAND_IN = Path(__file__).with_name("stand_in_soffice.py")
 PNG = b"\x89PNG\r\n\x1a\n"
@@ -160,11 +160,9 @@ def test_a_new_slide_and_a_dropped_slide_touch_no_other_picture(folder: Path) ->
     said = rendered(folder)
 
     lines = re.findall(r"^(?:new|changed|gone): \S+", said, flags=re.M)
-    # `signal` moved from page 3 to page 2, so the page number drawn on it changed.
+    # `signal` moved from page 3 to page 2: only its page number changed, so it is not listed.
     assert lines == [
         "new: renders/last.click0.png",
-        "changed: renders/signal.click0.png",
-        "changed: renders/signal.click1.png",
         "gone: renders/staged.click0.png",
         "gone: renders/staged.click1.png",
         "gone: renders/staged.click2.png",
@@ -174,6 +172,45 @@ def test_a_new_slide_and_a_dropped_slide_touch_no_other_picture(folder: Path) ->
         "signal.click0.png",
         "signal.click1.png",
         "title.click0.png",
+    ]
+
+
+def test_an_inserted_slide_lists_only_its_own_pictures(folder: Path) -> None:
+    """Every later slide moves one page on, and that is the only thing that changed on it."""
+    write(folder, THREE)
+    built(folder)
+    rendered(folder)
+    before = {name: (folder / "renders" / name).read_bytes() for name in pictures(folder)}
+
+    write(folder, {"title": PLAIN, "method": PLAIN, "staged": STAGED, "signal": BOTH})
+    built(folder)
+    said = rendered(folder)
+
+    assert re.findall(r"^(?:new|changed|gone): .*", said, flags=re.M) == [
+        "new: renders/method.click0.png  slide method (page 2), as it opens"
+    ]
+    assert "6 pictures did not change" in said
+    after = {name: (folder / "renders" / name).read_bytes() for name in before}
+    # A picture that is not listed is still written again, with the page number of now.
+    assert after["title.click0.png"] == before["title.click0.png"]
+    for name in ("staged.click0.png", "staged.click2.png", "signal.click1.png"):
+        assert after[name] != before[name], name
+
+
+def test_a_render_folder_with_no_fingerprints_is_compared_by_its_pictures(folder: Path) -> None:
+    """The pictures of a render made before fingerprints were kept still say what changed."""
+    write(folder, THREE)
+    built(folder)
+    rendered(folder)
+    (folder / "renders" / "states.json").unlink()
+    assert "no picture changed since the last render" in rendered(folder)
+    (folder / "renders" / "states.json").unlink()
+    (folder / "renders" / "title.click0.png").write_bytes(PNG)
+
+    said = rendered(folder)
+
+    assert re.findall(r"^(?:new|changed|gone): \S+", said, flags=re.M) == [
+        "changed: renders/title.click0.png"
     ]
 
 

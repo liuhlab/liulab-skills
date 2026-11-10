@@ -7,9 +7,14 @@ out, the timing is dropped and a hidden slide is shown. LibreOffice turns the co
 and Poppler's `pdftoppm` turns each page into a PNG. The deck itself is only ever read.
 
 The pictures live in `renders/` inside the deck folder, which git ignores. A picture is named
-by its slide's id and its click state, never by a page number, so an inserted slide leaves
-the pictures of every other slide as they were. A picture has changed when its bytes differ
-from the one the last render left there.
+by its slide's id and its click state, never by a page number. Every picture is written again
+by every render, so each shows the page number its slide has now.
+
+A click state has changed when its fingerprint differs from the one the last render kept in
+`renders/states.json`. The fingerprint is taken from the click state's slide in the deck
+file, not from the picture: its XML without the digits of the page number, the pictures it
+shows, and the masters, layouts and theme. So an inserted slide, which moves every later
+slide one page on, lists no picture of those slides as changed.
 
 LibreOffice is the system's app. `to_pdf` is the one place that runs it; a test names a
 stand-in program in `LAB_DECK_SOFFICE`.
@@ -18,6 +23,7 @@ stand-in program in `LAB_DECK_SOFFICE`.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import posixpath
 import re
@@ -33,9 +39,12 @@ from zipfile import ZipFile
 
 from lab_deck import stage
 from lab_deck.folder import Folder, Refusal
+from lab_deck.house import PAGE_NUMBER
 from lab_deck.merge import SLIDE_TYPE, P, R, write
 
 RENDERS = "renders"
+# The file in `renders/` that keeps each picture's fingerprint from one render to the next.
+STATES = "states.json"
 # The environment variable that names the LibreOffice program, for a test's stand-in or a
 # LibreOffice in an unusual place.
 SOFFICE = "LAB_DECK_SOFFICE"
@@ -49,6 +58,13 @@ WIDTH = 1600
 # The objects a click can show or hide, at any depth of the shape tree.
 OBJECTS = {f"{P} {kind}" for kind in ("sp", "pic", "grpSp", "graphicFrame", "cxnSp")}
 RELATION = re.compile(rb"<Relationship [^>]*/>")
+# The page number's shape, from its name to its end, and the digits it shows.
+NUMBER = re.compile(
+    rb'<p:cNvPr\b[^>]*\bname="' + PAGE_NUMBER.encode() + rb'".*?</p:sp>', flags=re.S
+)
+DIGITS = re.compile(rb"(?<=<a:t>)\d+(?=</a:t>)")
+# The parts every slide is drawn on.
+SHARED = ("ppt/slideMasters/", "ppt/slideLayouts/", "ppt/theme/")
 OVERRIDE = re.compile(rb'<Override [^>]*PartName="/ppt/slides/[^"]*"[^>]*/>')
 
 
@@ -64,6 +80,8 @@ class State:
     """How many clicks have been made: 0 is the slide as it opens."""
     hidden: bool
     """Whether the slide is hidden in the deck."""
+    fingerprint: str = ""
+    """What the click state shows, apart from the digits of its page number."""
 
     @property
     def picture(self) -> str:
@@ -229,6 +247,33 @@ def _plain(data: bytes) -> bytes:
     return re.sub(rb'(<p:sld\b[^>]*?)\s+show="(?:0|false)"', rb"\1", data, count=1)
 
 
+def _shown(parts: dict[str, bytes], rels: str) -> bytes:
+    """Name what a slide draws from outside its own XML: its pictures, and the shared parts.
+
+    A picture is named by its relationship id and its bytes. The notes and the layout are
+    left out: their part names follow the slide's place in the deck.
+    """
+    found = hashlib.sha256()
+    for name in sorted(parts):
+        if name.startswith(SHARED):
+            found.update(name.encode() + hashlib.sha256(parts[name]).digest())
+    media = []
+    for relation in RELATION.findall(parts.get(rels, b"")):
+        node = ET.fromstring(relation)
+        target = posixpath.normpath(posixpath.join("ppt/slides", node.get("Target", "")))
+        if target.startswith("ppt/media/") and target in parts:
+            media.append(node.get("Id", "").encode() + hashlib.sha256(parts[target]).digest())
+    for one in sorted(media):
+        found.update(one)
+    return found.digest()
+
+
+def _fingerprint(slide: bytes, shown: bytes) -> str:
+    """Fingerprint one click state: its slide without the page number's digits, and `shown`."""
+    bare = NUMBER.sub(lambda found: DIGITS.sub(b"", found[0]), slide)
+    return hashlib.sha256(bare + shown).hexdigest()
+
+
 def _order(parts: dict[str, bytes]) -> list[str]:
     """List the deck's slide parts in the order the deck shows them."""
     targets = {}
@@ -282,13 +327,15 @@ def expand(deck: Path, copy: Path) -> tuple[list[State], list[str]]:
                 if change.effect != "other":
                     shown.setdefault(change.shape, change.effect != "appear")
         rels = posixpath.join(posixpath.dirname(part), "_rels", posixpath.basename(part) + ".rels")
+        shown_parts = _shown(parts, rels)
         for made in range(len(clicks) + 1):
             for change in clicks[made - 1] if made else []:
                 if change.effect != "other":
                     shown[change.shape] = change.effect == "appear"
             cut = [span for shape, up in shown.items() if not up for span in spans.get(shape, [])]
             number = len(states) + 1
-            result[f"ppt/slides/slide{number}.xml"] = _plain(_without(data, cut))
+            plain = _plain(_without(data, cut))
+            result[f"ppt/slides/slide{number}.xml"] = plain
             if rels in parts:
                 result[f"ppt/slides/_rels/slide{number}.xml.rels"] = parts[rels]
             listed.append(f'<p:sldId id="{255 + number}" r:id="rIdState{number}"/>'.encode())
@@ -300,7 +347,7 @@ def expand(deck: Path, copy: Path) -> tuple[list[State], list[str]]:
                 f'<Override PartName="/ppt/slides/slide{number}.xml" '
                 f'ContentType="{SLIDE_TYPE}"/>'.encode()
             )
-            states.append(State(ident, page, made, hidden))
+            states.append(State(ident, page, made, hidden, _fingerprint(plain, shown_parts)))
 
     presentation = parts["ppt/presentation.xml"]
     presentation, swapped = re.subn(
@@ -337,6 +384,9 @@ def render(folder: Folder) -> Report:
     """Render every click state of the deck of `folder` into its `renders/` folder.
 
     Nothing in `renders/` changes until every picture is made, and the deck is only read.
+    Every picture is then written again. A click state is listed as changed when its
+    fingerprint is not the one the last render kept; a picture of a render that kept none is
+    compared by its bytes.
 
     Raises
     ------
@@ -360,16 +410,22 @@ def render(folder: Folder) -> Report:
         out.mkdir(exist_ok=True)
         # The folder ignores itself, so a deck folder made before this command needs no edit.
         (out / ".gitignore").write_text("*\n", encoding="utf-8")
+        kept = out / STATES
+        try:
+            before = json.loads(kept.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            before = {}
         new, changed = [], []
         for state, page in zip(states, pages, strict=True):
             last = out / state.picture
+            known = before.get(state.picture) if isinstance(before, dict) else None
             if not last.is_file():
                 new.append(state)
-            elif _digest(last) != _digest(page):
+            elif state.fingerprint != known if known else _digest(last) != _digest(page):
                 changed.append(state)
-            else:
-                continue
             page.replace(last)
+        marks = {state.picture: state.fingerprint for state in states}
+        kept.write_text(json.dumps(marks, indent=1) + "\n", encoding="utf-8")
         names = {state.picture for state in states}
         gone = sorted(old.name for old in out.glob("*.png") if old.name not in names)
         for name in gone:

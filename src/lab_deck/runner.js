@@ -26,8 +26,8 @@ const H = 7.5;
 const MARGIN = 0.7;
 const BLACK = "000000";
 const WHITE = "FFFFFF";
-// The name of a text box whose sentences are meant. `lab_deck/lint.py` knows it by this name.
-const SENTENCE = "Intended sentence";
+// The names of the shapes a later step finds, as `lab_deck/house.py` spells them.
+const NAMES = job.names;
 // The page number's box, in the bottom margin, clear of anything a slide draws inside it.
 const PAGE = { x: W - MARGIN - 1, y: H - 0.5, w: 1, h: 0.3 };
 
@@ -96,7 +96,7 @@ function helpers(pres, plan) {
       slide.addText(text, {
         x: MARGIN, y: 0.4, w: W - 2 * MARGIN, h: 1.2,
         fontFace: deck.font, fontSize: deck.size.title, bold: true, color: BLACK,
-        margin: 0, valign: "top", objectName: "Slide title",
+        margin: 0, valign: "top", objectName: NAMES.title,
       });
     },
 
@@ -115,7 +115,7 @@ function helpers(pres, plan) {
         x: MARGIN, y: 1.9, w: W - 2 * MARGIN, h: H - 1.9 - MARGIN, ...box,
         fontFace: deck.font, fontSize: box.fontSize || deck.size.body,
         margin: 0, valign: "top", paraSpaceAfter: 8,
-        ...(sentence ? { objectName: SENTENCE } : {}),
+        ...(sentence ? { objectName: NAMES.sentence } : {}),
       });
     },
 
@@ -135,7 +135,7 @@ function helpers(pres, plan) {
       slide.addTable(cells, {
         x: MARGIN, y: 1.9, w: W - 2 * MARGIN, ...place,
         fontFace: deck.font, fontSize: fontSize || deck.size.body, color: BLACK,
-        border: [none, none, line, none], valign: "middle", objectName: "Table",
+        border: [none, none, line, none], valign: "middle", objectName: NAMES.table,
       });
     },
 
@@ -145,7 +145,7 @@ function helpers(pres, plan) {
       slide.addText(text, {
         x: MARGIN, y: H - 0.5, w: W - 2 * MARGIN - 1.2, h: 0.3, ...box,
         fontFace: deck.font, fontSize: deck.size.citation, color: BLACK,
-        margin: 0, valign: "bottom", objectName: "Citation",
+        margin: 0, valign: "bottom", objectName: NAMES.citation,
       });
     },
 
@@ -207,7 +207,7 @@ function number(slide, deck, page) {
   slide.addText(String(page), {
     ...PAGE,
     fontFace: deck.font, fontSize: deck.size.citation, color: BLACK,
-    align: "right", valign: "bottom", margin: 0, objectName: "Page number",
+    align: "right", valign: "bottom", margin: 0, objectName: NAMES.page,
   });
 }
 

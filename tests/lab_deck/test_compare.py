@@ -9,15 +9,23 @@ from __future__ import annotations
 
 import re
 import shutil
-import subprocess
-import zipfile
-from collections.abc import Callable
 from pathlib import Path
 
 import pytest
 
-from tests.lab_deck.conftest import Deck, lab_deck
-from tests.lab_deck.test_deck import DOT, PLAIN, TABLE, write
+from tests.lab_deck.conftest import (
+    PLAIN,
+    Deck,
+    found,
+    git,
+    lab_deck,
+    on,
+    part,
+    save,
+    swap,
+    write,
+)
+from tests.lab_deck.test_deck import DOT, TABLE
 
 SHAPES = """\
 module.exports = (slide, deck) => {
@@ -31,21 +39,6 @@ module.exports = (slide, deck) => {
   });
 };
 """
-
-OPEN = ("<p:sp>", "<p:pic>", "<p:graphicFrame>")
-SAVED = "2026-11-09T08:00:00Z"
-
-
-def git(folder: Path, *args: str) -> str:
-    """Run git in the deck folder, as a member with a name would."""
-    done = subprocess.run(
-        ["git", "-c", "user.name=Member", "-c", "user.email=member@example.invalid", *args],
-        cwd=folder,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return done.stdout
 
 
 @pytest.fixture(scope="module")
@@ -68,59 +61,11 @@ def folder(committed: Path, tmp_path: Path) -> Path:
     return Path(shutil.copytree(committed, tmp_path / "talk"))
 
 
-def save(folder: Path, change: Callable[[dict[str, str]], None]) -> None:
-    """Change the XML parts of the deck, and save it as PowerPoint would: with a new time."""
-    path = folder / "talk.pptx"
-    with zipfile.ZipFile(path) as archive:
-        parts = {name: archive.read(name) for name in archive.namelist()}
-    text = {n: p.decode("utf-8") for n, p in parts.items() if n.endswith((".xml", ".rels"))}
-    change(text)
-    text["docProps/core.xml"] = re.sub(
-        r"(<dcterms:modified[^>]*>)[^<]+", rf"\g<1>{SAVED}", text["docProps/core.xml"]
-    )
-    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as archive:
-        for name, payload in parts.items():
-            archive.writestr(name, text.get(name, payload))
-
-
-def part(text: dict[str, str], slide: str) -> str:
-    """Name the part that holds the slide with this id."""
-    return next(n for n, xml in text.items() if f'<p:cSld name="{slide}">' in xml)
-
-
-def on(slide: str, marker: str, change: Callable[[str], str]) -> Callable[[dict[str, str]], None]:
-    """Change the one shape of `slide` whose XML holds `marker`."""
-
-    def apply(text: dict[str, str]) -> None:
-        name = part(text, slide)
-        xml = text[name]
-        at = xml.index(marker)
-        start = max(xml.rfind(tag, 0, at) for tag in OPEN)
-        close = "</" + xml[start + 1 : xml.index(">", start) + 1]
-        end = xml.index(close, at) + len(close)
-        changed = change(xml[start:end])
-        assert changed != xml[start:end], "the edit changed nothing"
-        text[name] = xml[:start] + changed + xml[end:]
-
-    return apply
-
-
-def swap(old: str, new: str, count: int = 1) -> Callable[[str], str]:
-    """Replace `old` with `new` in a shape's XML."""
-    return lambda xml: xml.replace(old, new, count)
-
-
 def report(folder: Path, *args: str) -> str:
     """Run `lab-deck compare` and give what it printed."""
     done = lab_deck("compare", folder, *args)
     assert done.returncode == 0, done.stdout + done.stderr
     return done.stdout
-
-
-def found(text: str) -> list[str]:
-    """List the report's headings and edits, down to the summary line."""
-    body = text.split("\n\n", 1)[1].split("\nNothing was copied")[0]
-    return [line.strip() for line in body.splitlines() if line.strip()]
 
 
 def test_a_deck_nobody_edited_reports_no_edit(folder: Path) -> None:

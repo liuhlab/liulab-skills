@@ -10,19 +10,22 @@ The build itself is in [build.md](build.md).
 slides included. Git ignores that folder. Run it after every build.
 
 A picture's name is `<slide id>.click<n>.png`: `click0` is the slide as it opens, and
-`click<n>` is the slide after n clicks. The name holds no page number, so each picture is
-compared with the last picture of the same slide and click state.
+`click<n>` is the slide after n clicks. The name holds no page number, so each click state is
+compared with the same click state of the last render.
 
 The command prints one line per picture to look at:
 
 | Line | Means |
 | --- | --- |
 | `new: renders/<name>` | The click state had no picture before |
-| `changed: renders/<name>` | The picture differs from the last render's |
+| `changed: renders/<name>` | The click state differs from the last render's: a shape, a word, a style or a picture |
 | `gone: renders/<name>` | No slide has this click state now. The picture was deleted |
 
-Look at each `new` and `changed` picture. A slide that moves to another page is listed as
-changed, because its page number changed.
+Look at each `new` and `changed` picture. A slide that only moves to another page, because
+a slide was inserted or dropped before it, is not listed: the digits of its page number are
+left out of the comparison. Its picture is still written again and shows the new number.
+The comparison reads the deck file, not the pictures, and keeps what it read in
+`renders/states.json`.
 
 How it works, and its limits:
 

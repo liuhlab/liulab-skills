@@ -7,6 +7,7 @@ reads the report a member would: the slide by id and page, the shape, the check 
 from __future__ import annotations
 
 import re
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -14,8 +15,8 @@ import pytest
 
 from lab_deck import lint
 from lab_deck.merge import write as write_deck
-from tests.lab_deck.conftest import lab_deck
-from tests.lab_deck.test_deck import DOT, PLAIN, write
+from tests.lab_deck.conftest import PLAIN, lab_deck, write
+from tests.lab_deck.test_deck import DOT
 
 # A slide that uses everything the lint reads and breaks none of it: a table, a picture
 # beside the text, Chinese text, the one citation line, and two clicks with their cues.
@@ -102,14 +103,28 @@ def failures(text: str) -> list[tuple[str, str, str, str, str]]:
     )
 
 
-def refused(folder: Path, bad: str) -> str:
-    """Build the passing deck, then the deck with `bad`, and return what the build said.
-
-    The second build must be refused, and must leave the first build's deck as it was.
-    """
-    deck_with(folder)
-    first = lab_deck("build", folder)
+@pytest.fixture(scope="module")
+def passing(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Build the passing deck once."""
+    path = tmp_path_factory.mktemp("lint") / "talk"
+    assert lab_deck("new", path).returncode == 0
+    deck_with(path)
+    first = lab_deck("build", path)
     assert first.returncode == 0, first.stdout + first.stderr
+    return path
+
+
+@pytest.fixture
+def folder(passing: Path, tmp_path: Path) -> Path:
+    """Give each test its own copy of the deck folder, with the passing deck built in it."""
+    return Path(shutil.copytree(passing, tmp_path / "talk"))
+
+
+def refused(folder: Path, bad: str) -> str:
+    """Build the deck with `bad` over a built deck, and return what the build said.
+
+    The build must be refused, and must leave the deck the last build wrote as it was.
+    """
     before = (folder / "talk.pptx").read_bytes()
     deck_with(folder, bad)
 
@@ -334,6 +349,8 @@ def test_a_slide_with_clicks_and_no_notes_passes(folder: Path) -> None:
 
 def test_lint_refuses_a_folder_whose_deck_is_not_built(folder: Path) -> None:
     """The lint reads the built deck, so there must be one."""
+    (folder / "talk.pptx").unlink()
+
     linted = lab_deck("lint", folder)
 
     assert linted.returncode == 1

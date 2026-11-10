@@ -6,14 +6,7 @@ import base64
 import re
 from pathlib import Path
 
-from tests.lab_deck.conftest import Deck, lab_deck
-
-PLAIN = """\
-module.exports = (slide, deck) => {
-  deck.title(slide, "TITLE");
-  deck.lines(slide, ["First phrase", { text: "Second phrase", accent: true }]);
-};
-"""
+from tests.lab_deck.conftest import PLAIN, Deck, lab_deck, write
 
 # PptxGenJS's own table, between two text boxes: the case whose shape ids it gets wrong.
 TABLE = """\
@@ -38,20 +31,6 @@ module.exports = (slide, deck) => {
 DOT = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
 )
-
-
-def write(folder: Path, slides: dict[str, str]) -> None:
-    """Give the deck folder these slides, in this order; each title is the slide's name."""
-    for name, source in slides.items():
-        (folder / "slides" / f"{name}.js").write_text(
-            source.replace("TITLE", f"About {name}"), encoding="utf-8"
-        )
-    listed = ", ".join(f'"{name}"' for name in slides)
-    order = folder / "deck.toml"
-    order.write_text(
-        re.sub(r"slides = \[.*\]", f"slides = [{listed}]", order.read_text(encoding="utf-8")),
-        encoding="utf-8",
-    )
 
 
 def built(folder: Path) -> Deck:

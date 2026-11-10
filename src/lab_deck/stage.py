@@ -26,12 +26,13 @@ from xml.parsers import expat
 from xml.sax.saxutils import quoteattr
 from zipfile import ZipFile
 
+from lab_deck import house
 from lab_deck.folder import Refusal
 from lab_deck.merge import SLIDE, A, P, write
 
 NS = {"p": P, "a": A}
 # The shapes no click may show or hide: the slide's conclusion stays up.
-FIXED = ("Slide title",)
+FIXED = (house.TITLE,)
 
 
 @dataclass(frozen=True)

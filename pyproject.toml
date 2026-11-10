@@ -130,6 +130,9 @@ fonttools = ">=4.50"
 [tool.pixi.pypi-dependencies]
 liulab-skills = { path = ".", editable = true }
 pytest = "*"
+# Runs the tests on every core. Each test works in its own temporary folder, so they share
+# nothing; the deck-build tests start Node and are most of the time the suite takes.
+pytest-xdist = "*"
 
 # The docs builder, in a feature of its own so that exactly one CI job installs it and the
 # gate everyone runs does not carry it.
@@ -195,7 +198,7 @@ conformance = "python scripts/conformance.py"
 # the real Node build on a small deck folder. For the first, every test that would
 # otherwise reach the Edison platform is answered by a stub the test writes itself, so the
 # suite is safe on the day the spend path is broken — which is the day it matters.
-test = "pytest"
+test = "pytest -n auto"
 # The static step list lives here and nowhere else; `check.sh` takes it as arguments, and
 # `ci.yml` invokes this task by name, so the local gate and CI cannot drift.
 check-static = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance"
