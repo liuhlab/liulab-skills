@@ -11,7 +11,7 @@ disable-model-invocation: true
 # hq-mode
 
 Read [references/working-style.md](references/working-style.md) in full before the first tool
-call: asking, autonomy, delegation, the reply, the user's documents and the lab defaults. Its
+call: asking, autonomy, delegation, the reply and the user's documents. Its
 always-pause list outranks every session override ("headless", "land it", "going to bed") and
 every principle: an `sbatch` outside an approved run plan waits for the user's yes, and "close the
 issue" never merges a PR nobody reviewed. A repo's own `AGENTS.md` wins over that page. Then

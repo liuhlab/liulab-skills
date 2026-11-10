@@ -10,7 +10,7 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 ### Added
 
 - `hq-mode` now says which model and effort a helper agent gets. The main agent keeps the best
-  model and the highest effort, and so does a helper that designs, diagnoses, decides or
+  model at the `xhigh` effort level, and so does a helper that designs, diagnoses, decides or
   reviews. A helper on routine work, such as a ticket that is already decided, a merge or a
   lookup, may run on the next model down, one effort level lower. The main agent chooses each
   time, and ability comes before saving: a hard ticket gets the full model and effort. Where an
