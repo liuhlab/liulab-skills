@@ -30,6 +30,16 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   builds to the same file, so a rebuild that changes nothing shows no change in git.
 - The theme file may change the font and the accent colour only. The build refuses anything
   else in it.
+- A slide can show and hide its sections on clicks. The slide source names each section and
+  says which ones a click brings or takes away. The only effects are Appear and Disappear. A
+  click names a section, not a shape, so moving a line in the source does not break the
+  clicks after it. A click that names a section the slide does not have stops the build.
+- A drawing made of many shapes becomes one group in PowerPoint, so it moves and shows as
+  one thing.
+- Speaker notes come from the deck folder, one file per slide. Mark each click in them with
+  `[Click]`.
+- A built deck no longer holds the folder path of a picture on your machine. A picture's alt
+  text is its file name, or the text the slide source gives.
 - A build page in `lab-presentation` that describes the deck folder, the slide helpers, the
   steps of the build and the known limits of PptxGenJS.
 - An images page in `lab-presentation`. When a slide needs a drawn picture, the agent has

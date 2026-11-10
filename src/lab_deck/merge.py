@@ -1,8 +1,9 @@
 """Put one-slide decks together into one deck, without changing a slide.
 
-`runner.js` writes each slide as a deck of its own. Three steps turn them into the deck:
+`runner.js` writes each slide as a deck of its own. Four steps turn them into the deck:
 
 - `repair` fixes what PptxGenJS gets wrong inside one slide, and names the slide.
+- `stage.stage`, in the module beside this one, then writes the slide's groups and clicks.
 - `merge` copies every slide, its notes and its pictures into one file. A slide's XML goes in
   byte for byte, so a shape id set before the merge is the shape id after it.
 - `check` reads the merged file back and refuses a deck PowerPoint would offer to repair.
@@ -55,7 +56,7 @@ def _shape_ids(slide: bytes) -> list[str]:
     return [node.get("id", "") for node in ET.fromstring(slide).iter(f"{{{P}}}cNvPr")]
 
 
-def _write(path: Path, parts: dict[str, bytes]) -> None:
+def write(path: Path, parts: dict[str, bytes]) -> None:
     """Write a zip file whose bytes depend on its parts alone."""
     with ZipFile(path, "w", ZIP_DEFLATED) as archive:
         for name, payload in parts.items():
@@ -104,7 +105,7 @@ def repair(path: Path, slide: str) -> None:
             "PowerPoint would offer to repair the deck. PptxGenJS numbers a video or a sound "
             "apart from other shapes; draw the slide without it."
         )
-    _write(path, parts)
+    write(path, parts)
 
 
 def merge(sources: list[Path], output: Path) -> None:
@@ -233,7 +234,7 @@ def _merge(archives: list[ZipFile], ids: list[str], output: Path) -> None:
     for number, archive in enumerate(archives, 1):
         assert out[f"ppt/slides/slide{number}.xml"] == archive.read(SLIDE)
         assert out[f"ppt/notesSlides/notesSlide{number}.xml"] == archive.read(NOTES)
-    _write(output, out)
+    write(output, out)
 
 
 def _retarget(payload: bytes, owner: str, owner_now: str, moved: dict[str, str]) -> bytes:
