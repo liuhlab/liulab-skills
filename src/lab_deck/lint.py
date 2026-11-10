@@ -1,8 +1,9 @@
 """Lint a built deck in plain code: no model, no tokens, about a second.
 
-The lint reads the deck file and nothing else. The room, which sets the size floor, comes
-from the audience brief through the caller. `build` runs the lint on the deck it is about to
-write and refuses to replace the last built deck when a blocking check fails.
+The lint reads the deck file and nothing else. The room, which sets the size floor, the
+use and the known terms come from the audience brief through the caller. `build` runs the
+lint on the deck it is about to write and refuses to replace the last built deck when a
+blocking check fails.
 
 A check is one entry of `CHECKS`: a name, a severity, the slide rule it enforces and a
 function that reads one slide. A `blocking` check stops a build. A `warning` check is
@@ -24,13 +25,14 @@ import xml.etree.ElementTree as ET
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
 from functools import cache
+from itertools import pairwise
 from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
 from fontTools.ttLib import TTFont, TTLibError
 
 from lab_deck import stage
-from lab_deck.folder import ROOMS, Refusal
+from lab_deck.folder import PRESENTED, READ_ALONE, ROOMS, Refusal
 from lab_deck.merge import A, P, R
 
 NS = {"p": P, "a": A}
@@ -40,6 +42,9 @@ WARNING = "warning"
 # The names the build gives the two shapes the size floor treats apart.
 PAGE_NUMBER = "Page number"
 CITATION = "Citation"
+# The names the build gives the title, and a text box whose sentences are meant.
+TITLE = "Slide title"
+SENTENCE = "Intended sentence"
 # The one size under the floor that a slide may carry, on its citation line, in points.
 CITATION_SIZE = 12
 # What DrawingML gives a run that states no size, and a text box that states no inset.
@@ -54,6 +59,26 @@ SLACK = 1.05
 # The share of regular width a bold face adds, for a font with no bold file to read.
 BOLD = 1.07
 CUE = re.compile(r"\[Click\]")
+
+# The limits of the warning checks. The slide-rules page says how each was measured.
+# The most words a slide carries beside its title, its citation and its page number.
+WORDS = 100
+# The most lines a title takes.
+TITLE_LINES = 2
+# The fewest words a line holds before the lint reads it as a sentence.
+SENTENCE_WORDS = 4
+# A line that opens with one of these has a subject, and is a sentence with no full stop.
+SUBJECT = re.compile(r"(We|I|It|They|There|He|She|You)\s")
+# A short form whose full stop ends no sentence.
+SHORT_FORM = re.compile(r"\b(e\.g|i\.e|etc|et al|vs|cf|Fig|approx)\.")
+# The longest word in capitals the lint reads as an abbreviation, in letters and digits.
+ABBREVIATION = 6
+# A word of letters and digits, and a Roman numeral, which is no abbreviation.
+TOKEN = re.compile(r"[A-Za-z][A-Za-z0-9]*")
+ROMAN = re.compile(r"[IVX]+")
+# Chinese and typographic punctuation, read as its plain form. NFKC first turns full-width
+# brackets, question marks and exclamation marks into their plain forms.
+PLAIN = str.maketrans("。”\u2019」』", '."\'""')
 
 # Advance widths of Helvetica, in thousandths of the font size, for the characters from the
 # space to the tilde. Arial has the same widths. Used when the font's file is not found.
@@ -76,6 +101,8 @@ class Run:
     size: float
     bold: bool
     font: str | None
+    color: str | None = None
+    """The colour the run states, as six hex digits or a theme colour's name."""
 
 
 @dataclass(frozen=True)
@@ -137,10 +164,18 @@ class Slide:
 
 @dataclass(frozen=True)
 class Setup:
-    """What the checks need beside the slide: the size floor and the font widths."""
+    """What the checks need beside the slide: the brief's lines and the font widths."""
 
     floor: int
     fonts: Fonts
+    use: str = PRESENTED
+    """`presented` or `read alone`. A deck read alone may carry sentences and more words."""
+    known: frozenset[str] = frozenset()
+    """The brief's known terms and each word of them, in lower case."""
+    first: dict[str, int] = field(default_factory=dict)
+    """The page each abbreviation of the deck is first used on."""
+    spelled: dict[str, int] = field(default_factory=dict)
+    """The page each abbreviation is first spelled out on, for those that are."""
 
 
 @dataclass(frozen=True)
@@ -327,12 +362,15 @@ def _paragraphs(body: ET.Element) -> list[Paragraph]:
             if look is not None and look.get("sz"):
                 size = int(look.get("sz", 0)) / 100
             latin = None if look is None else look.find("a:latin", NS)
+            fill = None if look is None else look.find("a:solidFill", NS)
+            color = None if fill is None or not len(fill) else fill[0].get("val")
             runs.append(
                 Run(
                     node.findtext("a:t", "", NS),
                     size,
                     look is not None and look.get("b") in ("1", "true"),
                     None if latin is None else latin.get("typeface"),
+                    color,
                 )
             )
         percent = None if props is None else props.find("a:lnSpc/a:spcPct", NS)
@@ -726,6 +764,183 @@ def click_cues(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
         )
 
 
+def _plain_marks(text: str) -> str:
+    """Spell Chinese and typographic punctuation as its plain form."""
+    return unicodedata.normalize("NFKC", text).translate(PLAIN)
+
+
+def _wide_letter(char: str) -> bool:
+    """Say whether this is a full-width letter, such as a Chinese character: not punctuation."""
+    return unicodedata.east_asian_width(char) in ("W", "F") and unicodedata.category(char) == "Lo"
+
+
+def count_words(text: str) -> int:
+    """Count the words of some text. A Chinese character counts as one word.
+
+    A word is a run of characters between spaces that holds a letter or a digit. A full-width
+    letter, such as a Chinese character or a kana, is a word by itself.
+    """
+    rest = "".join(" " if _wide_letter(char) else char for char in text)
+    wide = sum(1 for char in text if _wide_letter(char))
+    return wide + sum(1 for word in rest.split() if any(char.isalnum() for char in word))
+
+
+def _body(slide: Slide) -> Iterator[Shape]:
+    """Give the shapes whose text is the slide's body: not its title, citation or page number."""
+    for shape in slide.shapes:
+        if shape.text and shape.name not in (TITLE, CITATION, PAGE_NUMBER):
+            yield shape
+
+
+def slide_words(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
+    """Find a slide that carries more words than the limit. A deck read alone is not checked."""
+    if setup.use == READ_ALONE:
+        return
+    words = sum(count_words(shape.text) for shape in _body(slide))
+    if words > WORDS:
+        yield (
+            "slide",
+            f"the slide carries {words} words beside its title, and the limit is {WORDS} "
+            "(a Chinese character counts as one word)",
+        )
+
+
+def sentence(text: str) -> str | None:
+    """Say why a line reads as a full sentence, or None when it reads as a phrase.
+
+    A guess from the line's punctuation and its first word: the lint parses no grammar.
+    """
+    flat = SHORT_FORM.sub(r"\1", " ".join(_plain_marks(text).split()))
+    if count_words(flat) < SENTENCE_WORDS:
+        return None
+    bare = flat.rstrip("\"') ")
+    if bare.endswith((".", "!", "?")) and not bare.endswith(".."):
+        return "it ends as a sentence does"
+    if re.search(r"[a-z)][.!?] +[A-Z]", bare) or any(
+        end in ".!?" and _wide_letter(after) for end, after in pairwise(bare)
+    ):
+        return "it holds the end of a sentence"
+    if SUBJECT.match(flat):
+        return f"it opens with a subject, {flat.split()[0]}"
+    return None
+
+
+def body_sentence(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
+    """Find a full sentence below the title. An intended sentence and a deck read alone pass."""
+    if setup.use == READ_ALONE:
+        return
+    for shape in _body(slide):
+        if shape.name.startswith(SENTENCE):
+            continue
+        for paragraph in shape.paragraphs:
+            why = sentence(paragraph.text)
+            if why is not None:
+                yield (shape.name, f"{_quote(paragraph.text)} reads as a full sentence: {why}")
+
+
+def title_lines(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
+    """Find a title that takes more than two lines, by an estimate from font widths."""
+    for shape in slide.shapes:
+        if shape.name != TITLE or not shape.text or shape.w < 0:
+            continue
+        lines = layout(shape, setup.fonts).lines
+        if lines > TITLE_LINES:
+            yield (
+                shape.name,
+                f"the title takes about {lines} lines (an estimate from font widths), "
+                f"and the limit is {TITLE_LINES}",
+            )
+
+
+def _capitals(line: str) -> bool:
+    """Say whether a line is a heading set in capitals: two words or more, no small letter."""
+    words = [word for word in line.split() if any(char.isalpha() for char in word)]
+    return len(words) > 1 and not any(char.islower() for char in line)
+
+
+def abbreviations(text: str) -> list[str]:
+    """List the abbreviations in some text, each once, in the order met.
+
+    An abbreviation is a word with two capitals or more, where at least half of its letters
+    are capitals: DNA, mRNA, CpG. A plural loses its s. A Roman numeral is not one. Nor is
+    a word of a heading set in capitals: a word all in capitals that is longer than six
+    characters, or any word of a line of two words or more that is all in capitals.
+    """
+    found: list[str] = []
+    lines = [line for line in text.splitlines() if not _capitals(line)]
+    for word in TOKEN.findall("\n".join(lines)):
+        if word.isupper() and len(word) > ABBREVIATION:
+            continue
+        if len(word) > 3 and word.endswith("s") and word[-2].isupper():
+            word = word[:-1]
+        capitals = sum(1 for char in word if char.isupper())
+        letters = sum(1 for char in word if char.isalpha())
+        if capitals < 2 or capitals * 2 < letters or ROMAN.fullmatch(word):
+            continue
+        if word not in found:
+            found.append(word)
+    return found
+
+
+def spelled_out(text: str) -> set[str]:
+    """Find the abbreviations some text spells out: `long name (DNA)` or `DNA (long name)`."""
+    found = set()
+    for word in abbreviations(text):
+        name = re.escape(word)
+        if re.search(rf"\(\s*{name}s?\s*\)|\b{name}s?\s*\(\s*[^\s)]", _plain_marks(text)):
+            found.add(word)
+    return found
+
+
+def _read(slide: Slide) -> Iterator[Shape]:
+    """Give the shapes the abbreviation check reads: the title and the body, not the citation."""
+    for shape in slide.shapes:
+        if shape.text and shape.name not in (CITATION, PAGE_NUMBER):
+            yield shape
+
+
+def unknown_abbreviation(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
+    """Find an abbreviation at its first use, unless it is known or spelled out by then."""
+    seen: set[str] = set()
+    for shape in _read(slide):
+        for word in abbreviations(shape.text):
+            if word in seen or setup.first.get(word) != slide.page:
+                continue
+            seen.add(word)
+            if word.lower() in setup.known or setup.spelled.get(word, slide.page + 1) <= slide.page:
+                continue
+            yield (
+                shape.name,
+                f"{word} is first used here, is not spelled out on this slide or an earlier "
+                "one, and is not in the brief's known terms",
+            )
+
+
+def _accent(color: str) -> bool:
+    """Say whether a text colour is an accent: not black, white or a grey."""
+    if not re.fullmatch(r"[0-9A-Fa-f]{6}", color):
+        # A theme colour: its text and background colours are plain, the others accents.
+        return color.startswith(("accent", "hlink", "folHlink"))
+    return not color[0:2].lower() == color[2:4].lower() == color[4:6].lower()
+
+
+def accent_colours(slide: Slide, setup: Setup) -> Iterator[tuple[str, str]]:
+    """Find a slide whose text is in more than one accent colour."""
+    found: dict[str, str] = {}
+    for shape in slide.shapes:
+        for paragraph in shape.paragraphs:
+            for run in paragraph.runs:
+                if run.text.strip() and run.color and _accent(run.color):
+                    found.setdefault(run.color.upper(), shape.name)
+    if len(found) > 1:
+        colours = list(found)
+        yield (
+            found[colours[1]],
+            f"the slide's text is in {len(colours)} accent colours ({', '.join(colours)}); "
+            "one accent colour marks what the slide is about",
+        )
+
+
 # Every check the lint runs, in the order reported. The rule ids are those of the slide-rules
 # page of the `lab-presentation` skill, which names each check beside its rule.
 CHECKS: tuple[Check, ...] = (
@@ -734,6 +949,11 @@ CHECKS: tuple[Check, ...] = (
     Check("picture-over-text", BLOCKING, 16, picture_over_text),
     Check("negative-size", BLOCKING, 17, negative_size),
     Check("click-cues", BLOCKING, 18, click_cues),
+    Check("slide-words", WARNING, 1, slide_words),
+    Check("body-sentence", WARNING, 1, body_sentence),
+    Check("title-lines", WARNING, 2, title_lines),
+    Check("unknown-abbreviation", WARNING, 4, unknown_abbreviation),
+    Check("accent-colours", WARNING, 9, accent_colours),
 )
 
 
@@ -749,8 +969,8 @@ def _family(slides: list[Slide]) -> str:
     return max(counts, key=lambda name: counts[name]) if counts else "Arial"
 
 
-def lint(deck: Path, room: str) -> Report:
-    """Run every check on the deck at `deck`, for the room the audience brief names.
+def lint(deck: Path, room: str, use: str = PRESENTED, known_terms: Iterable[str] = ()) -> Report:
+    """Run every check on the deck at `deck`, for the room, use and known terms of the brief.
 
     Raises
     ------
@@ -759,7 +979,18 @@ def lint(deck: Path, room: str) -> Report:
     """
     slides = read(deck)
     floor = ROOMS[room]["floor"]
-    setup = Setup(floor, Fonts(_family(slides)))
+    terms = list(known_terms)
+    known = {term.strip().lower() for term in terms}
+    known |= {word.lower() for term in terms for word in TOKEN.findall(term)}
+    first: dict[str, int] = {}
+    spelled: dict[str, int] = {}
+    for slide in slides:
+        for shape in _read(slide):
+            for word in abbreviations(shape.text):
+                first.setdefault(word, slide.page)
+            for word in spelled_out(shape.text):
+                spelled.setdefault(word, slide.page)
+    setup = Setup(floor, Fonts(_family(slides)), use, frozenset(known), first, spelled)
     findings = [
         Finding(check.name, check.severity, check.rule, slide.ident, slide.page, shape, message)
         for slide in slides

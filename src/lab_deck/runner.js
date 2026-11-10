@@ -26,6 +26,8 @@ const H = 7.5;
 const MARGIN = 0.7;
 const BLACK = "000000";
 const WHITE = "FFFFFF";
+// The name of a text box whose sentences are meant. `lab_deck/lint.py` knows it by this name.
+const SENTENCE = "Intended sentence";
 // The page number's box, in the bottom margin, clear of anything a slide draws inside it.
 const PAGE = { x: W - MARGIN - 1, y: H - 0.5, w: 1, h: 0.3 };
 
@@ -99,7 +101,9 @@ function helpers(pres, plan) {
     },
 
     // Phrases, one per line. An item is a string or { text, accent, bold }.
-    lines(slide, items, box = {}) {
+    // `sentence: true` in the box marks its text as a sentence that is meant, such as a
+    // quote: the box takes the name the lint leaves out of its sentence check.
+    lines(slide, items, { sentence, ...box } = {}) {
       const runs = items.map((item) => {
         const it = typeof item === "string" ? { text: item } : item;
         return {
@@ -111,6 +115,7 @@ function helpers(pres, plan) {
         x: MARGIN, y: 1.9, w: W - 2 * MARGIN, h: H - 1.9 - MARGIN, ...box,
         fontFace: deck.font, fontSize: box.fontSize || deck.size.body,
         margin: 0, valign: "top", paraSpaceAfter: 8,
+        ...(sentence ? { objectName: SENTENCE } : {}),
       });
     },
 

@@ -5,7 +5,8 @@ depend on it. [practice.md](practice.md) gives the evidence behind them.
 
 Rule numbers are stable ids that the skill, the deck lint and other pages cite. A removed rule
 leaves a gap. A rule that the deck lint checks ends with the name of its check, as `Lint:`.
-Every check named on this page is blocking: it stops the build.
+A blocking check stops the build. A warning stops nothing: fix the slide, or explain the
+warning in the reply. A check is blocking unless its rule calls it a warning.
 
 <!-- The list numbers are the rule ids: they run on across the headings. -->
 <!-- markdownlint-disable MD029 -->
@@ -16,15 +17,21 @@ Every check named on this page is blocking: it stops the build.
    on the slide, and leave the sentence to the speaker. "We found that trimming the reads
    improved the alignment rate" becomes "Trimmed reads: higher alignment rate". A quote may
    stay a sentence. A deck the brief marks as read alone may carry its own sentences.
+   Lint, as warnings: `body-sentence` for a line that reads as a full sentence, and
+   `slide-words` for a slide of more than 100 words beside its title, citation and page
+   number. One Chinese character counts as one word. Mark a sentence that is meant with
+   `{ sentence: true }` in the box of `deck.lines`. A deck read alone gets neither warning.
 2. **The title states the conclusion.** One short sentence, two lines at most. It is the only
    sentence the slide needs. "Alignment rate by sample" becomes "Trimming raises the alignment
-   rate in every sample".
+   rate in every sample". Lint, as a warning: `title-lines`, an estimate from font widths.
 3. **One idea per slide, and the idea is on it.** A point that matters appears on the slide in
    short form, because the audience misses what is only said. Cut what the talk will not
    discuss, however interesting.
 4. **Jargon is judged against the brief.** Spell out a term or an abbreviation at first use,
    unless the brief lists it under known terms. Say what a named tool does in one plain line.
-   The agent's own sense of what is common knowledge decides nothing.
+   The agent's own sense of what is common knowledge decides nothing. Lint, as a warning:
+   `unknown-abbreviation`, at an abbreviation's first use, unless the brief lists it or a
+   slide up to that one spells it out, as in "polymerase chain reaction (PCR)".
 5. **The field's own wording.** Take each term of art from the field's papers. A paraphrase
    sounds wrong to the experts in the room.
 6. **A real figure, simplified.** Where a figure panel exists, use it. Never redraw a result
@@ -52,7 +59,9 @@ Every check named on this page is blocking: it stops the build.
 ## Look
 
 9. **Colour only with meaning.** Text is black. One accent colour marks the element the slide
-   is about, and nothing else. A colour with no reason becomes black.
+   is about, and nothing else. A colour with no reason becomes black. Lint, as a warning:
+   `accent-colours`, for a slide whose text is in two colours or more beside black, white
+   and grey.
 10. **Colours a colour-blind viewer can tell apart.** Take category colours from this palette,
     as red, green, blue: black 0,0,0; orange 230,159,0; sky blue 86,180,233; bluish green
     0,158,115; yellow 240,228,66; blue 0,114,178; vermillion 213,94,0; reddish purple
@@ -89,3 +98,21 @@ Every check named on this page is blocking: it stops the build.
 18. **One `[Click]` cue per click.** Where a slide has notes, they carry one `[Click]` cue
     for each click of the slide, and none on a slide with no click. A slide with no notes is
     not checked. Lint: `click-cues`.
+
+## Measured limits
+
+The word and title limits were measured on the accepted slides of two finished lab decks, on
+2026-11-09: 26 slides after the title slides, 25 of them with a title.
+
+| Measure | Median | 90th percentile | Most | Limit |
+| --- | --- | --- | --- | --- |
+| Words on a slide, beside its title, citation and page number | 60 | 104 | 125 | 100 |
+| Lines the title takes, estimated | 1 | 1.6 | 2 | 2 |
+| Characters in the title | 52 | 57 | 74 | none |
+| Words in the title | 7 | 9 | 10 | none |
+
+- **Words.** The limit is the 90th percentile, rounded to 100. A slide past it carries more
+  words than nine in ten of the accepted slides.
+- **Title.** The limit is the most lines an accepted title took. 22 of the 25 took one line.
+- **Chinese.** Neither deck is in Chinese, so the equivalence is a decision, not a
+  measurement: one character, one word.

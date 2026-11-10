@@ -70,7 +70,7 @@ the slide. Otherwise build one.
 ## 4. The check
 
 - The deck lint stops the build on a blocking failure. Fix the slide. Never loosen a check.
-- Fix every lint warning, or explain it in the reply. None passes in silence.
+- Fix every warning of `lab-deck lint`, or explain it in the reply. None passes in silence.
 - Run `lab-deck render` after each build: one picture per click state. Look only at the
   pictures it lists as new or changed.
 - Before you report the deck finished, look at every picture once.

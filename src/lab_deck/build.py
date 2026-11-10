@@ -80,8 +80,10 @@ def _plan(scratch: Path, slide: str) -> Path:
     return scratch / f"{slide}.plan.json"
 
 
-def build(folder: Folder) -> Path:
-    """Build the deck of `folder` and return the file written.
+def build(folder: Folder) -> lint.Report:
+    """Build the deck of `folder` into `folder.output`, and return what the lint found in it.
+
+    A warning of the lint stops nothing: the caller prints the report.
 
     Raises
     ------
@@ -117,7 +119,7 @@ def build(folder: Folder) -> Path:
             written = work / "merged deck.pptx"
             merge.merge(slides, written)
             merge.check(written, len(slides))
-            report = lint.lint(written, folder.room)
+            report = lint.lint(written, folder.room, folder.use, folder.known_terms)
             if report.blocking:
                 raise Refusal(lint.render(report, folder.output.name))
         except Refusal as error:
@@ -125,4 +127,4 @@ def build(folder: Folder) -> Path:
                 f"the build failed, and {folder.output.name} was left as it was.\n{error}"
             ) from None
         written.replace(folder.output)
-    return folder.output
+    return report

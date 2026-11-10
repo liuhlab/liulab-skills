@@ -46,6 +46,16 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   an estimate from font widths, and the report says so. Chinese text keeps the same floor.
 - `deck.citation` draws a slide's one citation line at 12 pt, the only text allowed under
   the floor beside the page number.
+- `lab-deck lint` and `lab-deck build` also print warnings, which stop nothing: a slide
+  with more than 100 words, a full sentence below the title, a title past two lines, an
+  abbreviation that is not in the brief's known terms and not spelled out by its first
+  use, and text in more than one accent colour. The agent fixes each warning or explains
+  it in its reply. One Chinese character counts as one word.
+- The word and title limits come from the accepted slides of two finished lab decks. The
+  slide rules give the numbers and say how each limit was chosen.
+- `{ sentence: true }` on a box of `deck.lines` marks a sentence that is meant, such as a
+  quote, and it stops warning. A brief with `use = "read alone"` turns off the word and
+  sentence warnings. The brief's `known_terms` and `use` are now read and checked.
 - Slide rules 16 to 18: no picture over text, no negative size, one `[Click]` cue per click.
   Each rule that the lint checks names its check.
 - A built deck no longer holds the folder path of a picture on your machine. A picture's alt

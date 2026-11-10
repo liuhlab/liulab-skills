@@ -80,14 +80,17 @@ def build(
     try:
         read = folders.read(folder)
         held = powerpoint.close_for_build(read.output, closed)
-        written = builder.build(read)
+        report = builder.build(read)
     except Refusal as error:
         if held is not None:
             # The build failed after the close: show the last built deck again.
             print(powerpoint.reopen(held))
         raise _refuse(error) from None
     count = len(read.slides)
-    print(f"built {written}: {count} slide{'' if count == 1 else 's'}")
+    print(f"built {read.output}: {count} slide{'' if count == 1 else 's'}")
+    if report.warnings:
+        # A warning stops no build, and none passes in silence.
+        print(linter.render(report, read.output.name))
     if held is not None:
         print(powerpoint.reopen(held, count))
 
@@ -96,10 +99,13 @@ def build(
 def lint(
     folder: Annotated[Path, typer.Argument(help="the deck folder (default: this one)")] = Path(),
 ) -> None:
-    """Check the built deck in plain code, with no model. Exit 1 on a blocking failure."""
+    """Check the built deck in plain code, with no model. Exit 1 on a blocking failure.
+
+    A warning is printed and leaves the exit at 0.
+    """
     try:
         read = folders.read(folder)
-        report = linter.lint(read.output, read.room)
+        report = linter.lint(read.output, read.room, read.use, read.known_terms)
     except Refusal as error:
         raise _refuse(error) from None
     print(linter.render(report, read.output.name))

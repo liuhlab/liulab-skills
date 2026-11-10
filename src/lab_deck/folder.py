@@ -29,6 +29,10 @@ THEME = "theme.toml"
 
 # Body size and the floor for anything the audience must read, in points, by room.
 ROOMS = {"meeting room": {"body": 24, "floor": 20}, "hall": {"body": 28, "floor": 24}}
+# How the deck is used. A deck read alone may carry its own sentences.
+PRESENTED = "presented"
+READ_ALONE = "read alone"
+USES = (PRESENTED, READ_ALONE)
 # One plain font, and the blue of the Okabe-Ito palette, which colour-blind viewers can tell
 # from its other colours.
 FONT = "Arial"
@@ -70,7 +74,8 @@ SLIDE_TEXT = """\
 // `slide` is the PptxGenJS slide. `deck` carries the theme, the sizes and a few helpers:
 //   deck.title(slide, text)            the slide's conclusion, in one short sentence
 //   deck.lines(slide, [..], box)       phrases, one per line; an item is a string or
-//                                      { text, accent: true, bold: true }
+//                                      { text, accent: true, bold: true }; a box of
+//                                      { sentence: true } marks a sentence as intended
 //   deck.table(slide, rows, box)       a table; the first row is its header
 //   deck.citation(slide, text)         the one citation line, at 12 pt
 //   deck.picture(name)                 the path of a file in pictures/
@@ -106,6 +111,10 @@ class Folder:
     room: str
     font: str
     accent: str
+    use: str = PRESENTED
+    """`presented` or `read alone`, from the audience brief."""
+    known_terms: tuple[str, ...] = ()
+    """The terms and abbreviations the brief says the audience needs no help with."""
 
     def source(self, slide: str) -> Path:
         """Return the source file of the slide with this id."""
@@ -199,6 +208,13 @@ def read(path: Path) -> Folder:
     room = brief.get("room") or "meeting room"
     if room not in ROOMS:
         raise Refusal(f"{BRIEF}: `room` is {room!r}; it must be one of {', '.join(ROOMS)}.")
+    # A missing use means presented.
+    use = brief.get("use") or PRESENTED
+    if use not in USES:
+        raise Refusal(f"{BRIEF}: `use` is {use!r}; it must be one of {', '.join(USES)}.")
+    known = brief.get("known_terms") or []
+    if not isinstance(known, list) or not all(isinstance(term, str) for term in known):
+        raise Refusal(f"{BRIEF}: `known_terms` must be a list of terms, each in quotes.")
     other = sorted(set(theme) - {"font", "accent"})
     if other:
         raise Refusal(
@@ -215,6 +231,8 @@ def read(path: Path) -> Folder:
         room=room,
         font=str(theme.get("font") or FONT),
         accent=accent,
+        use=use,
+        known_terms=tuple(known),
     )
     for slide in folder.slides:
         if not folder.source(slide).is_file():

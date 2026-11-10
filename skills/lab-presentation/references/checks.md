@@ -44,9 +44,9 @@ How it works, and its limits:
 `lab-deck lint` reads the built deck and the brief's room, in about a second, with no model.
 `lab-deck build` runs the same checks on the deck it is about to write. A blocking failure
 stops the build and leaves the last built deck as it was. Fix the slide source, never the
-check.
+check. A warning stops nothing: `build` and `lint` print it, and `lint` still exits 0.
 
-| Check | Slide rule | Fails when |
+| Blocking check | Slide rule | Fails when |
 | --- | --- | --- |
 | `size-floor` | 8 | Text is under the room's floor: 20 pt in a meeting room, 24 pt in a hall |
 | `text-overflow` | 8 | Text takes more height than its box has |
@@ -74,3 +74,35 @@ slide results (page 3), shape "Text 1": size-floor (rule 8): "Too small" is 16 p
 - **A picture covers text** when it is drawn after the text and over the place the lint
   estimates for the words, not over the empty part of the text's box.
 - **Click cues** are checked only on a slide whose notes hold text.
+
+### Warnings
+
+A warning is a judgment call. Fix the slide, or explain in the reply why it stays. The
+limits and how they were measured are in [slide-rules.md](slide-rules.md#measured-limits).
+
+| Warning check | Slide rule | Warns when |
+| --- | --- | --- |
+| `slide-words` | 1 | The slide carries more than 100 words beside its title, citation and page number |
+| `body-sentence` | 1 | A line below the title reads as a full sentence |
+| `title-lines` | 2 | The shape named `Slide title` takes more than two lines, by the same estimate as overflow |
+| `unknown-abbreviation` | 4 | An abbreviation at its first use is not in the brief's `known_terms` and not spelled out by then |
+| `accent-colours` | 9 | The slide's text is in two colours or more beside black, white and grey |
+
+- **Words.** A word is a run of characters between spaces that holds a letter or a digit.
+  One Chinese character counts as one word.
+- **A sentence is a guess** from punctuation and the first word: the lint parses no grammar.
+  A line of four words or more warns when it ends in a full stop, a question mark or an
+  exclamation mark, holds one before a new sentence, or opens with a subject such as "We"
+  or "It". The Chinese marks count the same.
+- **An intended sentence**, such as a quote, goes in its own box:
+  `deck.lines(slide, ["..."], { sentence: true })`. The box is named `Intended sentence` in
+  the deck, and the lint skips the sentence check for a shape of that name. Its words still
+  count.
+- **A deck read alone**, `use = "read alone"` in the brief, gets no `slide-words` and no
+  `body-sentence` warning.
+- **An abbreviation** is a word with two capitals or more, at least half of its letters:
+  DNA, mRNA, CpG. A heading in capitals is not one. It is spelled out by
+  "long name (DNA)" or "DNA (long name)", on that slide or an earlier one. A known term
+  covers each word in it: `"RNA-seq"` covers RNA. The citation line is not read. The lint
+  warns once per abbreviation, at its first use.
+- **A title past two lines** drawn by `deck.title` also overflows its box, which is blocking.
