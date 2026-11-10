@@ -41,7 +41,7 @@ The user invokes with a goal.
 3. **Ask the scale question.** A goal over a large set climbs in rungs: 1% (early proof), 10%
    (scale proof), 100% (the full run). The roadmap does one rung, and its last check is that the
    next rung can be planned from measured cost, time and failure rate.
-4. **Draft on a review page.** Publish the draft as an artifact: the stages as a diagram, the
+4. **Draft on a review page.** Publish the draft as an HTML review page: the stages as a diagram, the
    done-when checks, one section per stage, the calls you made and the questions left. Done when
    the user agrees with the page.
 5. **File it.** Create the roadmap issue and its milestone, and put the roadmap in it. Place every

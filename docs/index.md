@@ -16,14 +16,16 @@ plugin holds that knowledge.
 | [lab-edison](skills/lab-edison.md) | The Edison platform: Kosmos for a whole research goal, cited literature answers and data analysis for a single question. No cluster. |
 | [lab-setup](skills/lab-setup.md) | One step after installing: the plugin updates by itself, and Codex and Kimi Code get it too. |
 | [hq-mode](skills/hq-mode.md) | A whole task done the lab's way: working rules, a playbook per kind of task, and a list of steps that always wait for your yes. |
+| [lab-presentation](skills/lab-presentation.md) | Slides and talks: an audience brief, a text outline, then slides checked against numbered rules. |
 | [unslop-zh](skills/unslop-zh.md) | Chinese writing, strict translation and polishing, with protected mixed content and no unnecessary rewrites. |
 | [roadmap](skills/roadmap.md) | A goal bigger than one wayfinder map, split into stages that each get their own map, spec and tickets. |
 
 The three cluster skills load by themselves when your request touches remote compute.
 The Chinese writing skill loads when the deliverable contains Chinese, and you can also
-call it by name. Call lab-edison, lab-setup, hq-mode and roadmap by name: lab-edison because
-every run costs you money, lab-setup because you need it once per machine, and hq-mode and
-roadmap because you choose when a task gets them.
+call it by name. The presentation skill loads when you ask for slides, a deck or a talk. Call
+lab-edison, lab-setup, hq-mode and roadmap by name: lab-edison because every run costs you
+money, lab-setup because you need it once per machine, and hq-mode and roadmap because you
+choose when a task gets them.
 
 ## What the agent will not do
 

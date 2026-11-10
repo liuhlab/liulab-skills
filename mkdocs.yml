@@ -47,6 +47,7 @@ nav:
       - lab-edison: skills/lab-edison.md
       - lab-setup: skills/lab-setup.md
       - hq-mode: skills/hq-mode.md
+      - lab-presentation: skills/lab-presentation.md
       - unslop-zh: skills/unslop-zh.md
       - roadmap: skills/roadmap.md
   - Developers:

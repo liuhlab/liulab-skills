@@ -69,7 +69,7 @@ Run inside a clone; `gh` infers the repo. Sub-issues and blocking use the tracke
 Wayfinding operations, as wayfinder does.
 
 - **List milestones**, to number the new one after them:
-  `gh api 'repos/<owner>/<repo>/milestones?state=all' --jq '.[].title'`
+  `gh api --paginate 'repos/<owner>/<repo>/milestones?state=all' --jq '.[].title'`
 - **Create the milestone**: `gh api --method POST repos/<owner>/<repo>/milestones -f title="M<n>: <goal>" -f description="<one sentence>"`
 - **Put an issue or pull request in it**: `gh issue edit <n> --milestone "M<n>: <goal>"`, or
   `gh pr edit <n> --milestone "M<n>: <goal>"`.

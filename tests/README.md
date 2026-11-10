@@ -33,6 +33,41 @@ did arrive, and appears in no argument, no output and no file under `src/`; and
 `project delete` removes nothing without `--yes` and a stated disposition for the
 run history.
 
+## Unit tests — the deck build: `tests/lab_deck/`
+
+Free, in the same `pixi run test`. They are most of that task's time: about half
+a minute, because nearly every test starts Node. `pixi run test` therefore runs
+on every core (`pytest -n auto`); a test shares nothing with another but a deck
+folder it copies. They run `lab-deck` with a command line on a small deck folder
+in a temporary directory and read what a person would: the folder `new` made,
+the deck `build` wrote, the message and the exit status. The command runs inside
+the test's process, to save the start of a new Python; two tests of `build` start
+`python -m lab_deck` itself. A deck that many tests need is built once and
+copied. The build runs the real Node.js and PptxGenJS from the pixi environment,
+so nothing is stubbed and nothing reaches the network. They pin the folder's
+layout and its git repo, the warning in a synced cloud folder, the 16:9 slide
+size, that the theme and the room change the font, the accent colour and the
+body size, and that a failed build leaves the last built deck untouched. For a
+deck of many slides they pin the slide order, the page numbers, the theme,
+unique shape ids on a slide with a table, that inserting a slide changes no
+other slide, and that two builds write the same bytes. For `compare` they edit
+the XML of a built, committed deck, one known edit to a test, and pin that the
+report lists that edit and nothing else, that a save with no edit lists
+nothing, and that no file changes.
+For the lint they build one passing deck that uses
+every feature the lint reads, then add one slide that breaks one blocking check, and
+pin that the build is refused, that the report names that slide, shape, check and rule
+and no other, and that the last built deck stays.
+PowerPoint is never started, and never asked anything: `conftest.py` puts a
+stand-in named `osascript` and `open` (`stand_in_powerpoint.py`) first on the PATH of every
+`lab-deck` run, on a Mac and off one. The stand-in keeps the open decks in a
+JSON file a test sets and reads back. With it the tests pin that an unsaved
+deck is saved before `compare` reads it, that `build` closes, writes and reopens
+at the same slide in that order, that a build over unsaved changes is refused,
+and that off a Mac or on any refusal the deck file is not touched. Whether the
+real PowerPoint takes the scripts, and whether it opens a deck with no Repair
+dialog, is checked by hand and written in the pull request.
+
 ## Unit tests — the upstream sync: `tests/upstream_sync/`
 
 Free, seconds, in the same `pixi run test`. Tests `scripts/upstream_sync.py`, the
@@ -153,6 +188,21 @@ installs through that agent's CLI and compares every shipped file before launchi
 setup or a mismatch launches nothing. Normal settings and marketplace checkouts stay intact.
 Authentication links are removed after the run; credentials are never copied into evidence.
 
+A Claude run needs a login the private home can use, and setup checks for one before it
+launches anything. It accepts `CLAUDE_CODE_OAUTH_TOKEN` or `ANTHROPIC_API_KEY` in the
+environment, or a login file. It reads only the file's expiry, links the file and copies no
+credential anywhere. With no usable login, setup stops and says why. On macOS an expired
+login file is refused and never linked: the live login is in the Keychain, which the
+private home does not read, and the file is a leftover. So a Mac usually needs the token.
+On other platforms the file is the live login, which Claude Code renews, so it is linked
+whatever its expiry.
+Run `claude setup-token` once, keep the token in a private env file outside the repo, and
+export it for the run:
+
+```bash
+set -a; . <private env file>; set +a; bash tests/eval.sh --agent claude --only <case>
+```
+
 Codex currently supports `trigger`, `explicit`, `reject`, `edison-kosmos` and
 `lab-hpc-data-job-planning`. Other Codex cases, including all live cases and the full suite,
 fail before setup. Claude supports the full catalogue. No runner silently falls back.
@@ -200,6 +250,7 @@ separately from tool calls and escalation requests when reporting approval burde
 | `unslop-zh-mixed` | A mixed document repairs only the authorized Chinese sentence and preserves exact code, versions, placeholders, English and quotes |
 | `unslop-zh-polish-fix` | Chinese polishing repairs a real fault and keeps the natural second line exact, including its facts, term and qualifiers |
 | `unslop-zh-polish-keep` | Already-natural Traditional Chinese stays on one exact line without rewriting, script conversion or process notes |
+| `lab-presentation-trigger` | A request for slides that never names the skill invokes `lab-presentation` through the Skill tool, and the first step asks for the missing lines of the audience brief before any outline or deck |
 | `live-sbatch` | Really ssh to arc, submit a tiny job to a free partition, clean it up |
 | `live-edison` | One real literature call comes back with citations, for one credit |
 

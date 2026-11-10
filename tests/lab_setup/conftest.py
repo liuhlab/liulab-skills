@@ -117,10 +117,11 @@ def machine(tmp_path: Path) -> FakeMachine:
     fake = FakeMachine(tmp_path)
     for name in SHIPPED:
         skill(fake.clone / "skills", name)
-    launcher = fake.clone / "bin" / "edison-cli"
-    launcher.parent.mkdir(parents=True)
-    launcher.write_text("#!/bin/sh\necho launcher\n")
-    launcher.chmod(0o755)
+    (fake.clone / "bin").mkdir(parents=True)
+    for name in ("edison-cli", "lab-deck"):
+        launcher = fake.clone / "bin" / name
+        launcher.write_text("#!/bin/sh\necho launcher\n")
+        launcher.chmod(0o755)
     fake.bin_dir.mkdir(parents=True)
     (fake.home / ".kimi-code").mkdir()
     fake.stubs.mkdir()

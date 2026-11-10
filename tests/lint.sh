@@ -70,7 +70,7 @@ done
 ok "descriptions total ${total_desc} chars across ${n_skills} skills (informational)"
 
 echo "== adopted skill names =="
-# ADRs 0013, 0016 and 0018. A skill the lab wrote or derived is named `lab-*`, apart from
+# ADRs 0013, 0016 and 0019. A skill the lab wrote or derived is named `lab-*`, apart from
 # hq-mode, unslop-zh and roadmap. An adopted skill keeps its upstream name, and passes only
 # when `upstream/` records it: in a merged upstream's pin (tracked) or in an attribution record
 # (forked). The record formats are in upstream/README.md.
@@ -988,6 +988,7 @@ lab-jupyter: Jupyter, notebook, tunnel, port forward, reconnect, cluster, comput
 lab-containers: Singularity, container, image, SIF, liulab-runtime, ircbc, pull, build, pixi, Jupyter, LIU_LAB_PACKAGES
 lab-edison: Edison, literature, precedent, molecules, data analysis, Kosmos, dataset, recover, API key
 lab-setup: set up, installing, Claude Code, auto-update, Codex, Kimi Code, marketplace clone, edison-cli, PATH, lark-cli, Feishu
+lab-presentation: slides, deck, presentation, talk, pptx, PowerPoint
 hq-mode: hq-mode, whole task, analysis, cluster run, figure, paper, grant, talk, experiment plan, tickets, working-style, playbook
 bro: restate, last message, plain, jargon
 ketchup: ketchup, catch, last message, action item, summary

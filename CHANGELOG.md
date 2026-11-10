@@ -5,7 +5,7 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
-## 2026.11.0 — 2026-11-08
+## 2026.11.2 — 2026-11-10
 
 ### Added
 
@@ -17,7 +17,128 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   also starts and ends stages and closes the roadmap when every check passes. You call it by
   name; it never loads on its own.
 - `roadmap` is the third lab-owned skill with a bare name, after `hq-mode` and `unslop-zh`
-  (ADR 0018). `hq-mode` points a goal bigger than one map at it.
+  (ADR 0019). `hq-mode` points a goal bigger than one map at it.
+
+## 2026.11.1 — 2026-11-09
+
+### Added
+
+- `lab-presentation`, a skill that loads when you ask for slides, a deck, a talk or a
+  PowerPoint file. The agent asks for the missing lines of an audience brief, agrees a text
+  outline with you, builds the slides, and looks at every click before it reports. Speaker
+  notes come last, when you ask or for a formal talk.
+- Numbered slide rules: phrases in the body, a title that states the conclusion, text sized
+  for the room (24 pt body and a 20 pt floor in a meeting room, 28 pt and 24 pt in a hall),
+  colour only where it means something, a white background, and edits that change only what
+  you named.
+- A practice page that lists what published work says about talks and slides, each item with
+  its source and how well tested it is.
+- `lab-deck`, a command that ships with the plugin and builds a slide deck. `lab-deck new`
+  makes a deck folder with its own git history: the audience brief, the slide order, one
+  source file per slide, pictures, notes and the theme. It warns if the folder is inside a
+  synced cloud folder. `lab-deck build` turns the deck folder into a 16:9 PowerPoint file. A
+  failed build leaves the last built deck as it was.
+- `lab-deck build` builds a deck of many slides, in the order `deck.toml` lists them. Every
+  slide but the title has a page number in the bottom right corner. To insert a slide, add
+  one file and one name: no other slide is renamed. Tables work. The same deck folder always
+  builds to the same file, so a rebuild that changes nothing shows no change in git.
+- The theme file may change the font and the accent colour only. The build refuses anything
+  else in it.
+- A slide can show and hide its sections on clicks. The slide source names each section and
+  says which ones a click brings or takes away. The only effects are Appear and Disappear. A
+  click names a section, not a shape, so moving a line in the source does not break the
+  clicks after it. A click that names a section the slide does not have stops the build.
+- A drawing made of many shapes becomes one group in PowerPoint, so it moves and shows as
+  one thing.
+- Speaker notes come from the deck folder, one file per slide. Mark each click in them with
+  `[Click]`.
+- `lab-deck lint` checks a built deck in plain code, in about a second, with no model.
+  `lab-deck build` runs the same checks and refuses to replace the deck when one fails:
+  text under the size floor of the room, text that overflows its box, a picture over text,
+  a shape with a negative size, and notes whose `[Click]` cues do not match the slide's
+  clicks. Each failure names the slide, the shape and the slide rule. Whether text fits is
+  an estimate from font widths, and the report says so. Chinese text keeps the same floor.
+- `deck.citation` draws a slide's one citation line at 12 pt, the only text allowed under
+  the floor beside the page number.
+- `lab-deck lint` and `lab-deck build` also print warnings, which stop nothing: a slide
+  with more than 100 words, a full sentence below the title, a title past two lines, an
+  abbreviation that is not in the brief's known terms and not spelled out by its first
+  use, and text in more than one accent colour. The agent fixes each warning or explains
+  it in its reply. One Chinese character counts as one word.
+- The word and title limits come from the accepted slides of finished lab decks. The slide
+  rules give the limits and say how they were chosen.
+- A word in capitals with a digit in it, such as the name of a cell line, counts as an
+  abbreviation at any length.
+- `{ sentence: true }` on a box of `deck.lines` marks a sentence that is meant, such as a
+  quote, and it stops warning. A brief with `use = "read alone"` turns off the word and
+  sentence warnings. The brief's `known_terms` and `use` are now read and checked.
+- Slide rules 16 to 18: no picture over text, no negative size, one `[Click]` cue per click.
+  Each rule that the lint checks names its check.
+- A built deck no longer holds the folder path of a picture on your machine. A picture's alt
+  text is its file name, or the text the slide source gives.
+- A build page in `lab-presentation` that describes the deck folder, the slide helpers, the
+  steps of the build and the known limits of PptxGenJS.
+- An images page in `lab-presentation`. When a slide needs a drawn picture, the agent has
+  Codex draw it with no text in it, and the words stay as PowerPoint text you can edit. The
+  background is made pure white, so the picture hides no text. The prompt is kept beside the
+  picture, so it can be made again. Where a real figure panel exists, the agent uses that
+  instead, made simpler for the slide.
+- `lab-deck compare` lists the edits you made to a deck by hand in PowerPoint since the last
+  build: changed words, moved or resized shapes, changed style, added and deleted shapes,
+  slides in a new order, and a slide hidden or shown again. It names each slide by its id
+  and page. It changes no file. When you replace a whole text, it reports a style change
+  once for the whole text, or not at all.
+  The agent copies each edit into the slide source, so a rebuild keeps it. The report also
+  says what it cannot see yet, such as animations.
+- A round trip page in `lab-presentation` with the steps: commit the deck you edited,
+  compare, copy each edit into the slide source, rebuild, check, commit.
+- You can leave the deck open in PowerPoint on a Mac. `lab-deck compare` has PowerPoint save
+  a deck with unsaved changes before it reads your edits. `lab-deck build` closes the deck,
+  writes it and reopens it at the slide you were on, and refuses to build over unsaved
+  changes. Each tells you what it did. The first time, macOS asks once whether the agent may
+  control PowerPoint: click OK. Off a Mac, or when PowerPoint cannot be asked, the command
+  stops and asks you to save and close the deck; `--closed` then takes your word for it.
+- `lab-deck build` refuses to replace a deck that you saved by hand and that is not
+  committed in the deck folder, because the file is the only copy of your edits. It tells
+  the agent to commit the deck and run `lab-deck compare`. Over a committed deck it builds,
+  and names the commit to check the new build against.
+- `lab-deck new` leaves the lines of the audience brief empty until you have answered them.
+  Only the room and the use start with a default.
+- `deck.table` draws a table at the body size of the room: 24 pt, or 28 pt in a hall.
+- A slide source can hide its slide with `slide.hidden = true`.
+- The build page says how the agent shows 2 to 4 options for one slide without leaving an
+  extra slide in your deck, and that an old deck that no longer builds is updated to the
+  current build. No old version of the build is kept.
+- `LAB_DECK_SOFFICE` names a LibreOffice that is in an unusual place.
+- `lab-deck render` makes one picture of every slide after every click, hidden slides
+  included, so the agent sees what the audience sees. It lists the pictures that changed
+  since the last render, and the agent looks at those after each build. It needs LibreOffice
+  on your machine. It never changes the deck. A slide that only moved to another page,
+  because you inserted a slide before it, is not listed as changed.
+- `lab-deck preflight` says whether LibreOffice, Poppler and the deck's font are on your
+  machine, and how to get one that is missing.
+- `/lab-setup` links `lab-deck` onto your PATH beside `edison-cli`, so it works in Claude
+  Code, Codex and Kimi Code. Run `/lab-setup` again to get the link.
+
+### Changed
+
+- The `talk` playbook in `hq-mode` is now a short entry that points to `lab-presentation`.
+  Its recorded-talk step stays.
+- `pixi run check` runs the unit tests on every core of the machine, so the gate stays fast
+  with the deck build's tests in it.
+
+## 2026.11.0 — 2026-11-09
+
+### Fixed
+
+- A Claude eval on a Mac no longer fails as "Not logged in" with no reason given. Before it
+  launches anything, the eval runner checks for a login it can use: `CLAUDE_CODE_OAUTH_TOKEN`
+  or `ANTHROPIC_API_KEY` in the environment, or a login file. With none, it stops, says why
+  and tells you the fix: run `claude setup-token` once, keep the token in a private file
+  outside the repo, and export it for the run. On a Mac an expired login file counts as no
+  login and is no longer linked into the run, because the live login is in the Keychain.
+  On other systems the login file is linked as before. The runner still copies no
+  credential anywhere. `tests/README.md` has the steps.
 
 ## 2026.10.23 — 2026-10-30
 

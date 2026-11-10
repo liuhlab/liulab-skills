@@ -1,6 +1,7 @@
 # ============================== project ==============================
 #
-# This repo ships ONE package it never publishes: `src/edison_cli`, the Edison spend path.
+# This repo ships TWO packages it never publishes: `src/edison_cli`, the Edison spend path,
+# and `src/lab_deck`, the deck build (`docs/adr/0018`).
 # Everything else here is a Claude Code plugin marketplace of Agent Skills — Markdown and
 # bash — and nothing is ever uploaded to a package index, so the name stays an identifier
 # rather than a claim on one. The package exists so that `ruff` and `pyright` can read the
@@ -42,6 +43,8 @@ dependencies = ["edison-client>=0.16", "fhlmi>=1.0", "typer>=0.12"]
 # is what makes either spelling work from any working directory.
 [project.scripts]
 edison-cli = "edison_cli.__main__:main"
+# The same shape, for the deck build: `bin/lab-deck` runs `python -m lab_deck`.
+lab-deck = "lab_deck.__main__:main"
 
 # ============================== build ==============================
 
@@ -61,7 +64,7 @@ fallback-version = "0.0.0"
 # No directory here is named after the project, so the wheel target has to name the package
 # explicitly or the build finds nothing to package.
 [tool.hatch.build.targets.wheel]
-packages = ["src/edison_cli"]
+packages = ["src/edison_cli", "src/lab_deck"]
 
 # ============================== pixi ==============================
 
@@ -99,6 +102,20 @@ shellcheck = "*"
 # For conformance, which parses `mkdocs.yml` and the workflows and runs in `default`. Not on
 # the `docs` feature: the checker reads the site configuration, it does not build the site.
 pyyaml = "*"
+# The library `lab-deck build` draws slides with, from conda-forge so that no `npm install`
+# runs on any machine. It lands in `lib/node_modules` under the environment's prefix, which
+# Node does not search by itself: `src/lab_deck/build.py` names that folder in `NODE_PATH`.
+# Exact, because 4.0.1 is the version the build's workarounds were read against.
+pptxgenjs = "==4.0.1"
+# For `lab-deck render` and `lab-deck preflight`. Poppler's `pdftoppm` turns the PDF that
+# LibreOffice writes into one picture per page. fontconfig's `fc-list` names the fonts on the
+# machine. LibreOffice itself is the system's app and is not installed from here.
+poppler = "*"
+fontconfig = "*"
+# The one font-measuring library: `src/lab_deck/lint.py` reads glyph widths from the theme
+# font's file with it, to estimate whether text fits its box. From conda-forge, as every
+# runtime dependency of `lab-deck` is.
+fonttools = ">=4.50"
 
 # The package itself, editable, so `pyright` and `pytest` read the working tree rather than
 # a copy — and so `edison-cli` lands on the environment's PATH. This is what pulls
@@ -113,6 +130,9 @@ pyyaml = "*"
 [tool.pixi.pypi-dependencies]
 liulab-skills = { path = ".", editable = true }
 pytest = "*"
+# Runs the tests on every core. Each test works in its own temporary folder, so they share
+# nothing; the deck-build tests start Node and are most of the time the suite takes.
+pytest-xdist = "*"
 
 # The docs builder, in a feature of its own so that exactly one CI job installs it and the
 # gate everyone runs does not carry it.
@@ -174,10 +194,11 @@ shellcheck = "shellcheck $(git ls-files '*.sh' 'bin/*')"
 # script is a verbatim copy of the template's — never edit it here; a rule this repo cannot
 # meet is answered with a waiver, not a patch.
 conformance = "python scripts/conformance.py"
-# The unit tests, all of `src/edison_cli` and none of the network. Every test that would
+# The unit tests: `src/edison_cli` with none of the network, and `src/lab_deck`, which runs
+# the real Node build on a small deck folder. For the first, every test that would
 # otherwise reach the Edison platform is answered by a stub the test writes itself, so the
 # suite is safe on the day the spend path is broken — which is the day it matters.
-test = "pytest"
+test = "pytest -n auto"
 # The static step list lives here and nowhere else; `check.sh` takes it as arguments, and
 # `ci.yml` invokes this task by name, so the local gate and CI cannot drift.
 check-static = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance"
@@ -185,8 +206,8 @@ check = { depends-on = ["check-static", "skill-lint"] }
 
 # ============================== pytest ==============================
 
-# `src/edison_cli` is the only Python here a unit test can say anything about, and every one
-# of its tests answers from a stub. Nothing in `tests/` may reach the platform.
+# Every test of `src/edison_cli` answers from a stub: nothing in `tests/` may reach the
+# platform. The tests of `src/lab_deck` run the real Node build, which needs no network.
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q --strict-markers"

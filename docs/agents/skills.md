@@ -32,7 +32,7 @@ the marketplace. `hq-mode`, `unslop-zh` and `roadmap` are the three exceptions. 
 upstream name and is recorded in `upstream/`. Lint admits no other bare name
 (`docs/adr/0013-adopted-skills-keep-upstream-names.md`,
 `docs/adr/0016-unslop-zh-is-a-naming-exception.md`,
-`docs/adr/0018-roadmap-is-a-naming-exception.md`).
+`docs/adr/0019-roadmap-is-a-naming-exception.md`).
 
 ## Rules every lab skill keeps
 

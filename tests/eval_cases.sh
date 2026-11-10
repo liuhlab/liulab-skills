@@ -31,7 +31,8 @@
 #                   unslop-zh-non-chinese|unslop-zh-code|
 #                   unslop-zh-translate|unslop-zh-mixed|
 #                   unslop-zh-polish-fix|unslop-zh-polish-keep|
-#                   unslop-zh-rewrite|unslop-zh-hq-routing|live-sbatch|live-edison)
+#                   unslop-zh-rewrite|unslop-zh-hq-routing|
+#                   lab-presentation-trigger|live-sbatch|live-edison)
 #                  Any `live-*` case implies --live, so naming one is enough.
 #   --all          run every non-live case. Add --live for the two end-to-end
 #                  cases as well: a tiny hostname job submitted and cleaned up on
@@ -48,7 +49,7 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 source tests/eval_assert.sh
 
-CASES="trigger explicit reject containers jupyter-ircbc reuse-job lab-hpc-data-job-planning edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-run-plan-outside hq-pause-merge unslop-zh-original unslop-zh-source unslop-zh-not-chinese unslop-zh-english-delivery unslop-zh-zh-request-english unslop-zh-non-chinese unslop-zh-code unslop-zh-translate unslop-zh-mixed unslop-zh-polish-fix unslop-zh-polish-keep unslop-zh-rewrite unslop-zh-hq-routing live-sbatch live-edison"
+CASES="trigger explicit reject containers jupyter-ircbc reuse-job lab-hpc-data-job-planning edison-refuse edison-molecules edison-kosmos edison-recover prototype-language diagnosing-bugs-slow-loop hq-pause-sbatch hq-run-plan-outside hq-pause-merge unslop-zh-original unslop-zh-source unslop-zh-not-chinese unslop-zh-english-delivery unslop-zh-zh-request-english unslop-zh-non-chinese unslop-zh-code unslop-zh-translate unslop-zh-mixed unslop-zh-polish-fix unslop-zh-polish-keep unslop-zh-rewrite unslop-zh-hq-routing lab-presentation-trigger live-sbatch live-edison"
 
 # Refuse, and say what to type instead. Exit 2 — the same code an unknown flag gets,
 # because both mean "this invocation asked for nothing runnable", and neither is a
@@ -483,13 +484,26 @@ launch_eval unslop-zh-polish-keep '^雨停在黃昏前，巷口的燈一盞一�
   "請潤飾以下繁體中文，只改確有問題的地方；已經自然的文字必須完整保留，不要為了改寫而改寫，也不要轉換簡繁或改變文體。只回覆完整文本，不改檔案。文本：
 雨停在黃昏前，巷口的燈一盞一盞亮起；她不急著回家，只想把這封信再讀一遍。"
 
-# 28. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
+# 28. `lab-presentation` loads on its own. The prompt asks for slides and never names the
+#     skill, so SKILL wants the real Skill call. The expect is the first step the skill
+#     sets: the lines of the audience brief the request left out. The prompt gives the
+#     length and the listeners and says none of audience, brief, outline, room or terms, so
+#     only the skill produces them. The ALSO is the step that follows the brief. The DENY is
+#     a deck claimed as made before either: the brief and the outline come first.
+DENY="(built|wrote|saved|created|generated|made) (the|a|your|this) (deck|slides|slide deck|pptx|presentation)"
+ALSO='outline'
+SKILL=lab-presentation
+launch_eval lab-presentation-trigger 'audience brief|already know|known terms|presented or read|meeting room or (a )?hall' \
+  "I'm giving a 15-minute update at Friday's group meeting on our new alignment pipeline. Put the slides together for me. Reply with your first step only and change no files." \
+  --output-format stream-json --verbose
+
+# 29. Live end-to-end: ssh + sbatch + cleanup, tiny and self-cleaning.
 if $LIVE; then
   launch_eval live-sbatch '[0-9]{5,}' \
     "Using the lab-hpc skill: ssh to the arc cluster and submit a minimal smoke-test Slurm job (payload just 'hostname', 5-minute time limit) to a no-cost partition suitable for smoke tests. You have my explicit approval to submit this job — no need to ask again. Report the job id and its state, then ensure nothing is left behind: scancel it if it is still pending or running. Do not touch any other jobs." \
     --allowedTools "Bash(ssh:*)"
 
-  # 29. Live Edison: one real standard literature call, one credit, and the answer
+  # 30. Live Edison: one real standard literature call, one credit, and the answer
   #     has to come back cited. The assertion looks for citation furniture the
   #     platform emits and the prompt does not contain — page spans, a DOI, an
   #     "et al", a reference list — so a confident summary with no sources fails.
