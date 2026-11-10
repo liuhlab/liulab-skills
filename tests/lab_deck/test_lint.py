@@ -7,7 +7,6 @@ reads the report a member would: the slide by id and page, the shape, the check 
 from __future__ import annotations
 
 import re
-import shutil
 import zipfile
 from pathlib import Path
 
@@ -15,7 +14,7 @@ import pytest
 
 from lab_deck import lint
 from lab_deck.merge import write as write_deck
-from tests.lab_deck.conftest import PLAIN, lab_deck, write
+from tests.lab_deck.conftest import PLAIN, build_once, copy_deck, lab_deck, write
 from tests.lab_deck.test_deck import DOT
 
 # A slide that uses everything the lint reads and breaks none of it: a table, a picture
@@ -106,18 +105,20 @@ def failures(text: str) -> list[tuple[str, str, str, str, str]]:
 @pytest.fixture(scope="module")
 def passing(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Build the passing deck once."""
-    path = tmp_path_factory.mktemp("lint") / "talk"
-    assert lab_deck("new", path).returncode == 0
-    deck_with(path)
-    first = lab_deck("build", path)
-    assert first.returncode == 0, first.stdout + first.stderr
-    return path
+
+    def build(path: Path) -> None:
+        assert lab_deck("new", path).returncode == 0
+        deck_with(path)
+        first = lab_deck("build", path)
+        assert first.returncode == 0, first.stdout + first.stderr
+
+    return build_once(tmp_path_factory, "lint", build)[0]
 
 
 @pytest.fixture
 def folder(passing: Path, tmp_path: Path) -> Path:
     """Give each test its own copy of the deck folder, with the passing deck built in it."""
-    return Path(shutil.copytree(passing, tmp_path / "talk"))
+    return copy_deck(passing, tmp_path / "talk")
 
 
 def refused(folder: Path, bad: str) -> str:

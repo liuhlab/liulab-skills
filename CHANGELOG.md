@@ -15,6 +15,18 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   own page, and it is now the first step of the cluster-run playbook and a step of the
   long-run playbook.
 
+## 2026.11.3 — 2026-11-10
+
+### Changed
+
+- `pixi run check` is more than twice as fast. `tests/lint.sh` now starts beside the other
+  steps, so the gate takes as long as its slowest step. The tests of the eval runner run it in
+  a small copy of the tree, and one test worker imports the real Edison client. A deck that
+  many deck tests copy is built once for the whole run, not once per worker. The stand-in for
+  PowerPoint answers without starting a new Python each time. No test and no lint check was
+  dropped. The target is 40 seconds or less on a developer Mac; `tests/README.md` says how it
+  is measured.
+
 ## 2026.11.2 — 2026-11-10
 
 ### Added
