@@ -12,8 +12,8 @@ The whole cluster sits behind a **VPN** (the atrust app) that the user manages b
 
 ## Hosts and reaching a compute node (verified 2026-09-04)
 
-- **Login:** `ircbc`. A doorway. Two reasons to be here (`SKILL.md`): submitting your first job, and the two things compute nodes lack —
-  internet and `git`.
+- **Login:** `ircbc`. A doorway. Two reasons to be here (`SKILL.md`): submitting your first job, and the three things compute nodes lack —
+  internet, `git` and a route to arc (last section).
 - **Compute:** `cpu01`…`cpu08`, ProxyJumping through `ircbc`.
 - **Transfer:** `ircbc-transfer` — separate shared lab account, direct internet, local disk of its own, but it does **not mount `/share`**,
   so it cannot see lab code or the image store. Fetch there and copy over; never compute there. It does have `git` and `rsync`.
@@ -61,3 +61,36 @@ straight on `/share` (2026-07-05). `$LIU_LAB_PACKAGES` is set on both hosts and 
 only the network *fetch* is login-bound. It holds the `*.sif` images, a `*.sif.digest` sidecar each (a `sha256:` line, compared against
 `crane digest` for updates), `bin/` (`crane`, smoke-test scripts), `oci/` (transient tarballs) and `logs/`. Which images exist changes —
 **list the store rather than assuming**. It is group-writable with setgid dirs so any member can add images; keep it that way.
+
+## Bulk copies from arc (verified 2026-11-08)
+
+Run the copy **on the `ircbc` login node**, pulling from arc's transfer node through `ircbc-transfer`. It is the only route that
+writes to `/share` at a usable rate, and the one long-running process this skill allows on a login node. Only arc → ircbc was tested;
+treat the reverse as unverified.
+
+| Route | Result |
+| --- | --- |
+| Laptop relay: arc → laptop → `cpu0X` | About 16 KB/s into `/share`. Unusable. |
+| Slurm job on `cpu0X` pulling from arc | No route: compute nodes cannot reach `ircbc-transfer`, and `ircbc` refuses ssh from a compute node. Never plan this job. |
+| Stage on `ircbc-transfer`, then copy on | Works, but its local disk is smaller than a large dataset and it does not mount `/share`. |
+| `rsync` on `ircbc` through `ircbc-transfer` | Works: about 10 MB/s on one 850 MB file, login-node load below 0.5. |
+
+**The alias lives in `~/.ssh/config` on ircbc,** not on the laptop: `chimera-transfer`, with `ProxyJump ircbc-transfer` and
+`KexAlgorithms diffie-hellman-group14-sha256` (template in the README's "Per-user config"). Without the `KexAlgorithms` line the
+handshake stalls: the TCP connection opens, then the default key exchange waits forever for the server's reply. The cause is unknown.
+Authenticate with a forwarded agent (`ssh -A ircbc`), so no key that opens arc sits on `/share`; the copy can reconnect only while
+that laptop session stays open (unverified).
+
+**arc's transfer node runs no shell commands.** `ssh chimera-transfer <cmd>` answers `Interactive access is denied`; it accepts only
+rsync, scp and sftp. Test the alias with `rsync --list-only chimera-transfer:<src>/`.
+
+**Get the user's yes for each copy,** showing the exact command: it writes to shared data and can run for a day. `df -h /share` first.
+
+```bash
+setsid nohup nice -n 19 ionice -c3 bash -c \
+  'until rsync -a --partial chimera-transfer:<src>/ <dest>/; do sleep 60; done' \
+  > ~/<name>.rsync.log 2>&1 &
+```
+
+**One stream, never parallel:** the login node is shared, and lowest CPU and I/O priority is what keeps the copy harmless. Check
+`uptime` on `ircbc` a few minutes in and now and then after; if the load climbs with the copy, stop it and tell the user.

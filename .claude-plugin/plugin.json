@@ -1,7 +1,7 @@
 {
   "name": "lab",
   "description": "Liu Lab shared agent skills: HPC clusters, containers, Jupyter, and the Edison research platform",
-  "version": "2026.11.7",
+  "version": "2026.11.8",
   "author": {
     "name": "Hanqing Liu",
     "email": "hanqing_liu@sioc.ac.cn"

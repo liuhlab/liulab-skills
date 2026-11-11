@@ -41,9 +41,10 @@ fan-out of "small" agent commands takes it down. `ssh arc '<cmd>'` is the wrong 
 a one-liner: the whole Slurm client (`squeue`, `sbatch`, `scancel`) runs on the compute node.
 Only **two reasons** justify a login node:
 
-1. **You hold no job**, so no compute node is yours yet. Only a login node can submit that
+1. **You hold no job**, so no compute node is yours. Only a login node can submit that
    first one.
-2. **The compute node lacks what you need:** on ircbc, internet and `git`. On **arc, nothing**:
+2. **The compute node lacks what you need:** on ircbc, internet, `git` and arc (`ircbc-hpc.md`).
+   On **arc, nothing**:
    its compute nodes have internet and a full toolchain, so once you hold one, never leave.
 
 ## SOP — take a foothold, then keep it
