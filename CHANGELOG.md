@@ -5,6 +5,17 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.7 — 2026-11-10
+
+### Added
+
+- `hq-mode` has a new rule for checking a large store of records. An agent first lists the
+  questions the check answers, then answers each from the cheapest source: the tables, then
+  one directory listing, then a random sample of records read in full. A check that opens
+  every record needs the user's yes, and a repair or a format change that calls for it. The
+  agent also says what the check will cost before it runs, times a few records before the
+  full loop, and looks at a long check in its first minutes.
+
 ## 2026.11.6 — 2026-11-10
 
 ### Added
