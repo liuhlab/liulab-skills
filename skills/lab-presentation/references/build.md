@@ -1,6 +1,6 @@
 # The build
 
-How a deck folder becomes a PowerPoint file. Open this page at step 3, before you write a
+How a deck folder becomes a PowerPoint file. Open this page at step 4, before you write a
 slide source or run `lab-deck`.
 
 `lab-deck` ships with the plugin and is on the PATH after `/lab-setup`. The build code lives
@@ -11,6 +11,7 @@ in the plugin, never in a deck folder (`docs/adr/0018-the-deck-build-ships-with-
 | Command | Does |
 | --- | --- |
 | `lab-deck new <folder> [--title <title>]` | Makes a deck folder with one starter slide and a local git repo. Warns when the folder is inside a synced cloud folder, and changes nothing for it |
+| `lab-deck plan-lint [<folder>]` | Checks the slide plan page, `plan.html`, in plain code, before any slide is built: [plan.md](plan.md#the-plan-lint). Exit 1 on a blocking failure |
 | `lab-deck build [<folder>]` | Builds the deck folder, by default the current one, into its PowerPoint file |
 | `lab-deck lint [<folder>]` | Checks the built deck in plain code, with no model: [the lint](checks.md#the-lint). Exit 1 on a blocking failure |
 | `lab-deck compare [<folder>] [--since <commit>]` | Lists the hand edits in the deck since its last build, and writes no file itself: [round-trip.md](round-trip.md) |
@@ -27,7 +28,8 @@ Exit codes: 0 fine, 1 refused with the reason on stderr, 2 wrong usage.
 
 | Path | Holds |
 | --- | --- |
-| `brief.toml` | The audience brief: `audience`, `knows`, `minutes`, `language`, `known_terms`, `room`, `use` |
+| `brief.toml` | The audience brief: `audience`, `knows`, `minutes`, `language`, `known_terms`, `room`, `use`, `level` |
+| `plan.html` | The slide plan the user approved, from the skill's template: [plan.md](plan.md) |
 | `deck.toml` | `title`, `output` (the built file's name) and `slides`, the slide ids in the order shown |
 | `theme.toml` | `font` and `accent`, and nothing else |
 | `slides/<id>.js` | One source file per slide. The file name is the slide's id |

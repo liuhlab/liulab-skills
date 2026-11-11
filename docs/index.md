@@ -16,7 +16,7 @@ plugin holds that knowledge.
 | [lab-edison](skills/lab-edison.md) | The Edison platform: Kosmos for a whole research goal, cited literature answers and data analysis for a single question. No cluster. |
 | [lab-setup](skills/lab-setup.md) | One step after installing: the plugin updates by itself, and Codex and Kimi Code get it too. |
 | [hq-mode](skills/hq-mode.md) | A whole task done the lab's way: working rules, a playbook per kind of task, and a list of steps that always wait for your yes. |
-| [lab-presentation](skills/lab-presentation.md) | Slides and talks: an audience brief, a text outline, then slides checked against numbered rules. |
+| [lab-presentation](skills/lab-presentation.md) | Slides and talks: an audience brief, a text outline, a slide plan you approve, then slides checked against numbered rules. |
 | [unslop-zh](skills/unslop-zh.md) | Chinese writing, strict translation and polishing, with protected mixed content and no unnecessary rewrites. |
 | [roadmap](skills/roadmap.md) | A goal bigger than one wayfinder map, split into stages that each get their own map, spec and tickets. |
 

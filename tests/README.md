@@ -67,6 +67,10 @@ For the lint they build one passing deck that uses
 every feature the lint reads, then add one slide that breaks one blocking check, and
 pin that the build is refused, that the report names that slide, shape, check and rule
 and no other, and that the last built deck stays.
+For the slide plan they write a small `plan.html` into a new deck folder, run
+`lab-deck plan-lint`, and pin that a mock-up over the word limit warns, that the
+side panel's words do not count, that the limit is the deck lint's own number,
+and that the template the skill ships passes. These start no Node.
 PowerPoint is never started, and never asked anything: `conftest.py` puts a
 stand-in named `osascript` and `open` (`stand_in_powerpoint.py`) first on the PATH of every
 `lab-deck` run, on a Mac and off one. `lab-deck` finds it there; in a run inside

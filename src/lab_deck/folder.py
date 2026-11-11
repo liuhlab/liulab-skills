@@ -3,6 +3,7 @@
 The layout, all of it content and none of it build code::
 
     brief.toml       the audience brief
+    plan.html        the slide plan, approved before any slide is built
     deck.toml        the title, the built file's name, and the slides in order
     theme.toml       the font and the accent colour
     slides/<id>.js   one source file per slide; the file name is the slide's id
@@ -33,10 +34,17 @@ ROOMS = {"meeting room": {"body": 24, "floor": 20}, "hall": {"body": 28, "floor"
 PRESENTED = "presented"
 READ_ALONE = "read alone"
 USES = (PRESENTED, READ_ALONE)
+# The level the talk reports at. High-level is what was built, how the work proceeds and why
+# it matters; technical detail then belongs in the notes.
+HIGH_LEVEL = "high-level"
+LEVELS = (HIGH_LEVEL, "technical")
 # One plain font, and the blue of the Okabe-Ito palette, which colour-blind viewers can tell
 # from its other colours.
 FONT = "Arial"
 ACCENT = "0072B2"
+
+# A slide's id: a name, which is also the name of its source file.
+SLIDE_NAME = re.compile(r"[\w][\w.-]*")
 
 # Path parts that mean a sync client owns the folder. A match only warns: the sync client and
 # git both rewrite files, and the member decides whether that matters.
@@ -53,6 +61,7 @@ language = ""            # the language of the slides, such as "en" or "zh"
 known_terms = []         # terms and abbreviations they need no help with
 room = "meeting room"    # or "hall"
 use = "presented"        # or "read alone"
+level = "high-level"     # or "technical": the level the talk reports at
 """
 
 ORDER_TEXT = """\
@@ -115,6 +124,8 @@ class Folder:
     """`presented` or `read alone`, from the audience brief."""
     known_terms: tuple[str, ...] = ()
     """The terms and abbreviations the brief says the audience needs no help with."""
+    level: str = HIGH_LEVEL
+    """`high-level` or `technical`, from the audience brief: the level the talk reports at."""
 
     def source(self, slide: str) -> Path:
         """Return the source file of the slide with this id."""
@@ -197,7 +208,7 @@ def read(path: Path) -> Folder:
     if not isinstance(slides, list) or not slides or not all(isinstance(s, str) for s in slides):
         raise Refusal(f"{ORDER}: `slides` must list at least one slide name.")
     for slide in slides:
-        if not re.fullmatch(r"[\w][\w.-]*", slide):
+        if not SLIDE_NAME.fullmatch(slide):
             raise Refusal(f"{ORDER}: {slide!r} is not a slide name; use letters, digits, - and _.")
     if len(set(slides)) != len(slides):
         raise Refusal(f"{ORDER}: a slide is listed twice.")
@@ -212,6 +223,10 @@ def read(path: Path) -> Folder:
     use = brief.get("use") or PRESENTED
     if use not in USES:
         raise Refusal(f"{BRIEF}: `use` is {use!r}; it must be one of {', '.join(USES)}.")
+    # A missing level means high-level.
+    level = brief.get("level") or HIGH_LEVEL
+    if level not in LEVELS:
+        raise Refusal(f"{BRIEF}: `level` is {level!r}; it must be one of {', '.join(LEVELS)}.")
     known = brief.get("known_terms") or []
     if not isinstance(known, list) or not all(isinstance(term, str) for term in known):
         raise Refusal(f"{BRIEF}: `known_terms` must be a list of terms, each in quotes.")
@@ -233,6 +248,7 @@ def read(path: Path) -> Folder:
         accent=accent,
         use=use,
         known_terms=tuple(known),
+        level=level,
     )
     for slide in folder.slides:
         if not folder.source(slide).is_file():

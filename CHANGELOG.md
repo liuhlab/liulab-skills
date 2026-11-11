@@ -5,7 +5,7 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
-## 2026.11.6 — 2026-11-10
+## 2026.11.7 — 2026-11-10
 
 ### Added
 
@@ -15,6 +15,33 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   every record needs the user's yes, and a repair or a format change that calls for it. The
   agent also says what the check will cost before it runs, times a few records before the
   full loop, and looks at a long check in its first minutes.
+
+## 2026.11.6 — 2026-11-10
+
+### Added
+
+- `lab-presentation` has a new step between the text outline and the slides: the slide plan.
+  It is one web page that shows every slide as a small mock-up. Beside each mock-up is the
+  planned picture, what you will say, and where each number comes from. You approve which
+  slides exist, and each slide's title and picture, before any slide is built. The agent then
+  builds the deck without asking again. A deck of one or two slides, on material the audience
+  has seen, skips the step.
+- `lab-deck plan-lint` checks the plan page in plain code. It warns when a mock-up holds more
+  words than a built slide may, and it uses the same limit as the deck check. It fails a slide
+  with no id, no title, or no choice between a picture and "text only".
+- The audience brief has a new line, `level`: high-level or technical. The agent never asks
+  for it. It takes high-level, which means what was built, how the work proceeds and why it
+  matters. A deck folder made before this release still builds.
+- Before the agent designs a picture, it now looks in your earlier decks for a slide that
+  already draws it.
+
+### Changed
+
+- The outline now ends with the source of every number in it, and is written at the level the
+  brief gives.
+- A three-slide update no longer skips straight from the outline to the build. It gets the
+  slide plan too.
+- The decision record on the deck build now lists the slide plan among a deck folder's files.
 
 ## 2026.11.5 — 2026-11-10
 
