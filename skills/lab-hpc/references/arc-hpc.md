@@ -13,7 +13,7 @@ needing a current OS/glibc. **No VPN** (that is ircbc's rule): if `ssh arc` hang
 - **Bulk transfer:** `chimera-transfer`, for genuinely large moves only. Ordinary files go straight
   to the compute node — an `rsync` from a laptop through the ProxyJump is quick (2026-09-04).
   It runs no shell commands (`Interactive access is denied`): only rsync, scp and sftp, so test it with
-  `rsync --list-only` (2026-11-08). Copying to ircbc: `ircbc-hpc.md`, "Bulk copies from arc".
+  `rsync --list-only` (denial seen 2026-11-08). Copying to ircbc: `ircbc-hpc.md`, "Bulk copies from arc".
 - **Compute nodes:** Slurm node names (`GPU****` / `CPU****` style) double as ssh aliases that
   ProxyJump through the login host, declared in one shared `Host` stanza. `sinfo -N` lists them.
 
