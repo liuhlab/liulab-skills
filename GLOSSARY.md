@@ -430,8 +430,8 @@ Contrast a forked skill. See `docs/adr/0012-upstream-skills-merge-from-a-pin.md`
 
 ### Transfer node
 
-The alias for a cluster's data-mover host — `chimera-transfer`, `ircbc-transfer`. Use it
-for bulk copies instead of the login node. On ircbc it does not mount the same storage the
+The alias for a cluster's data-mover host — `chimera-transfer`, `ircbc-transfer`. Bulk
+copies go through it, not straight to the login node. On ircbc it does not mount the same storage the
 login node does, so a file landed there has to be copied onward.
 
 ### Upstream

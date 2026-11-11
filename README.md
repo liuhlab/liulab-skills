@@ -143,6 +143,17 @@ details.
    `%C` gives each connection its own socket file. The shared connection
    stays open ten minutes after the last call. The config check prints an
    `ssh: ADVISORY` line while the compute-node aliases lack it.
+
+   Only if you copy large data from arc to ircbc: that copy runs on the
+   ircbc login node. So your `~/.ssh/config` *on ircbc* needs two aliases of
+   its own, `ircbc-transfer` and `chimera-transfer`. Give `chimera-transfer`
+   these two lines, or its connection hangs before login:
+
+   ```text
+   ProxyJump ircbc-transfer
+   KexAlgorithms diffie-hellman-group14-sha256
+   ```
+
 2. Copy [templates/personal.md](templates/personal.md) to
    `~/.claude/lab/personal.md` and fill in your usernames/directories.
    Never commit it anywhere.

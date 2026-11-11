@@ -43,7 +43,8 @@ Only **two reasons** justify a login node:
 
 1. **You hold no job**, so no compute node is yours yet. Only a login node can submit that
    first one.
-2. **The compute node lacks what you need:** on ircbc, internet and `git`. On **arc, nothing**:
+2. **The compute node lacks what you need:** on ircbc, internet, `git` and a route to arc (`ircbc-hpc.md`).
+   On **arc, nothing**:
    its compute nodes have internet and a full toolchain, so once you hold one, never leave.
 
 ## SOP — take a foothold, then keep it
@@ -77,5 +78,4 @@ a `sleep` loop; `-h` lists its exit codes. Every job-watching subagent's brief n
   It ends with the run. No plan: a yes per script. Probes like `squeue` need none.
 - **Reachable never means permitted.** ircbc lets you ssh to a node you hold no job on; working
   there steals from the scheduler. Hold an allocation.
-- If ssh to `ircbc` hangs, **stop and tell the user to check the VPN** (atrust, managed by
-  hand). arc is not behind it. Never retry in a loop.
+- If ssh to `ircbc` hangs, **stop and tell the user to check the VPN**. arc is not behind it. Never retry in a loop.
