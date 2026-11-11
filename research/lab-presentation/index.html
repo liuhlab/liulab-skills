@@ -1,0 +1,1466 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Teach AI coding agents how the Liu Lab works, starting with its HPC clusters">
+      
+      
+      
+        <link rel="canonical" href="https://liuhlab.github.io/liulab-skills/research/lab-presentation/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.57">
+    
+    
+      
+        <title>Research for the lab-presentation skill - Liu Lab Skills</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../../assets/stylesheets/modern/main.5da3a30f.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/modern/palette.812a03bb.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-6M1CJF9WXY"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-6M1CJF9WXY",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-6M1CJF9WXY",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#research-for-the-lab-presentation-skill" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Liu Lab Skills" class="md-header__button md-logo" aria-label="Liu Lab Skills" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Liu Lab Skills
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Research for the lab-presentation skill
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/liuhlab/liulab-skills" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    liuhlab/liulab-skills
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Liu Lab Skills" class="md-nav__button md-logo" aria-label="Liu Lab Skills" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 5v16M20.001 19A2 2 0 0 0 22 17V5a2 2 0 0 0-1.999-2L16 3.002A5 5 0 0 0 12 5a5 5 0 0 0-4-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 1.999 2H8a5 5 0 0 1 4 2 5 5 0 0 1 4-2z"/></svg>
+
+    </a>
+    Liu Lab Skills
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/liuhlab/liulab-skills" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    liuhlab/liulab-skills
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Basic usage
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Skills
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Skills
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-hpc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-hpc
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-jupyter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-jupyter
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-containers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-containers
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-edison/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-edison
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-setup
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/hq-mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  hq-mode
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/lab-presentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  lab-presentation
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/unslop-zh/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  unslop-zh
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../skills/roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  roadmap
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Developers
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Developers
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Repo layout
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developers/upstreams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Upstream skills
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developers/design/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Design choices
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-orchestrating-agent-rechecked" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What the orchestrating agent rechecked
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-changed-in-the-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        What changed in the design
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#talk-and-slide-content-published-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Talk and slide content: published evidence
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Talk and slide content: published evidence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#against-our-retro" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Against our retro
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-points" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Open points
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evidence-for-the-visual-slide-rules-legibility-colour-figures-animation-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Evidence for the visual slide rules: legibility, colour, figures, animation, layout
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Evidence for the visual slide rules: legibility, colour, figures, animation, layout">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rules-and-evidence" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rules and evidence
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verdict-on-24-pt-default-and-18-pt-floor" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Verdict on 24 pt default and 18 pt floor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open-points_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Open points
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lab-deck-tooling-four-claims-checked" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        lab-deck tooling: four claims checked
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lab-deck tooling: four claims checked">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-powerpoint-scripting-on-macos" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1. PowerPoint scripting on macOS
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-installing-pptxgenjs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        2. Installing PptxGenJS
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-pptxgenjs-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        3. PptxGenJS limits
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-rendering-and-measuring" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        4. Rendering and measuring
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+<h1 id="research-for-the-lab-presentation-skill">Research for the <code>lab-presentation</code> skill<a class="headerlink" href="#research-for-the-lab-presentation-skill" title="Permanent link">&para;</a></h1>
+<p>Gathered on 2026-11-09 for issue 161, by three research agents, one per part. Each claim names
+its source and how well established it is. A claim marked <em>(abstract)</em> was read from the
+abstract only.</p>
+<h2 id="what-the-orchestrating-agent-rechecked">What the orchestrating agent rechecked<a class="headerlink" href="#what-the-orchestrating-agent-rechecked" title="Permanent link">&para;</a></h2>
+<p>These claims were opened again and matched their source:</p>
+<ul>
+<li>Kosslyn 2012: 140 decks; text not "greater than 20 point" in about 65%; bullets not shown one
+  at a time in about 95%; "main point was obscured by lots of irrelevant detail" as the most
+  common and most annoying fault.</li>
+<li>The display-size standard's open summary: the table of minimum element height by viewing
+  ratio, and the factor 200.</li>
+<li>Garner and Alley 2013: 110 students, random assignment, d = 0.81 and d = 0.89.</li>
+<li>Naegle 2021: one slide per minute, about 20 slides for 20 minutes, one panel per slide.</li>
+<li><code>pptxgenjs</code> 4.0.1 on conda-forge.</li>
+</ul>
+<p>One correction. Naegle 2021 asks for a heading that states the slide's message, and gives short
+declarative examples. It does not require a full sentence. The full-sentence title comes from
+Alley and from Doumont.</p>
+<p>Nothing else was rechecked. Nothing was run against PowerPoint or LibreOffice.</p>
+<h2 id="what-changed-in-the-design">What changed in the design<a class="headerlink" href="#what-changed-in-the-design" title="Permanent link">&para;</a></h2>
+<ul>
+<li>The text floor rose from 18 pt to 20 pt, and to 24 pt for a hall.</li>
+<li>PptxGenJS became a pixi dependency.</li>
+<li>The slide title became the one place a sentence is wanted.</li>
+<li>Key terms stay on the slide; the notes say the point in other words.</li>
+<li>The audience brief records the room and whether the deck is presented or read alone.</li>
+</ul>
+<h2 id="talk-and-slide-content-published-evidence">Talk and slide content: published evidence<a class="headerlink" href="#talk-and-slide-content-published-evidence" title="Permanent link">&para;</a></h2>
+<p>Read in full unless marked <em>(abstract)</em>. "d" is a standardised group difference: 0.5 medium, 0.8 large. "System-paced": the audience cannot control the pace, as in a live talk.</p>
+<table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>What the source reports</th>
+<th>How established</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open with five items: attention getter, need, task, main message, preview. Order the body as points supporting the message, not as the work's history. End with review, conclusion, close.</td>
+<td>The main message is "the one sentence you want your audience to remember, if they remember only one", stated early. Methods: only what helps convince, "usually little".</td>
+<td>Expert opinion</td>
+<td>Doumont J-L and co-authors, <em>English Communication for Scientists</em>, units 4.1 and 4.5. Nature Education. <a href="https://www.nature.com/scitable/ebooks/english-communication-for-scientists-14053993/118520778">https://www.nature.com/scitable/ebooks/english-communication-for-scientists-14053993/118520778</a> and <a href="https://www.nature.com/scitable/ebooks/cntNm-14053993/14240403">https://www.nature.com/scitable/ebooks/cntNm-14053993/14240403</a></td>
+</tr>
+<tr>
+<td>Budget about one slide per minute, one idea per slide, three points to keep.</td>
+<td>Bourne: more than one visual per minute is too many; a listener should recall three points a week later. Naegle: "around 20 slides" for 20 minutes; one figure panel per slide; cut anything you will not discuss.</td>
+<td>Expert opinion, no data</td>
+<td>Bourne PE (2007) <em>PLoS Comput Biol</em> 3(4):e77. doi:10.1371/journal.pcbi.0030077; Naegle KM (2021) <em>PLoS Comput Biol</em> 17(12):e1009554. doi:10.1371/journal.pcbi.1009554</td>
+</tr>
+<tr>
+<td>In a 5-minute talk: one story; methods in at most two sentences; start closing at about 80%; repeat the key message once with a different visual.</td>
+<td>Timed formats: 20 slides in 5 to 6 minutes.</td>
+<td>Expert opinion</td>
+<td>Lortie CJ (2017) <em>PLoS Comput Biol</em> 13(3):e1005373. doi:10.1371/journal.pcbi.1005373</td>
+</tr>
+<tr>
+<td>Write the title as a sentence stating the slide's claim (two lines at most; Doumont: 10 to 15 words); fill the body with visual evidence.</td>
+<td>110 engineering undergraduates, randomised; same recorded 8-minute narration. Assertion-evidence slides (21 words each) against topic title plus bullets (42 words). Essay score d = 0.81; fewer misconceptions; lower rated effort (d = 0.50); surprise test a week later d = 0.89. Fact recall did not differ.</td>
+<td>One controlled study, by the method's authors. Title, word count, graphics and builds changed together, so the title's share is unknown. The winning group also rated its prior knowledge higher.</td>
+<td>Garner JK, Alley MP (2013) <em>Int J Eng Educ</em> 29(6):1564-1579. <a href="https://www.ijee.ie/articles/Vol29-6/23_ijee2791ns.pdf">https://www.ijee.ie/articles/Vol29-6/23_ijee2791ns.pdf</a></td>
+</tr>
+<tr>
+<td>Put the fact to be remembered in the title, not in a bullet.</td>
+<td>Four sections of a geoscience course (136 to 202 students each). On 15 exam questions whose answer had moved into a sentence title: 79% correct against 69%. Unchanged content: no difference.</td>
+<td>Weak: different semesters, not randomised; the title was also larger and bold; two questions went the other way. Farkas: poor control slides, gains "surprisingly modest".</td>
+<td>Alley M et al. (2006) <em>Tech Commun</em> 53(2):225-234. <a href="https://writing.engr.psu.edu/ae_headlines.pdf">https://writing.engr.psu.edu/ae_headlines.pdf</a>; Farkas DK (2010) unpublished assessment. <a href="https://faculty.washington.edu/farkas/dfpubs/Farkas-Assessment%20Of%20Alleys%20Slide%20Design.pdf">https://faculty.washington.edu/farkas/dfpubs/Farkas-Assessment%20Of%20Alleys%20Slide%20Design.pdf</a></td>
+</tr>
+<tr>
+<td>Never put the spoken sentences on the slide. Keep 2 to 3 word labels beside the part of the figure they describe.</td>
+<td>Mayer: narrated diagram slides; 2 to 3 printed words by the diagram raised retention (d = 0.47 and 0.70), not transfer. Yue: text identical to the narration impaired recall and transfer; slightly reworded text helped.</td>
+<td>Controlled studies, students, short recorded lessons</td>
+<td>Mayer RE, Johnson CI (2008) <em>J Educ Psychol</em> 100(2):380-386. <em>(abstract)</em>; Yue CL et al. (2013) <em>J Educ Psychol</em> 105(2):266-277. doi:10.1037/a0031971 <em>(abstract)</em></td>
+</tr>
+<tr>
+<td>Do not strip a slide to no words: keep the key terms, above all for newcomers and figure-free slides.</td>
+<td>57 studies. Speech plus text beat speech alone, for low prior knowledge, system-paced and picture-free material. Key terms beat verbatim text. Liu: 120 students in a simulated classroom; slide text plus speech beat speech alone.</td>
+<td>Meta-analysis; contradicts a strict "redundant text always hurts"</td>
+<td>Adesope OO, Nesbit JC (2012) <em>J Educ Psychol</em> 104(1):250-263. doi:10.1037/a0026147 <em>(abstract)</em>; Liu T-C et al. (2015) <em>Comput Educ</em> 88:303-314. doi:10.1016/j.compedu.2015.04.014 <em>(abstract)</em></td>
+</tr>
+<tr>
+<td>If a point matters, put it on the slide in short form; a dense slide makes the audience miss what is only said.</td>
+<td>209 students; no slides, regular slides or concise slides. Regular slides suppressed retention of spoken-only information; concise slides did not. Cause: attention, not overload.</td>
+<td>One controlled study</td>
+<td>Wecker C (2012) <em>Comput Educ</em> 59(2):260-273. doi:10.1016/j.compedu.2012.01.013 <em>(abstract)</em></td>
+</tr>
+<tr>
+<td>Cut interesting but irrelevant material.</td>
+<td>Meta-analysis: such details hinder learning. Survey of 205 audience members: "main point was obscured by lots of irrelevant detail" was the most common and most annoying fault.</td>
+<td>Meta-analysis; survey</td>
+<td>Sundararajan N, Adesope O (2020) <em>Educ Psychol Rev</em> 32:707-734. doi:10.1007/s10648-020-09522-4 <em>(abstract)</em>; Kosslyn SM et al. (2012) <em>Front Psychol</em> 3:230. doi:10.3389/fpsyg.2012.00230</td>
+</tr>
+<tr>
+<td>Break a long explanation into meaningful segments and mark what to look at.</td>
+<td>Segmenting: 56 investigations, small to medium gains, also when system-paced; larger for high prior knowledge. Overview of 29 reviews: signalling among the largest effects; design matters more for complex, system-paced material.</td>
+<td>Meta-analyses</td>
+<td>Rey GD et al. (2019) <em>Educ Psychol Rev</em> 31:389-419. doi:10.1007/s10648-018-9456-4 <em>(abstract)</em>; Noetel M et al. (2022) <em>Rev Educ Res</em> 92(3):413-454. doi:10.3102/00346543211052329 <em>(abstract)</em></td>
+</tr>
+<tr>
+<td>Explain a figure aloud, not in a paragraph beside it. For a deck people read alone, write the words down.</td>
+<td>43 effects: speech plus picture beat text plus picture, strongly when system-paced. Tabbers: 111 self-paced students; speech did worse.</td>
+<td>Meta-analysis; reverses when self-paced</td>
+<td>Ginns P (2005) <em>Learn Instr</em> 15(4):313-331. doi:10.1016/j.learninstruc.2005.07.001 <em>(abstract)</em>; Tabbers HK et al. (2004) <em>Br J Educ Psychol</em> 74:71-81. doi:10.1348/000709904322848824 <em>(abstract)</em></td>
+</tr>
+<tr>
+<td>Spell out any term or abbreviation not in the audience's daily use.</td>
+<td>650 people: jargon impaired processing. 79% of 1.1 million acronyms appeared fewer than 10 times.</td>
+<td>One experiment on written text; one count of papers</td>
+<td>Bullock OM et al. (2019) <em>Public Underst Sci</em> 28(7):845-853. doi:10.1177/0963662519865687 <em>(abstract)</em>; Barnett A, Doubleday Z (2020) <em>eLife</em> 9:e60080. doi:10.7554/eLife.60080</td>
+</tr>
+<tr>
+<td>Write notes as an outline in other words than the slide's.</td>
+<td>Doumont: memorise a tree of points, not a script. Yue (above): speech identical to slide text impairs.</td>
+<td>Expert opinion plus one study</td>
+<td>As above</td>
+</tr>
+</tbody>
+</table>
+<h3 id="against-our-retro">Against our retro<a class="headerlink" href="#against-our-retro" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>"Phrases not sentences"</strong> holds for the body. The title is the exception: Naegle, Doumont and Alley want a sentence; Farkas leaves it to the speaker.</li>
+<li><strong>Less text is not always better.</strong> Key terms help low-knowledge listeners and figure-free slides. No study here tested experts.</li>
+<li><strong>"Reveal by section, not bullet by bullet"</strong> is untested. Kosslyn's rules count bullets shown all at once as a fault (96% of 140 decks); that is his rule, not a result.</li>
+<li><strong>Audience liking is a poor guide.</strong> Garner's better-learning group rated its text amount as less appropriate; Yue's students preferred the identical text that hurt them.</li>
+</ul>
+<h3 id="open-points">Open points<a class="headerlink" href="#open-points" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Talk length: Lortie covers 5 minutes; nothing found separates 15 from 50. His 20 slides in 5 minutes conflicts with one per minute.</li>
+<li>Nearly all experiments used students and short recorded lessons, not experts at a live seminar.</li>
+<li>Speaker notes: no study found.</li>
+<li>Chinese slides: no credible source found. Nearest: Liu 2015 (Taiwan; lesson language not confirmed) and Noetel's largest effect, captions on second-language video, which suggests on-screen key terms help second-language listeners (my inference).</li>
+</ul>
+<h2 id="evidence-for-the-visual-slide-rules-legibility-colour-figures-animation-layout">Evidence for the visual slide rules: legibility, colour, figures, animation, layout<a class="headerlink" href="#evidence-for-the-visual-slide-rules-legibility-colour-figures-animation-layout" title="Permanent link">&para;</a></h2>
+<p>Slide: 16:9, 13.33 x 7.5 inch, so height H = 540 pt. Font proportions assumed by me: Latin x-height (height of a lowercase "x") about 0.5 of the point size
+(Times New Roman is 0.45, per Legge and Bigelow), capital height about 0.7, a Chinese character
+about 0.9.</p>
+<h3 id="rules-and-evidence">Rules and evidence<a class="headerlink" href="#rules-and-evidence" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>What the source reports</th>
+<th>How established</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Size text by the farthest viewer: text height as % of slide height &gt;= (viewer distance / screen height) / 200.</td>
+<td>Table of minimum "%element height" by viewing ratio: 1.5% at 2-3 screen heights, 2.5% at 4-5, 3% at 5-6, 4% at 7-8, 5% at 9-10. "Acuity factor" 200. Every row fits distance = 200 x element height (my reading; formula paywalled), a visual angle of 17 arcminutes.</td>
+<td>Standard, paywalled; open first-party summary</td>
+<td>AVIXA (Audiovisual and Integrated Experience Association), "Display Image Size for 2D Content in Audiovisual Systems", ANSI/INFOCOMM V202.01. <a href="https://www.avixa.org/standards/discas-calculators/discas/learn-more-about-display-size">https://www.avixa.org/standards/discas-calculators/discas/learn-more-about-display-size</a></td>
+</tr>
+<tr>
+<td>2. Keep lowercase x-height at or above 0.2 degrees for the back row.</td>
+<td>Reading speed falls sharply below a "critical print size"; consensus 0.2 degrees of x-height (range 0.15-0.3). Letters stay identifiable at about half that.</td>
+<td>Review of controlled studies</td>
+<td>Legge GE, Bigelow CA (2011) J Vision 11(5):8. doi:10.1167/11.5.8</td>
+</tr>
+<tr>
+<td>3. Flag any text at or below 20 pt.</td>
+<td>Words not "greater than 20 point" count as a flaw; 65% of 140 sampled decks broke it.</td>
+<td>Expert rule; the 20 pt figure is not itself tested</td>
+<td>Kosslyn SM et al. (2012) Front Psychol 3:230. doi:10.3389/fpsyg.2012.00230</td>
+</tr>
+<tr>
+<td>4. Give Chinese text the same point floor as Latin, never a lower one; go larger for dense characters.</td>
+<td>At the acuity limit, characters of average complexity (8-9 strokes) need 1.62 times the height of the Snellen E; the simplest need 37% more than Sloan letters. Thicker strokes lowered the threshold (4.66 to 4.31 arcminutes, P = 0.052).</td>
+<td>Controlled study, small; threshold, not reading speed</td>
+<td>Zhang J-Y et al. (2007) Invest Ophthalmol Vis Sci 48:2383-2390. doi:10.1167/iovs.06-1195</td>
+</tr>
+<tr>
+<td>5. Text contrast &gt;= 4.5:1; &gt;= 3:1 only for large text.</td>
+<td>4.5:1 normal text, 3:1 for "18 point or 14 point bold". Thin-stroke fonts render fainter.</td>
+<td>Standard (World Wide Web Consortium), written for screens</td>
+<td>WCAG (Web Content Accessibility Guidelines) 2.2, Understanding 1.4.3. <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html</a></td>
+</tr>
+<tr>
+<td>6. Take category colours from the 8-colour palette: black 0,0,0; orange 230,159,0; sky blue 86,180,233; bluish green 0,158,115; yellow 240,228,66; blue 0,114,178; vermillion 213,94,0; reddish purple 204,121,167.</td>
+<td>Distinguishable under red-green colour blindness: up to 8% of Northern European men (Okabe and Ito: 5% of Asian men).</td>
+<td>Expert design, widely adopted</td>
+<td>Wong B (2011) Nat Methods 8:441. doi:10.1038/nmeth.1618; Okabe M, Ito K (2002, rev. 2008) <a href="https://jfly.uni-koeln.de/color/">https://jfly.uni-koeln.de/color/</a></td>
+</tr>
+<tr>
+<td>7. At most 6-8 category colours per slide; above 6-7 categories split into panels.</td>
+<td>"A group of 6-8 colors. Beyond this number... picking distinctive colors becomes difficult"; over six or seven categories, use small multiples.</td>
+<td>Expert opinion</td>
+<td>Wong B (2010) Nat Methods 7:573; Krzywinski M, Wong B (2013) Nat Methods 10:451</td>
+</tr>
+<tr>
+<td>8. Never encode by colour alone; add shape, line style or position. No red text on dark; no red-green pairs (use magenta-green).</td>
+<td>Dark red looks near black to viewers lacking red receptors.</td>
+<td>Expert opinion</td>
+<td>Okabe and Ito, as above</td>
+</tr>
+<tr>
+<td>9. Label series directly; no separate legend.</td>
+<td>Matching colours between a key and distant marks is "extremely difficult" for colour-blind viewers. Rougier's improved example labels each plot, with no legend box.</td>
+<td>Expert opinion</td>
+<td>Okabe and Ito; Rougier (row 10)</td>
+</tr>
+<tr>
+<td>10. Redraw a paper figure for the slide: remove detail, thicken lines, enlarge labels, no vertical text, no plot background.</td>
+<td>"Abandon the practice of extracting a figure from your article to be put, as is, in your oral presentation"; the slide version has "bigger axis and tick labels, no title, thicker lines". No sizes given.</td>
+<td>Expert opinion</td>
+<td>Rougier NP, Droettboom M, Bourne PE (2014) PLoS Comput Biol 10(9):e1003833. doi:10.1371/journal.pcbi.1003833</td>
+</tr>
+<tr>
+<td>11. Colour or highlight only the element the slide is about; if there is no reason for a colour, use black.</td>
+<td>Experiment cited by Wong: making the irrelevant variable most visible on a weather map made viewers answer from it. Rougier: no reason for a colour, "keep it black".</td>
+<td>One controlled study (cited, not opened) plus expert opinion</td>
+<td>Wong B (2011) Nat Methods 8:889. doi:10.1038/nmeth.1762; Rougier, as above</td>
+</tr>
+<tr>
+<td>12. No looping movies, no moving emphasis, no decorative transitions.</td>
+<td>"An oscillating arrow will draw more of our attention than the objects it is intended to highlight". Kosslyn lists uninformative change as a flaw.</td>
+<td>Expert opinion</td>
+<td>Wong 8:889; Kosslyn 2012</td>
+</tr>
+<tr>
+<td>13. Reveal by section, not line by line.</td>
+<td>Against: students scored lower after a recorded lecture with step-by-step entrances than with static slides (82% vs 71%, p &lt; 0.001; direction from the abstract). For: Kosslyn counts unbuilt bullet lists as a flaw.</td>
+<td>Contested: one lab against an expert rule</td>
+<td>Mahar S, Yaylacicegi U, Janicki TN (2009) Inf Syst Educ J 7(82). <a href="http://isedj.org/7/82/">http://isedj.org/7/82/</a>; Kosslyn 2012</td>
+</tr>
+<tr>
+<td>14. At most 4 groups per slide, 4 items per list, 2 lines per bullet.</td>
+<td>Working memory holds about four units, each of about four.</td>
+<td>Rule from established memory research; cut-offs are expert</td>
+<td>Kosslyn 2012</td>
+</tr>
+<tr>
+<td>15. Do not choose a font by serif.</td>
+<td>Fonts differing only in serifs: no difference in reading speed; a "tiny" gain at small sizes, from spacing.</td>
+<td>Controlled study, small</td>
+<td>Arditi A, Cho J (2005) Vision Res 45:2926-2933. doi:10.1016/j.visres.2005.06.013 (abstract only)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="verdict-on-24-pt-default-and-18-pt-floor">Verdict on 24 pt default and 18 pt floor<a class="headerlink" href="#verdict-on-24-pt-default-and-18-pt-floor" title="Permanent link">&para;</a></h3>
+<p>Farthest readable seat, in screen heights (H):</p>
+<table>
+<thead>
+<tr>
+<th>Size</th>
+<th>x-height</th>
+<th>AVIXA, x-height as element (x 200)</th>
+<th>AVIXA, capital height as element</th>
+<th>Legge, fluent reading (x-height / tan 0.2 deg = x 286)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>24 pt</td>
+<td>12 pt = 2.22% H</td>
+<td>4.4 H</td>
+<td>16.8 pt = 3.11% -&gt; 6.2 H</td>
+<td>6.4 H</td>
+</tr>
+<tr>
+<td>18 pt</td>
+<td>9 pt = 1.67% H</td>
+<td>3.3 H</td>
+<td>12.6 pt = 2.33% -&gt; 4.7 H</td>
+<td>4.8 H</td>
+</tr>
+<tr>
+<td>14 pt</td>
+<td>7 pt = 1.30% H</td>
+<td>2.6 H</td>
+<td>9.8 pt = 1.81% -&gt; 3.6 H</td>
+<td>3.7 H</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>24 pt default: supported</strong> for rooms up to about 6 screen heights deep, and it clears Kosslyn's
+  "greater than 20 pt".</li>
+<li><strong>18 pt floor: too small as a general floor.</strong> It reaches only 3-5 screen heights (a meeting room)
+  and breaks the 20 pt rule. A 20 pt floor reaches 3.7-5.3 H. For a
+  hall 8 H deep, AVIXA needs 4% = 21.6 pt of element height: 31-43 pt type.</li>
+<li>Lint floor from room depth in screen heights: points &gt;= depth x 540 / 200 / 0.5 (strict) or
+  / 0.7 (lenient).</li>
+<li>Chinese: a 24 pt character is about 21.6 pt tall, 1.8 times the Latin x-height, which roughly
+  offsets the 1.62 factor. Same floor.</li>
+</ul>
+<h3 id="open-points_1">Open points<a class="headerlink" href="#open-points_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Which part of a letter AVIXA counts as the "element": paywalled.</li>
+<li>ISO 9241-303 (display ergonomics), with a reported 20 arcminute minimum for Chinese text:
+  paywalled, seen second-hand, not used.</li>
+<li>Projected contrast under room light: no source opened.</li>
+<li>Hei (even strokes) versus Song (thin horizontals): only the stroke result in row 4. Chi, Cai
+  and You (2003, Ergonomics) reportedly rank Hei most legible; not opened.</li>
+<li>Stepwise reveal: a meta-analysis of segmenting exists (Rey et al. 2019, Educ Psychol Rev
+  31:389) but was not opened in full.</li>
+<li>Whitespace and alignment: nothing measured; only Wong's advice to align blocks so gaps
+  form regular bands (Nat Methods 8:5, doi:10.1038/nmeth0111-5).</li>
+<li>No source gives label sizes for slide figures; apply the text floor to axis labels.</li>
+</ul>
+<h2 id="lab-deck-tooling-four-claims-checked">lab-deck tooling: four claims checked<a class="headerlink" href="#lab-deck-tooling-four-claims-checked" title="Permanent link">&para;</a></h2>
+<p>Checked 2026-11-09 on macOS arm64. Tiers: <strong>verified</strong> (ran it), <strong>read</strong> (first-party docs or
+source), <strong>unverified</strong>.</p>
+<h3 id="1-powerpoint-scripting-on-macos">1. PowerPoint scripting on macOS<a class="headerlink" href="#1-powerpoint-scripting-on-macos" title="Permanent link">&para;</a></h3>
+<p><strong>Yes, the dictionary has every piece. Tier: read. Nothing was sent to PowerPoint.</strong></p>
+<p><code>sdef</code> itself failed: it needs full Xcode, and this machine has only the command line tools.
+I read the same dictionary from the app bundle instead (<code>Info.plist</code> key
+<code>OSAScriptingDefinition</code> = <code>PowerPoint.sdef</code>, in <code>Contents/Resources/</code>), PowerPoint 16.114.3.</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Name in the dictionary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unsaved changes</td>
+<td>class <code>presentation</code>, property <code>saved</code> (boolean, read-write)</td>
+</tr>
+<tr>
+<td>Which file</td>
+<td><code>presentation</code> properties <code>full name</code>, <code>path</code>, <code>name</code>, <code>read only</code></td>
+</tr>
+<tr>
+<td>Front deck</td>
+<td><code>application</code> properties <code>active presentation</code>, <code>active window</code></td>
+</tr>
+<tr>
+<td>Save, close, open</td>
+<td>Standard Suite, included from the system <code>CocoaStandard.sdef</code>: <code>save</code> (<code>in</code> file, <code>as</code>), <code>close</code> (<code>saving</code> yes/no/ask, <code>saving in</code>), <code>open</code> (files)</td>
+</tr>
+<tr>
+<td>Go to a slide</td>
+<td>command <code>go to slide</code>, direct parameter a <code>view</code>, parameter <code>number</code> (integer). <code>document window</code> has property <code>view</code>; <code>view</code> has a writable <code>slide</code> property</td>
+</tr>
+<tr>
+<td>Current slide</td>
+<td><code>slide</code> properties <code>slide index</code>, <code>slide number</code>, <code>slide ID</code></td>
+</tr>
+</tbody>
+</table>
+<p>So the expected spelling is <code>go to slide (view of document window 1) number N</code>. <strong>Unverified:</strong>
+that <code>presentation</code> accepts the standard <code>save</code> and <code>close</code> (the dictionary declares them for
+"document(s) or window(s)" and gives <code>presentation</code> no <code>responds-to</code> line), and any behaviour
+at run time.</p>
+<p><strong>Permission.</strong> The first Apple event from the calling app to PowerPoint needs the user's
+consent; the grant is listed under System Settings &gt; Privacy &amp; Security &gt; Automation, per
+calling app (read:
+<a href="https://support.apple.com/guide/mac-help/allow-apps-to-control-other-apps-mchl07817563/mac">https://support.apple.com/guide/mac-help/allow-apps-to-control-other-apps-mchl07817563/mac</a>).
+The prompt's exact wording and the error a denied script gets: unverified.</p>
+<p><strong>Is the file open?</strong> <strong>Unverified.</strong> I found no first-party Microsoft page on the
+<code>~$name.pptx</code> owner file for PowerPoint; only community answers on Microsoft Q&amp;A, one of which
+reports PowerPoint does not always keep it
+(<a href="https://learn.microsoft.com/en-gb/answers/questions/4377821/why-do-some-computers-retain-the-*-pptx-file-after">https://learn.microsoft.com/en-gb/answers/questions/4377821/why-do-some-computers-retain-the-*-pptx-file-after</a>).
+<code>lsof -p &lt;PowerPoint pid&gt;</code> on the running app showed zero <code>.pptx</code> handles, but I could not
+tell whether a deck was open, so that test is inconclusive. Asking PowerPoint (<code>full name</code> of
+each <code>presentation</code>) is the documented route.</p>
+<h3 id="2-installing-pptxgenjs">2. Installing PptxGenJS<a class="headerlink" href="#2-installing-pptxgenjs" title="Permanent link">&para;</a></h3>
+<p><strong>It is on conda-forge. Add it to pixi; neither npm route is needed. Tier: verified (package
+exists and its contents), read (how Node finds it).</strong></p>
+<ul>
+<li><code>pixi search pptxgenjs</code>: <code>pptxgenjs 4.0.1</code>, build <code>hc364b38_0</code>, <code>noarch</code>, 884 KiB, depends on
+  <code>nodejs</code>. Only this version is listed.</li>
+<li>I downloaded the <code>.conda</code> to scratch and listed it: files land in
+  <code>lib/node_modules/pptxgenjs/</code>, with its dependencies (<code>jszip</code>, <code>image-size</code>, <code>https</code>,
+  <code>@types/node</code> and theirs) bundled in a nested <code>node_modules</code>. SHA256 matched the index.</li>
+<li>Node does not search <code>$PREFIX/lib/node_modules</code> by default, so the wrapper must set
+  <code>NODE_PATH</code> to it or require by absolute path (read:
+  <a href="https://nodejs.org/api/modules.html">https://nodejs.org/api/modules.html</a>, "Loading from the global folders"). Not run.</li>
+<li>pixi Node is <code>v22.23.4</code>, npm <code>10.9.9</code> (verified).</li>
+<li><code>npm view pptxgenjs</code>: version <code>4.0.1</code>, tarball
+  <code>https://registry.npmjs.org/pptxgenjs/-/pptxgenjs-4.0.1.tgz</code>, integrity
+  <code>sha512-TeJISr8wouAuXw4C1F/mC33xbZs/FuEG6nH9FG1Zj+nuPcGMP5YRHl6X+j3HSUnS1f3at6k75ZZXPMZlA5Lj9A==</code>,
+  dependencies <code>@types/node ^22.8.1</code>, <code>https ^1.0.0</code>, <code>image-size ^1.2.1</code>, <code>jszip ^3.10.1</code>.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>First use</th>
+<th>On plugin update</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>conda-forge in pixi (recommended)</strong></td>
+<td>Network, inside the <code>pixi install</code> the environment already needs</td>
+<td>New version directory rebuilds the environment as today; packages come from pixi's cache</td>
+<td>Pinned by <code>pixi.lock</code> hash. Only 4.0.1 exists, so decks on 3.12 move up a major</td>
+</tr>
+<tr>
+<td>(a) <code>npm ci</code> to an outside cache</td>
+<td>Network, unless npm's cache is warm</td>
+<td>Survives only if the cache key is the lock file's hash, not the plugin version</td>
+<td>A second lock file and install step to own</td>
+</tr>
+<tr>
+<td>(b) Archive in the repo</td>
+<td>None</td>
+<td>Ships again with every version</td>
+<td>1.6 MB binary in a public repo; checksum code to write</td>
+</tr>
+</tbody>
+</table>
+<p>npm facts (read): <code>npm ci</code> requires a lock file, errors on a mismatch with <code>package.json</code>,
+deletes any <code>node_modules</code> first, never writes the lock
+(<a href="https://docs.npmjs.com/cli/v10/commands/npm-ci">https://docs.npmjs.com/cli/v10/commands/npm-ci</a>). The lock stores an SRI <code>integrity</code> hash per
+package (<a href="https://docs.npmjs.com/cli/v10/configuring-npm/package-lock-json">https://docs.npmjs.com/cli/v10/configuring-npm/package-lock-json</a>). The cache
+verifies data "on both insertion and extraction"
+(<a href="https://docs.npmjs.com/cli/v10/commands/npm-cache">https://docs.npmjs.com/cli/v10/commands/npm-cache</a>). npm's offline flags: not read.</p>
+<h3 id="3-pptxgenjs-limits">3. PptxGenJS limits<a class="headerlink" href="#3-pptxgenjs-limits" title="Permanent link">&para;</a></h3>
+<p><strong>All three hold, in 3.12.0 and in the current 4.0.1. Tier: read (source at tags <code>v3.12.0</code> and
+<code>v4.0.1</code>).</strong> Latest release is 4.0.1, 2025-06-25; it changes none of them.</p>
+<ul>
+<li><strong>No group shapes.</strong> <code>src/</code> writes <code>p:grpSp</code> nowhere; the only group element is the slide's
+  own root (<code>src/gen-xml.ts</code> line 101). Issue #307 (open since 2018); pull request #929 "Add
+  support for groups" was closed unmerged.</li>
+<li><strong><code>addTable()</code> reuses ids.</strong> <code>src/gen-xml.ts</code> line 175: table id is
+  <code>intTableNum * slide._slideNum + 1</code>; other objects use <code>idx + 2</code> (line 412; 410 in 3.12.0).
+  The first table on slide 1 gets id 2, the same as the first object. Issue #1532 (open).</li>
+<li><strong><code>slideNumber</code> reuses an id.</strong> <code>src/gen-xml.ts</code> line 705 (703 in 3.12.0): a fixed
+  <code>id="25"</code>, which equals the id of the 24th object on a slide. No issue found for this one.</li>
+</ul>
+<p>Source: <a href="https://github.com/gitbrent/PptxGenJS">https://github.com/gitbrent/PptxGenJS</a>.</p>
+<h3 id="4-rendering-and-measuring">4. Rendering and measuring<a class="headerlink" href="#4-rendering-and-measuring" title="Permanent link">&para;</a></h3>
+<p><strong>(a) Poppler yes, LibreOffice no. Tier: verified.</strong> <code>pixi search poppler --platform
+osx-arm64</code> gives <code>poppler 26.11.0</code>; its archive contains <code>bin/pdftoppm</code>. <code>pixi search
+'*libreoffice*'</code> finds nothing for osx-arm64 or linux-64, so it must be the system app
+(a current release is installed here).</p>
+<p><strong>(b) Both libraries work. Tier: verified</strong>, in a throwaway <code>pixi exec</code> environment (Pillow
+13.0.0, fontTools 4.68.0; neither is in the repo environment today).</p>
+<ul>
+<li>Pillow: <code>ImageFont.truetype(path, size).getlength(text)</code>, in pixels
+  (<a href="https://pillow.readthedocs.io/en/stable/reference/ImageFont.html">https://pillow.readthedocs.io/en/stable/reference/ImageFont.html</a>).</li>
+<li>fontTools: <code>TTFont(path)</code>, <code>getBestCmap()</code>, <code>getGlyphSet()[name].width</code>, scaled by
+  <code>font["head"].unitsPerEm</code>
+  (<a href="https://fonttools.readthedocs.io/en/latest/ttLib/ttFont.html">https://fonttools.readthedocs.io/en/latest/ttLib/ttFont.html</a>).</li>
+<li>Same string in Arial at 100 px: 652.0 (Pillow, basic layout) against 650.3 (fontTools, summed
+  advances, no kerning). Close enough for a lint.</li>
+</ul>
+<p><strong>(c) Hidden slides are skipped by default, and there is an option. Tier: read.</strong>
+<code>ExportHiddenSlides</code>, boolean, default <code>false</code>: "exports slides not included in slide shows".
+Passed as
+<code>--convert-to 'pdf:&lt;filter&gt;:{"ExportHiddenSlides":{"type":"boolean","value":"true"}}'</code>
+(<a href="https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html">https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html</a>). The page names
+no Impress filter; the installed app's <code>registry/impress.xcd</code> contains <code>impress_pdf_Export</code>.
+Not run.</p>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"../..","features":["content.code.copy","navigation.footer"],"search":"../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.49251538.min.js"></script>
+      
+    
+  </body>
+</html>
