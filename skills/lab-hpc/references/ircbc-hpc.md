@@ -73,7 +73,7 @@ treat the reverse as unverified.
 | Laptop relay: arc → laptop → `cpu0X` | Works for ordinary files, far too slow for bulk data. |
 | Slurm job on `cpu0X` pulling from arc | No route: compute nodes cannot reach `ircbc-transfer`, and `ircbc` refuses ssh from a compute node. Never plan this job. |
 | Stage on `ircbc-transfer`, then copy on | Works, but its local disk is smaller than a large dataset, and every file needs a second copy. |
-| `rsync` on `ircbc` through `ircbc-transfer` | Works. |
+| `rsync` on `ircbc` through `ircbc-transfer` | Works: about 5–6 MB/s sustained, so a terabyte takes two days (2026-11-10). |
 
 **Two aliases live in `~/.ssh/config` on ircbc,** not on the laptop: `ircbc-transfer`, and `chimera-transfer` with
 `ProxyJump ircbc-transfer` and `KexAlgorithms diffie-hellman-group14-sha256`. Without the `KexAlgorithms` line the handshake stalls:
@@ -83,13 +83,19 @@ how to test an alias to arc's transfer node, which runs no shell commands.
 **How the login node logs in to arc is the user's own ssh setup; ask, never arrange it.** A forwarded agent keeps keys off `/share`,
 but it ends with the laptop session, so a detached copy cannot rely on it to reconnect (inferred, not tested).
 
-**Get the user's yes for each copy,** showing the exact command: it writes to shared data and can run for a day. `df -h /share` first.
+**Get the user's yes for each copy,** showing the exact command: it writes to shared data and can run for days. `df -h /share` first.
 
 ```bash
 setsid nohup nice -n 19 ionice -c3 bash -c 'echo $$ > ~/<name>.pid
-  for i in $(seq 20); do rsync -a --partial chimera-transfer:<src>/ <dest>/ && break; sleep 60; done' \
-  > ~/<name>.rsync.log 2>&1 &
+  for i in $(seq 20); do
+    rsync -a --partial chimera-transfer:<src>/ <dest>/ && { echo "$(date +%FT%T) rsync exit 0, done"; break; }
+    rc=$?; echo "$(date +%FT%T) rsync exit $rc, try $i of 20, retry in 5 min"; sleep 300
+  done' > ~/<name>.rsync.log 2>&1 &
 ```
+
+**Keep `rc=$?` ahead of the log line:** the `$(date …)` in it resets `$?`, so the log said `exit 0` after a failed run (2026-11-10).
+The `done` line is the whole check. rsync verifies every file it copies against a whole-file checksum, so skip a separate `sha256sum`
+pass: it only adds read load to the shared disk.
 
 **One stream, never parallel:** the login node is shared. `ionice` may do nothing on a network filesystem (inferred), so do not count
 on it. Check `uptime` on `ircbc` a few minutes in and now and then after. If the load climbs with the copy, stop the loop and its

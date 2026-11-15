@@ -5,7 +5,7 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
-## 2026.11.8 — 2026-11-11
+## 2026.11.8 — 2026-11-14
 
 ### Added
 
@@ -13,7 +13,8 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   login node and pulls from arc's transfer node through `ircbc-transfer`. It is one `rsync`
   at the lowest priority, and the agent asks before each copy. The page also lists the routes
   that fail, so an agent no longer plans a Slurm job that cannot reach arc. The README has
-  the ssh alias to add on ircbc.
+  the ssh alias to add on ircbc. The copy runs at about 5 to 6 MB/s, so a terabyte takes two
+  days. Its retry loop logs the real exit code of each failed try.
 
 ## 2026.11.7 — 2026-11-10
 
