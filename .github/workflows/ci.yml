@@ -58,7 +58,7 @@ jobs:
           # list as a failure rather than a pass — a gate with nothing to read is not a
           # gate that agrees with you.
           fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.10.2
+      - uses: prefix-dev/setup-pixi@v0.11.3
         with:
           # `docs` is the one environment `default` does not cover: it holds the site builder.
           environments: default docs
