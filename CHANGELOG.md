@@ -5,6 +5,16 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.10 — 2026-11-14
+
+### Changed
+
+- The lab defaults now ask agents to open a pull request as a draft and mark it ready once
+  the local checks pass. The lab's CI will skip drafts, so it runs once per pull request,
+  just before merge. In one private lab repo, 83 of 181 CI runs over two weeks repeated a
+  run on the same pull request. Running once per pull request would have cut its billed
+  minutes by about half.
+
 ## 2026.11.9 — 2026-11-14
 
 ### Changed
