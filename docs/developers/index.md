@@ -102,15 +102,16 @@ choices](design.md#a-version-names-one-tree) says why every change bumps one.
 
 ## Checking a change
 
-`pixi run check` is the one command that must pass. It starts every check at once and reports
-every failure in a single run, so read the output to the bottom.
+`pixi run check` is the one command that must pass. It starts every check at once, then runs
+the tests, and reports every failure in a single run, so read the output to the bottom.
 
 ```mermaid
 flowchart LR
     you["You, before you push"] --> check["pixi run check"]
     ci["CI, on every pull request"] -->|"same task, by name"| check
-    check --> static["check-static, all at once:<br/>ruff, format, pyright, pytest, vale,<br/>markdownlint, shellcheck, conformance"]
+    check --> static["check-static, all at once:<br/>ruff, format, pyright, vale,<br/>markdownlint, shellcheck, conformance"]
     check --> lint["tests/lint.sh:<br/>manifests, skill names, no-secrets sweep,<br/>version tags, eval case lists"]
+    check -->|"then"| tests["pytest, under its time limits"]
 ```
 
 The list of steps lives in one place, the `check-static` task in `pyproject.toml`. CI calls

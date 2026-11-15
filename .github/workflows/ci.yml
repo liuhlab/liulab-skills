@@ -2,12 +2,13 @@
 #
 # This repo is PUBLIC and ships no connection details. The no-secrets sweep inside
 # `tests/lint.sh` is the only mechanical enforcement of that property, and until this file
-# existed nothing ran it except a human who remembered. That is what the `test` job below
-# is for.
+# existed nothing ran it except a human who remembered. That is what the `skill-lint` step
+# below is for.
 #
-# A job exists because a pixi ENVIRONMENT differs, not because a tool differs. The static
-# steps share one environment and are one job; the bash suite is a second job so a red
-# sweep and a red linter are two distinct status checks rather than one.
+# ONE job, because GitHub bills every job rounded up to a whole minute: several short jobs bill
+# far more than one longer one. Every step after the first gate step runs even when one before
+# it failed, so a run still reports every failure, and each step has its own verdict on the run
+# page.
 #
 # Every step invokes `pixi run <task>` and never a bare command line. The step list lives
 # in `pyproject.toml` — `check-static` names it once — so adding a step is one more word
@@ -19,21 +20,23 @@
 # Adding either later is a decision, not a tidy-up. `tests/README.md` records which layers
 # of the bash suite are meaningful on a runner and which stay local.
 #
-# There is no `build` job: this repo produces no wheel.
+# There is no `build` step: this repo produces no wheel.
 name: ci
 
 on:
-  # `pull_request` is the trigger that matters. It tests the MERGE commit — the code that
-  # will exist after the merge, not the branch tip — and it is the only event that
-  # produces a run for a pull request from a fork. `push` is for `main` alone; on every
-  # branch it would run everything a second time for no new information.
-  push:
-    branches: [main]
+  # `pull_request` tests the MERGE commit — the code that will exist after the merge, not the
+  # branch tip — and it is the only event that produces a run for a pull request from a fork.
+  # Nothing runs on a push to `main`: it would test again what the pull request just tested.
+  # `workflow_dispatch` is for checking `main` by hand.
+  #
+  # `ready_for_review` is listed because a draft runs nothing (the job's `if:` below): open a
+  # pull request as a draft, pass the local gate, then mark it ready to run CI once.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 
 # Keyed on the workflow and the ref, so pushing again to a pull request cancels the run it
-# supersedes. `main` runs are never cancelled: a cancelled run on the branch everything
-# merges into is an unreliable gate, and a red-or-missing history is worse than a slow one.
+# supersedes. A run started by hand is never cancelled.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -42,25 +45,9 @@ permissions:
   contents: read
 
 jobs:
-  # ruff and pyright, started together and both reported, whichever fails.
   check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: prefix-dev/setup-pixi@v0.10.2
-        with:
-          environments: default
-          # Fail if `pixi.lock` no longer matches `pyproject.toml`, rather than silently
-          # solving something else. This is what makes CI run the versions the laptop ran.
-          locked: true
-      # `check-static`, not `check`: `check` is these steps plus the bash suite, and the
-      # bash suite is the `test` job below.
-      - run: pixi run check-static
-
-  # The repo's own layer-1 suite: manifests, skill frontmatter, the per-skill description
-  # cap and the no-secrets sweep. Half of the sweep is machine-local by design — see the
-  # note in `tests/README.md` — but everything it can check on a runner, it checks here.
-  test:
+    # Skipped on a draft, which bills nothing. A run by hand has no pull request, so it runs.
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -73,19 +60,22 @@ jobs:
           fetch-depth: 0
       - uses: prefix-dev/setup-pixi@v0.10.2
         with:
-          environments: default
+          # `docs` is the one environment `default` does not cover: it holds the site builder.
+          environments: default docs
+          # Fail if `pixi.lock` no longer matches `pyproject.toml`, rather than silently
+          # solving something else. This is what makes CI run the versions the laptop ran.
           locked: true
+      # `check-static`, `test` and `skill-lint` as three steps, not `check` as one, so each
+      # has its own verdict on the run page.
+      - run: pixi run check-static
+      - run: pixi run test
+        if: ${{ !cancelled() }}
+      # The repo's own layer-1 suite: manifests, skill frontmatter, the per-skill description
+      # cap and the no-secrets sweep. Half of the sweep is machine-local by design — see the
+      # note in `tests/README.md` — but everything it can check on a runner, it checks here.
       - run: pixi run skill-lint
-
-  # A third environment, so a third job: the docs builder is a pinned alpha nothing else
-  # needs installed. It BUILDS and stops — publishing lives in `docs.yml`, on `main` alone —
-  # so a broken site is a red pull request rather than a discovery at deploy time.
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: prefix-dev/setup-pixi@v0.10.2
-        with:
-          environments: docs
-          locked: true
+        if: ${{ !cancelled() }}
+      # `--strict` is in the task, so a broken site is a red pull request rather than a
+      # discovery at deploy time. Publishing the site is `docs.yml`, on `main`.
       - run: pixi run docs-build
+        if: ${{ !cancelled() }}
