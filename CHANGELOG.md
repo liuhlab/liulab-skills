@@ -14,7 +14,7 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
   at the lowest priority, and the agent asks before each copy. The page also lists the routes
   that fail, so an agent no longer plans a Slurm job that cannot reach arc. The README has
   the ssh alias to add on ircbc. The copy runs at about 5 to 6 MB/s, so a terabyte takes two
-  days. Its retry loop logs the real exit code of each failed try.
+  days.
 
 ## 2026.11.7 — 2026-11-10
 

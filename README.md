@@ -147,11 +147,13 @@ details.
    Only if you copy large data from arc to ircbc: that copy runs on the
    ircbc login node. So your `~/.ssh/config` *on ircbc* needs two aliases of
    its own, `ircbc-transfer` and `chimera-transfer`. Give `chimera-transfer`
-   these two lines, or its connection hangs before login:
+   two more lines than on your laptop, or its connection hangs before login:
 
    ```text
-   ProxyJump ircbc-transfer
-   KexAlgorithms diffie-hellman-group14-sha256
+   Host chimera-transfer
+     # HostName and User as on your laptop
+     ProxyJump ircbc-transfer
+     KexAlgorithms diffie-hellman-group14-sha256
    ```
 
 2. Copy [templates/personal.md](templates/personal.md) to

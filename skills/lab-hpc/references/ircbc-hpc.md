@@ -12,8 +12,8 @@ The whole cluster sits behind a **VPN** (the atrust app) that the user manages b
 
 ## Hosts and reaching a compute node (verified 2026-09-04)
 
-- **Login:** `ircbc`. A doorway. Two reasons to be here (`SKILL.md`): submitting your first job, and the two things compute nodes lack —
-  internet and `git`. A bulk copy from arc is a third ("Bulk copies from arc", 2026-11-08).
+- **Login:** `ircbc`. A doorway. Two reasons to be here (`SKILL.md`): submitting your first job, and the three things compute nodes lack —
+  internet, `git` and a route to arc ("Bulk copies from arc", 2026-11-08).
 - **Compute:** `cpu01`…`cpu08`, ProxyJumping through `ircbc`.
 - **Transfer:** `ircbc-transfer` — separate shared lab account, direct internet, local disk of its own, but it does **not mount `/share`**,
   so it cannot see lab code or the image store. Fetch there and copy over; never compute there. It does have `git` and `rsync`.
@@ -70,7 +70,7 @@ treat the reverse as unverified.
 
 | Route | Result |
 | --- | --- |
-| Laptop relay: arc → laptop → `cpu0X` | Works for ordinary files, far too slow for bulk data. |
+| Laptop relay: arc → laptop → `cpu0X` | Unusable: about 16 KB/s into `/share`. |
 | Slurm job on `cpu0X` pulling from arc | No route: compute nodes cannot reach `ircbc-transfer`, and `ircbc` refuses ssh from a compute node. Never plan this job. |
 | Stage on `ircbc-transfer`, then copy on | Works, but its local disk is smaller than a large dataset, and every file needs a second copy. |
 | `rsync` on `ircbc` through `ircbc-transfer` | Works: about 5–6 MB/s sustained, so a terabyte takes two days (2026-11-10). |
@@ -89,7 +89,7 @@ but it ends with the laptop session, so a detached copy cannot rely on it to rec
 setsid nohup nice -n 19 ionice -c3 bash -c 'echo $$ > ~/<name>.pid
   for i in $(seq 20); do
     rsync -a --partial chimera-transfer:<src>/ <dest>/ && { echo "$(date +%FT%T) rsync exit 0, done"; break; }
-    rc=$?; echo "$(date +%FT%T) rsync exit $rc, try $i of 20, retry in 5 min"; sleep 300
+    rc=$?; echo "$(date +%FT%T) rsync exit $rc, try $i of 20"; sleep 300
   done' > ~/<name>.rsync.log 2>&1 &
 ```
 
