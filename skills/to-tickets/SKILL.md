@@ -46,6 +46,7 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
+- **Tests**: the seam the new tests go through, and how many: usually one per acceptance criterion. An implementer with no user to ask takes this as its cap.
 
 Ask the user:
 
@@ -76,6 +77,8 @@ Do NOT close or modify any parent issue.
 
 **Status:** ready-for-agent
 
+**Tests:** the seam, and the number of new tests.
+
 - [ ] Acceptance criterion 1
 - [ ] Acceptance criterion 2
 
@@ -95,6 +98,10 @@ The end-to-end behaviour this ticket makes work, from the user's perspective, no
 
 - [ ] Criterion 1
 - [ ] Criterion 2
+
+## Tests
+
+The seam, and the number of new tests.
 
 ## Blocked by
 

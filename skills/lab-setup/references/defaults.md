@@ -38,6 +38,12 @@ package to new code, and let the sibling lab package own its mechanism (genomes 
 lab's genome package). Record configuration, never measurements. Shared things, the repo
 template above all, stay general and light.
 
+Tests have a budget: pytest runs in under 45 s in CI, and each test in under 2 s. A slower
+test is marked `slow` and runs on demand. A repo's `timeout` and `suite_budget` in
+`pyproject.toml` override both numbers. Private repos share 2,000 GitHub Actions minutes a
+month, and each job bills rounded up to a whole minute, so push a branch once its local gate
+passes.
+
 ## Always on
 
 - Load `lab-hpc` before any ssh or Slurm step.

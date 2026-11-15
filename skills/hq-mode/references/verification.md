@@ -33,10 +33,9 @@ what each proves. That list is the repo's map of what can be checked.
   an exit code of 0 is a proxy.
 - **Its evidence survives.** The command, the output path and the job ID go in the reply or
   the decision trail (`show-me-your-work.md`), and cleanup never deletes them.
-- **It is worth its cost.** It proves something no other check proves, and it runs fast enough
-  for its lane. Time the checks before and after your change, and give the increase in the
-  reply when they grew. `tdd` carries the two anti-patterns: over-testing, and slow in the fast
-  loop.
+- **It is worth its cost.** It proves something no other check proves, and it fits the test
+  budget (the lab defaults' Tooling). `tdd` carries the two anti-patterns: over-testing, and
+  slow in the fast loop.
 
 ## A check over many records
 

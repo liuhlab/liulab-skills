@@ -57,6 +57,8 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 When the diff touches analysis code (a script, notebook or pipeline stage), the baseline also carries the science smells in [science-smells.lab.md](science-smells.lab.md), bound by the same two rules; paste them in with the rest.
 
+When the diff touches tests or a test limit, the Standards brief also carries [test-cost.lab.md](test-cost.lab.md), pasted in full; its first two items are hard violations.
+
 ### 4. Spawn both sub-agents in parallel
 
 Issue both sub-agent calls together, in the foreground, and aggregate the reports they return.

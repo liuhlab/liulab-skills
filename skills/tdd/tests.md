@@ -21,6 +21,7 @@ Characteristics:
 - Survives internal refactors
 - Describes WHAT, not HOW
 - One logical assertion per test
+- One logical assertion can span several `assert` lines: check every field of one result in one test, so a costly fixture is built once
 
 ## Bad Tests
 
