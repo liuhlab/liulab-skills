@@ -41,8 +41,9 @@ template above all, stay general and light.
 Tests have a budget: pytest runs in under 45 s in CI, and each test in under 2 s. A slower
 test is marked `slow` and runs on demand. A repo's `timeout` and `suite_budget` in
 `pyproject.toml` override both numbers. Private repos share 2,000 GitHub Actions minutes a
-month, and each job bills rounded up to a whole minute, so push a branch once its local gate
-passes.
+month, and each job bills rounded up to a whole minute. So open a pull request as a draft,
+and mark it ready (`gh pr ready`) once its local gate passes. A repo whose CI skips drafts
+then runs it once, before merge.
 
 ## Always on
 
