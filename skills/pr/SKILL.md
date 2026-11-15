@@ -163,6 +163,8 @@ Screenshots are S-tier - when the environment is set up for it and the change is
 
 Execution-based evidence is A-tier. Test results, console output. Show the exact test that now fails and passes, using pseudocode.
 
+When the change adds or changes tests, Evidence also gives the test run's time on the base branch and on this one, against the budget: `pytest 38 s on main → 41 s here, budget 45 s`.
+
 ### Merge Danger
 
 Describe whether it's a one-way or two-way door. You can walk back through two-way doors, but not one-way doors. A PR that is cheap to roll back is lower risk. Changes that involve destructive actions or hard-to-reverse decisions are one-way doors.

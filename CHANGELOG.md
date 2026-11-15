@@ -5,6 +5,24 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.9 — 2026-11-14
+
+### Changed
+
+- Tests now have a budget. The lab defaults say pytest runs in under 45 s in CI, and each
+  test in under 2 s. A slower test is marked `slow` and runs only when asked for. Two lab
+  repos showed the need. In one, the CI test run grew from 15 s to about 150 s in a month. In
+  the other it tripled in one day, and agents raised the time limit per test four times
+  rather than make a test faster. That repo then used up the lab's GitHub Actions minutes.
+- `tdd` takes its test count from the ticket when no one can agree it with the user, as in a
+  subagent. A limit that fails means a faster test or a moved one, and the agent reports the
+  test run's time before and after. `to-tickets` gives each ticket a Tests line: where the
+  tests go and how many.
+- `code-review` checks what tests cost. A raised limit or a run over budget is a hard
+  finding. The review also reports the run's time before and after, the test count against
+  the spec, and setup that is built again for each test.
+- `pr` puts the test run's time, before and after, in its Evidence section.
+
 ## 2026.11.8 — 2026-11-14
 
 ### Added
