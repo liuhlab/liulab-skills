@@ -130,6 +130,7 @@ def test_a_hidden_slide_is_rendered_too(folder: Path) -> None:
     assert "slide staged (page 2, hidden), as it opens" in said
 
 
+@pytest.mark.slow
 def test_a_second_render_lists_only_the_pictures_that_changed(folder: Path) -> None:
     """A picture has changed when it differs from the one the last render left."""
     write(folder, THREE)
@@ -149,6 +150,7 @@ def test_a_second_render_lists_only_the_pictures_that_changed(folder: Path) -> N
     assert "5 pictures did not change" in said
 
 
+@pytest.mark.slow
 def test_a_new_slide_and_a_dropped_slide_touch_no_other_picture(folder: Path) -> None:
     """Pictures are named by slide id, so each is compared with its own last picture."""
     write(folder, THREE)
@@ -175,6 +177,7 @@ def test_a_new_slide_and_a_dropped_slide_touch_no_other_picture(folder: Path) ->
     ]
 
 
+@pytest.mark.slow
 def test_an_inserted_slide_lists_only_its_own_pictures(folder: Path) -> None:
     """Every later slide moves one page on, and that is the only thing that changed on it."""
     write(folder, THREE)

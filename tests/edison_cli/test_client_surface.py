@@ -20,7 +20,9 @@ from edison_cli import tasks
 
 # Importing the real client takes seconds, and each test process pays it once. One group
 # keeps this file on one worker (`--dist loadgroup` in the `test` task), so one worker pays.
-pytestmark = pytest.mark.xdist_group("real-edison-client")
+# The import alone is over the time limit, and whichever test runs first pays it, so the whole
+# file is `slow`: `pixi run test-slow` runs it.
+pytestmark = [pytest.mark.xdist_group("real-edison-client"), pytest.mark.slow]
 
 CALLED = {
     "create_task": ("task_data", "files"),

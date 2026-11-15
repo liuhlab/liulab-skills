@@ -40,7 +40,8 @@ run history.
 One file reads the real client: `test_client_surface.py`. Importing it takes
 seconds, so the file carries one `xdist_group` mark and `pixi run test` passes
 `--dist loadgroup`: one worker pays the import, not each worker that draws one of
-its tests.
+its tests. The import alone is over the time limit, so the file is marked `slow` and
+runs in `pixi run test-slow`.
 
 ## Unit tests — the deck build: `tests/lab_deck/`
 
