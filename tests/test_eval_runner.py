@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import program
+
 REPO = Path(__file__).resolve().parents[1]
 # Everything a run of one case reads: the entry point, the runner, the catalogue and its two
 # helpers, the plugin manifest the evidence quotes, and one skill for the mismatch test to
@@ -108,9 +110,7 @@ else:
     sys.exit(int(os.environ.get('STUB_RUN_EXIT', '0')))
 """
     for name in ("codex", "claude", "kimi"):
-        stub = bindir / name
-        stub.write_text(script)
-        stub.chmod(0o755)
+        program(bindir, name, script)
     regular = tmp_path / "regular-homes"
     regular.mkdir()
     for name in ("codex", "claude", "home"):

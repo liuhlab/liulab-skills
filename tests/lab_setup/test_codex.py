@@ -7,6 +7,7 @@ Codex home inside `--home`, and only for what `config.toml` does not already rec
 
 from __future__ import annotations
 
+from tests.conftest import program
 from tests.lab_setup.conftest import FakeMachine
 
 
@@ -55,7 +56,8 @@ def test_a_failing_codex_command_fails_the_run_and_says_what_it_printed(
     machine: FakeMachine,
 ) -> None:
     """A refused install has to reach the member, with Codex's own reason."""
-    (machine.stubs / "codex").write_text("#!/bin/sh\necho 'marketplace unreachable' >&2\nexit 3\n")
+    (machine.stubs / "codex").unlink()
+    program(machine.stubs, "codex", "#!/bin/sh\necho 'marketplace unreachable' >&2\nexit 3\n")
 
     result = machine.run()
 

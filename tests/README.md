@@ -16,6 +16,11 @@ draft. **Only the
 unit tests and layer 1 run in CI** — the other two are local-only, for the reasons
 below.
 
+A unit test that puts a stub program on PATH gets it from `program` in
+`tests/conftest.py`: a link to one copy for the whole run. A Mac checks each new program
+the first time it runs, one at a time for the whole machine, so a stub written by every
+test made the tests queue past the 2 s limit.
+
 ## Unit tests — the Edison spend path: `tests/edison_cli/`
 
 Free, seconds. `pixi run test`, which `check` runs after `check-static`. Tests the **code**:
