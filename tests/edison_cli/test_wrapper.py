@@ -25,6 +25,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import program
+
 REPO = Path(__file__).resolve().parents[2]
 WRAPPER = REPO / "bin" / "edison-cli"
 ARGS = ["status", "--json"]
@@ -110,9 +112,7 @@ def _run_with_stub_pixi(tmp_path: Path, launcher: Path) -> list[str]:
     """Run `launcher` with a `pixi` on PATH that only writes down what it was asked to do."""
     stub_dir = tmp_path / "stub"
     stub_dir.mkdir()
-    stub = stub_dir / "pixi"
-    stub.write_text('#!/bin/sh\nprintf \'%s\\n\' "$@" > "$PIXI_STUB_LOG"\n', encoding="utf-8")
-    stub.chmod(0o755)
+    program(stub_dir, "pixi", '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$PIXI_STUB_LOG"\n')
     log = tmp_path / "pixi-args"
     env = {
         "PATH": os.pathsep.join([str(stub_dir), "/usr/bin", "/bin"]),

@@ -17,6 +17,7 @@ import pytest
 
 from lab_deck import preflight, render
 from lab_deck.merge import write as write_zip
+from tests.conftest import program
 from tests.lab_deck.conftest import PLAIN, Deck, lab_deck, write
 from tests.lab_deck.test_clicks import BOTH, STAGED
 from tests.lab_deck.test_deck import built
@@ -29,14 +30,13 @@ THREE = {"title": PLAIN, "staged": STAGED, "signal": BOTH}
 @pytest.fixture(autouse=True)
 def soffice(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Put the stand-in where `lab-deck` looks for LibreOffice."""
-    program = tmp_path / "soffice"
-    program.write_text(
+    stand_in = program(
+        tmp_path,
+        "soffice",
         f'#!/bin/sh\nexec {shlex.quote(sys.executable)} {shlex.quote(str(STAND_IN))} "$@"\n',
-        encoding="utf-8",
     )
-    program.chmod(0o755)
-    monkeypatch.setenv(render.SOFFICE, str(program))
-    return program
+    monkeypatch.setenv(render.SOFFICE, str(stand_in))
+    return stand_in
 
 
 def rendered(folder: Path) -> str:
@@ -130,6 +130,7 @@ def test_a_hidden_slide_is_rendered_too(folder: Path) -> None:
     assert "slide staged (page 2, hidden), as it opens" in said
 
 
+@pytest.mark.slow
 def test_a_second_render_lists_only_the_pictures_that_changed(folder: Path) -> None:
     """A picture has changed when it differs from the one the last render left."""
     write(folder, THREE)
@@ -149,6 +150,7 @@ def test_a_second_render_lists_only_the_pictures_that_changed(folder: Path) -> N
     assert "5 pictures did not change" in said
 
 
+@pytest.mark.slow
 def test_a_new_slide_and_a_dropped_slide_touch_no_other_picture(folder: Path) -> None:
     """Pictures are named by slide id, so each is compared with its own last picture."""
     write(folder, THREE)
@@ -175,6 +177,7 @@ def test_a_new_slide_and_a_dropped_slide_touch_no_other_picture(folder: Path) ->
     ]
 
 
+@pytest.mark.slow
 def test_an_inserted_slide_lists_only_its_own_pictures(folder: Path) -> None:
     """Every later slide moves one page on, and that is the only thing that changed on it."""
     write(folder, THREE)
@@ -199,7 +202,8 @@ def test_an_inserted_slide_lists_only_its_own_pictures(folder: Path) -> None:
 
 def test_a_render_folder_with_no_fingerprints_is_compared_by_its_pictures(folder: Path) -> None:
     """The pictures of a render made before fingerprints were kept still say what changed."""
-    write(folder, THREE)
+    # Two slides, not three: it renders three times, and every page is a picture to write.
+    write(folder, {"title": PLAIN, "signal": BOTH})
     built(folder)
     rendered(folder)
     (folder / "renders" / "states.json").unlink()

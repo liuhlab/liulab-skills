@@ -5,6 +5,27 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.11 — 2026-11-16
+
+### Changed
+
+- This repo's own tests now keep the lab's time limits: 2 s for each test and 45 s for the
+  whole run. A slower test is marked `slow` and runs only with `pixi run test-slow`. `pixi run
+  check` now runs the tests after the other checks rather than beside them, so a busy machine
+  does not push a test over its limit. The whole-run limit works with the tests spread over
+  every core, and it times the tests only: a run in which a slow test ran is not timed.
+- A stub program that many tests put on PATH is now written once for the whole run. A Mac
+  checks each new program the first time it runs, one at a time, and a stub per test made
+  the tests wait their turn past the 2 s limit.
+- CI is now one job instead of three, so it bills fewer minutes. It runs only on a pull
+  request that is not a draft, and no longer again on `main` after the merge. A push to a
+  draft, marked ready right after, no longer loses its run: the draft's skipped run used to
+  cancel it. The site
+  deploy skips a private copy of the repo.
+- The repo structure check has a new rule: the time limits are set in `pyproject.toml` and
+  nowhere else. It now also counts the words of a glossary entry written as a bold term on a
+  line of its own.
+
 ## 2026.11.10 — 2026-11-14
 
 ### Changed

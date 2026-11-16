@@ -1368,8 +1368,8 @@ fi
 #   * the key arriving in the client's environment and appearing in no argument, no program
 #     text and no output — `test_key_discipline.py`.
 #
-# They run under `pixi run test`, which is a step of `check-static`, so `pixi run check` still
-# asserts all four. The stub principle is unchanged: a test of the spending path must be safe
+# They run under `pixi run test`, which `pixi run check` runs after `check-static`, so the gate
+# still asserts all four. The stub principle is unchanged: a test of the spending path must be safe
 # on the day the path is broken.
 
 echo "== eval guard self-test =="

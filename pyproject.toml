@@ -133,9 +133,10 @@ pytest = "*"
 # Runs the tests on every core. Each test works in its own temporary folder, so they share
 # nothing; the deck-build tests start Node and are most of the time the suite takes.
 pytest-xdist = "*"
+# Reads `timeout` in `[tool.pytest.ini_options]`. From PyPI beside pytest, for the reason above.
+pytest-timeout = "*"
 
-# The docs builder, in a feature of its own so that exactly one CI job installs it and the
-# gate everyone runs does not carry it.
+# The docs builder, in a feature of its own so that `pixi run check` never installs it.
 #
 # Exact, and bumped in a commit of its own: at `0.0.x` nothing promises the next patch is
 # compatible, and a patch release has already broken search once. Re-run `pixi run docs-build`
@@ -151,8 +152,8 @@ zensical = "==0.0.57"
 docs = "zensical serve"
 docs-build = "zensical build --clean --strict"
 
-# `default` deliberately does NOT take `docs`: the docs feature exists so that one CI job,
-# and one laptop command, installs the builder and nothing else pays for it.
+# `default` deliberately does NOT take `docs`, so `pixi run check` never installs the site
+# builder.
 #
 # `docs` takes `no-default-feature` and leaves the solve group, and both halves are
 # load-bearing — each alone still fails. zensical's conda dependencies put `click` and
@@ -204,18 +205,22 @@ conformance = "python scripts/conformance.py"
 # real client takes seconds to import, and one worker pays that, not every worker that
 # happens to draw one of its tests.
 test = "pytest -n auto --dist loadgroup"
+test-slow = "pytest -m slow"
 # The static step list lives here and nowhere else; `check.sh` takes it as arguments, and
 # `ci.yml` invokes this task by name, so the local gate and CI cannot drift.
 #
 # `extra_steps` is how `check` adds the bash suite to the same list, so the suite starts beside the
-# other steps and the gate takes as long as its slowest step, not the sum. CI passes
-# nothing: there the suite is a job of its own, and it runs once.
-check-static = { cmd = "bash scripts/check.sh lint fmt-check typecheck test vale markdownlint shellcheck conformance {{ extra_steps }}", args = [
+# other steps. CI passes nothing: there the suite is a step of its own, and it runs once.
+check-static = { cmd = "bash scripts/check.sh lint fmt-check typecheck vale markdownlint shellcheck conformance {{ extra_steps }}", args = [
     { arg = "extra_steps", default = "" },
 ] }
 # The gate. The target is 40 s or less on a developer Mac: the closing line of a warm run,
 # median of three. `tests/README.md` says how it is kept.
-check = { depends-on = [{ task = "check-static", args = ["skill-lint"] }] }
+#
+# `test` runs whatever `check-static` returned; `depends-on` would skip it. After it, not beside
+# it, so pytest's time limits and vale's walk of `tests/` never share the machine. pixi's task
+# shell has `$?` but no arithmetic.
+check = "pixi run check-static skill-lint; static=$?; pixi run test && exit $static"
 
 # ============================== pytest ==============================
 
@@ -223,7 +228,12 @@ check = { depends-on = [{ task = "check-static", args = ["skill-lint"] }] }
 # platform. The tests of `src/lab_deck` run the real Node build, which needs no network.
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q --strict-markers"
+addopts = ["-q", "--strict-markers", "-m", "not slow"]
+# The two time limits, here and nowhere else: conformance fails a copy in a workflow, a task or
+# a test. `conftest.py` reads `suite_budget`; pytest-timeout reads `timeout`, which covers a
+# test's setup, call and teardown. A test marked `slow` is held to neither.
+timeout = 2
+suite_budget = 45
 
 # ============================== ruff ==============================
 
@@ -255,6 +265,11 @@ ignore = ["E501", "D203", "D213"]
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
+# The template's test of the time limits, copied verbatim so the next template sync is a plain
+# copy. The template does not run pydocstyle over its tests, so this file's tests carry none.
+[tool.ruff.lint.per-file-ignores]
+"tests/test_time_limits.py" = ["D"]
+
 # ============================== pyright ==============================
 
 [tool.pyright]
@@ -263,7 +278,7 @@ convention = "numpy"
 # nothing, which is the defect `docs/adr/0011` exists to close. `tests` is deliberately
 # absent: its stub defines a second `edison_client`, and pyright reading both would report
 # the real client's own surface as a redeclaration.
-include = ["scripts", "skills", "src"]
+include = ["scripts", "skills", "src", "conftest.py"]
 exclude = ["**/__pycache__", "**/.pixi"]
 venvPath = ".pixi/envs"
 venv = "default"
@@ -280,22 +295,14 @@ reportMissingTypeStubs = "none"
 # ============================== liulab ==============================
 # Read by `scripts/conformance.py`; its docstring has the rules.
 
-# The agent-facing files, and the Vale Length rule that caps each. A key does two jobs, and
-# the two read it differently. Conformance rule 2 resolves it against `git ls-files` as a
-# plain path prefix — a trailing `/` matches a directory, any other key matches that one
-# path — and reads only the keys under the site source, so the `skills/` keys never reach
-# it. Conformance rule 3 looks for the key verbatim INSIDE a `.vale.ini` section header, and
-# there a glob is what pairs. The `skills/` keys below are globs for that reason.
-#
-# Every key must appear verbatim in exactly one `.vale.ini` section header — a key in zero
-# sections is checked by nothing, and a key in two cannot be paired. That is why there is no
-# plain `skills/` key: it is a substring of the references header AND of the skill-body
-# header, so it would match twice and fail. Skill bodies carry LengthSkill at 600; the
-# reference pages keep LengthDoc, a glob wider than the lab template's `skills/*/SKILL.md`
-# so that the per-cluster and per-platform pages are capped at all. The support files beside
-# a body and playbook folders keep LengthDoc too; adopted skills, upstream text, are exempt in
-# a `.vale.ini` section of their own that no key names. A lab side page beside an adopted
-# skill, `*.lab.md`, is lab text and keeps LengthDoc in a later section.
+# The agent-facing files, and the Vale Length rule that caps each. Conformance rule 2 reads a
+# key as a plain path prefix, and rule 3 pairs it with the one `.vale.ini` section header that
+# spells it verbatim. Rule 3 fails a glob key, so the skill pages have no key here, and their
+# caps live in `.vale.ini` alone. Skill bodies carry LengthSkill; reference pages, support
+# files beside a body, playbooks and a lab side page beside an adopted skill (`*.lab.md`) carry
+# LengthDoc; adopted skills, upstream text, are exempt. Rule 3 still audits the body and the
+# reference sections, through the `.claude/commands/` and `docs/agents/` keys that share them;
+# the `*.lab.md` section has no key to pair, and only Vale reads it.
 #
 # `docs/research/` is absent because this repo has no research notes; declaring a key for a
 # directory nobody wrote would fail rule 3 on the section that has no key to pair with.
@@ -304,11 +311,6 @@ reportMissingTypeStubs = "none"
 "GLOSSARY.md" = false                  # capped per entry by conformance rule 4, not per file
 "docs/agents/" = "LengthDoc"
 "upstream/README.md" = "LengthDoc"     # the pin and attribution formats
-"skills/*/references/" = "LengthDoc"
-"skills/*/*.md" = "LengthDoc"          # support files beside a skill body
-"skills/*/*.lab.md" = "LengthDoc"      # lab side pages beside an adopted skill's text
-"skills/*/playbooks/" = "LengthDoc"
-"skills/*/SKILL.md" = "LengthSkill"
 ".claude/commands/" = "LengthSkill"    # the maintainer-only skill, which the plugin never ships
 "docs/adr/" = "LengthAdr"
 

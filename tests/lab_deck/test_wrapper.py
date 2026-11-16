@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import program
+
 REPO = Path(__file__).resolve().parents[2]
 WRAPPER = REPO / "bin" / "lab-deck"
 ARGS = ["build", "a deck"]
@@ -54,9 +56,7 @@ def test_the_wrapper_runs_this_project_from_any_folder(tmp_path: Path, how: str)
         launcher.symlink_to(WRAPPER)
     stub_dir = tmp_path / "stub"
     stub_dir.mkdir()
-    stub = stub_dir / "pixi"
-    stub.write_text('#!/bin/sh\nprintf \'%s\\n\' "$@" > "$PIXI_STUB_LOG"\n', encoding="utf-8")
-    stub.chmod(0o755)
+    program(stub_dir, "pixi", '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$PIXI_STUB_LOG"\n')
     log = tmp_path / "pixi-args"
     (tmp_path / "pyproject.toml").write_text("[project]\nname = 'not-this-one'\n", encoding="utf-8")
 

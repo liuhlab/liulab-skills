@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.conftest import program
+
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "skills" / "lab-setup" / "scripts" / "lab_setup.py"
 # What the fake clone ships. A real clone ships more; these three are enough to clash with.
@@ -125,7 +127,5 @@ def machine(tmp_path: Path) -> FakeMachine:
     fake.bin_dir.mkdir(parents=True)
     (fake.home / ".kimi-code").mkdir()
     fake.stubs.mkdir()
-    codex = fake.stubs / "codex"
-    codex.write_text(CODEX_STUB)
-    codex.chmod(0o755)
+    program(fake.stubs, "codex", CODEX_STUB)
     return fake

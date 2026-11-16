@@ -6,18 +6,24 @@ and layer 3 only when a skill's behaviour has changed. Two skills also ship real
 code, and so does the maintainer's upstream sync. Each has unit tests of its own,
 described first.
 
-`pixi run check` runs everything cheap and safe: the static linters, the unit
-tests and layer 1, all started at once, every failure reported in one run.
+`pixi run check` runs everything cheap and safe: the static linters and layer 1,
+all started at once, then the unit tests, every failure reported in one run.
 **The target is 40 s or less** on a developer Mac: the gate's own closing line,
 warm environment, median of three runs. The gate takes as long as its slowest
-step, which is the unit tests, so a slow new test is what breaks the target.
-`.github/workflows/ci.yml` runs the same tasks on every pull request. **Only the
+static step plus the unit tests, so a slow new test is what breaks the target.
+`.github/workflows/ci.yml` runs the same tasks on every pull request that is not a
+draft. **Only the
 unit tests and layer 1 run in CI** — the other two are local-only, for the reasons
 below.
 
+A unit test that puts a stub program on PATH gets it from `program` in
+`tests/conftest.py`: a link to one copy for the whole run. A Mac checks each new program
+the first time it runs, one at a time for the whole machine, so a stub written by every
+test made the tests queue past the 2 s limit.
+
 ## Unit tests — the Edison spend path: `tests/edison_cli/`
 
-Free, seconds. `pixi run test`, and a step of `check-static`. Tests the **code**:
+Free, seconds. `pixi run test`, which `check` runs after `check-static`. Tests the **code**:
 `src/edison_cli`, which is the only Python in this repo that can spend a lab
 member's money.
 
@@ -39,7 +45,8 @@ run history.
 One file reads the real client: `test_client_surface.py`. Importing it takes
 seconds, so the file carries one `xdist_group` mark and `pixi run test` passes
 `--dist loadgroup`: one worker pays the import, not each worker that draws one of
-its tests.
+its tests. The import alone is over the time limit, so the file is marked `slow` and
+runs in `pixi run test-slow`.
 
 ## Unit tests — the deck build: `tests/lab_deck/`
 

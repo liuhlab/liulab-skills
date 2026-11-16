@@ -23,10 +23,19 @@ release.
 
 | Lane | Command | What it proves |
 | --- | --- | --- |
-| Gate | `pixi run check` | Every static check, unit test and `tests/lint.sh`; what CI runs on each PR. All failures print in one run, so read to the bottom |
-| Docs | `pixi run docs-build` | The site builds strictly. CI runs it too |
+| Gate | `pixi run check` | Every static check and `tests/lint.sh`, then the unit tests; what CI runs. All failures print in one run, so read to the bottom |
+| Docs | `pixi run docs-build` | The site builds strictly. A CI step too |
 | Preflight | `bash tests/preflight.sh [--live]` | This machine is set up for the clusters. Local only |
 | Evals | `bash tests/eval.sh --agent <agent> --only <case>` | A skill's behaviour, in a real headless session against the *installed* plugin: the runner installs and verifies a private snapshot first. Costs tokens: ask the user before `--all` or `--live` |
+
+CI runs on pull requests only, and tests the merge commit.
+
+Test time has two limits, set in `[tool.pytest.ini_options]` and nowhere else:
+
+- **`timeout`** caps one test, setup and teardown included.
+- **`suite_budget`** caps a run without slow tests, and prints its time against it.
+- **The slow lane:** a test marked `slow` is held to neither, and runs only in
+  `pixi run test-slow`.
 
 Use the development agent for evals. Manage only its installation. Carry authorization
 through review, release and cleanup; batch routine steps and reuse approved prefixes.
