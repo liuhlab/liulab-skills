@@ -9,15 +9,21 @@ attribution record and the two gate lists that exempt upstream text, as this rep
 git reads no config but the test's own. A maintainer's global `commit.gpgsign`, hooks or
 default branch would otherwise decide whether a fixture builds, and the real home directory
 is never touched.
+
+Nearly all of a test's time is starting git, so the fixture starts it as rarely as it can.
+Every repo is a copy of one empty repo made once per run, a commit is two git calls, and no
+commit starts `git maintenance`.
 """
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tarfile
 from collections.abc import Callable
 from pathlib import Path
 
@@ -28,6 +34,8 @@ SCRIPT = REPO / "scripts" / "upstream_sync.py"
 UPSTREAM = "mattpocock"
 PIN = f"upstream/{UPSTREAM}/pin.json"
 ATTRIBUTION = "upstream/attribution.json"
+#: The empty repo every fixture repo starts as a copy of: set once per run by `empty_repo`.
+_EMPTY: Path | None = None
 
 
 def numbered(name: str) -> list[str]:
@@ -46,11 +54,12 @@ class Tree:
     """A git repo on disk that a test writes, commits and reads by repo-relative path."""
 
     def __init__(self, root: Path, env: dict[str, str]) -> None:
-        """Create the directory and an empty repo on `main`."""
+        """Create the directory and an empty repo on `main`, copied from `empty_repo`'s."""
+        assert _EMPTY is not None, "the empty_repo fixture has not run"
         self.root = root
         self.env = env
         root.mkdir(parents=True)
-        self.git("init", "-q", "-b", "main")
+        shutil.copytree(_EMPTY, root / ".git")
 
     def git(self, *args: str) -> str:
         """Run git in this repo and return its stripped stdout."""
@@ -92,10 +101,28 @@ class Tree:
             path.unlink()
 
     def commit(self, message: str = "fixture") -> str:
-        """Commit everything and return the full commit."""
+        """Commit everything and return the full commit, read from the branch's ref file."""
         self.git("add", "-A")
         self.git("commit", "-q", "--allow-empty", "-m", message)
-        return self.git("rev-parse", "HEAD")
+        head = (self.root / ".git/HEAD").read_text().strip()
+        ref = head.removeprefix("ref: ")
+        return (self.root / ".git" / ref).read_text().strip() if ref != head else head
+
+    def archive(self, commit: str) -> dict[str, bytes]:
+        """Return every file in `commit`, by path, in one git call."""
+        tar = subprocess.run(
+            ["git", "archive", "--format=tar", commit],
+            cwd=self.root,
+            env=self.env,
+            capture_output=True,
+            check=True,
+        ).stdout
+        with tarfile.open(fileobj=io.BytesIO(tar)) as archive:
+            return {
+                member.name: archive.extractfile(member).read()  # type: ignore[union-attr]
+                for member in archive.getmembers()
+                if member.isfile()
+            }
 
     def json(self, rel: str) -> dict:
         """Return the JSON object at `rel`."""
@@ -199,6 +226,29 @@ def follow_by_review(lab: Lab, name: str, base: str, items: dict[str, str]) -> N
     lab.commit(f"follow {name}")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def empty_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Make the empty repo on `main` that every fixture repo copies, once per run.
+
+    It has no hooks or other template files, and `maintenance.auto` off, so that a commit
+    starts no second git process to maintain the repo.
+    """
+    global _EMPTY
+    root = tmp_path_factory.mktemp("empty-repo")
+    clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    clean.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+    subprocess.run(
+        ["git", "init", "-q", "-b", "main", "--template=", str(root)],
+        env=clean,
+        capture_output=True,
+        check=True,
+    )
+    with (root / ".git" / "config").open("a", encoding="utf-8") as config:
+        config.write("[maintenance]\n\tauto = false\n")
+    _EMPTY = root / ".git"
+    return _EMPTY
+
+
 @pytest.fixture
 def env(tmp_path: Path) -> dict[str, str]:
     """Return an environment where git reads only the fixture's identity, under a fake home."""
@@ -242,10 +292,12 @@ def make_lab(tmp_path: Path, env: dict[str, str]) -> MakeLab:
     ) -> Lab:
         forked = forked or {}
         lab = Lab(tmp_path / "lab", env)
+        files = upstream.archive(base)
         for name, bucket in {**tracked, **forked}.items():
             prefix = f"skills/{bucket}/{name}/"
-            for rel in upstream.git("ls-tree", "-r", "--name-only", base, prefix).splitlines():
-                lab.write(f"skills/{name}/{rel.removeprefix(prefix)}", upstream.show(base, rel))
+            for rel, data in files.items():
+                if rel.startswith(prefix):
+                    lab.write(f"skills/{name}/{rel.removeprefix(prefix)}", data.decode("utf-8"))
         pin = {
             "repo": "https://example.invalid/fixture-skills",
             "commit": base,
