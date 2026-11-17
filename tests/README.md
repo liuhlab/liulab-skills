@@ -52,8 +52,7 @@ runs in `pixi run test-slow`.
 
 Free, in the same `pixi run test`. They are most of that task's time: about half
 a minute, because nearly every test starts Node. `pixi run test` therefore runs
-on every physical core (`pytest -n auto`, which counts physical cores because the
-environment has `psutil`); a test shares nothing with another but a deck
+on every core (`pytest -n auto`); a test shares nothing with another but a deck
 folder it copies. They run `lab-deck` with a command line on a small deck folder
 in a temporary directory and read what a person would: the folder `new` made,
 the deck `build` wrote, the message and the exit status. The command runs inside
