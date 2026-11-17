@@ -21,6 +21,7 @@ Feishu's `lark-cli` is the exception: section 4 sets it up by hand.
 | Step | What it sets up |
 | --- | --- |
 | `claude` | `autoUpdate: true` on the `liulab` entry under `extraKnownMarketplaces` in `~/.claude/settings.json` |
+| `plugin` | reports an installed `lab@liulab` older than the clone's release; `lab-hpc`'s preflight warns of it too |
 | `codex` | `codex plugin marketplace add liuhlab/liulab-skills`, then `codex plugin add lab@liulab` |
 | `kimi` | the marketplace clone's `skills/` in `extra_skill_dirs` in `~/.kimi-code/config.toml` |
 | `defaults` | one marked block pointing at [references/defaults.md](references/defaults.md) in `~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md` and `~/.kimi-code/AGENTS.md`; a rerun replaces only the block |
@@ -43,7 +44,7 @@ Run `<python> <skill dir>/scripts/lab_setup.py --home "$HOME" --dry-run`. If `CO
   plugin *is* installed, Claude Code has moved its clone; say this skill needs a fix, and stop.
 - **`would change`**: one change the script will make once the user says yes.
 - **`skipped`**, the odd machine:
-  - *No Codex or no Kimi Code*: nothing to set up for that agent. Say so and move on.
+  - *No Codex or no Kimi Code*: say so and move on.
   - *No user bin folder on PATH*: offer to create `~/.local/bin` and add it to PATH in the
     user's shell profile. With a yes, do both, and run the step with
     `PATH="$HOME/.local/bin:$PATH"` in front of the command.
@@ -52,6 +53,7 @@ Run `<python> <skill dir>/scripts/lab_setup.py --home "$HOME" --dry-run`. If `CO
 - **`clash`**: a user-level copy that shadows the plugin's skill of that name, in every
   agent, without a word. Name each path. What happens to it is the user's call; never delete
   it.
+- **`stale`**: offer to run the update command it prints.
 - **`failed`**: relay the reason. A file the script cannot read is the user's to fix.
 
 ## 3. Make the agreed changes
