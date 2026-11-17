@@ -40,6 +40,11 @@ server work.
   installed lab plugin is older than the marketplace copy, so a machine left on old rules
   says so. `/lab-setup --dry-run` reports the same as a new `stale` status. The check reads
   local files only and never changes the preflight's exit code.
+- `hq-mode`: a new page for a job that outlives the session, linked from the cluster-run
+  playbook. Read the log of each unattended step's first run, set every variable a job needs
+  in its script, stop cleanly below a free-space floor, keep the Mac awake on a headless
+  night, fetch a large file once, and tell the user which jobs keep running unwatched. The
+  lab sets up no failure alert: once the session ends, watching the job is the user's.
 
 ## 2026.11.15 — 2026-11-17
 

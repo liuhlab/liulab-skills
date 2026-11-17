@@ -65,9 +65,10 @@ requirements in implementer briefs, with the planned units and how each is verif
    work, record that reason and size the allocation accordingly.
 10. Scale up in rounds sized to the question. See [Rounds](#rounds).
 11. Check each new job in its first minutes: state, node, the first output lines and the rate
-    against the pilot's. Run `lab-hpc`'s `scripts/watch-job.sh` in the background to watch it
-    after that. A job slower than the pilot predicts gets its cause found at once, before it
-    burns its time budget.
+    against the pilot's. Then the main session watches it in the background with `lab-hpc`'s
+    `scripts/watch-job.sh`, one per job. A job slower than the pilot predicts gets its cause
+    found at once, before it burns its time budget.
+    [Unattended jobs](../unattended-jobs.md) covers a job that outlives the session.
 12. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
     one unit), and wait for a yes unless the plan covers it.
 13. Verify outputs, not exit codes: sizes, counts, a
@@ -100,15 +101,15 @@ is an example, not a default.
 
 - Each round skips the items already done, and checks speed, errors and load against the
   last round before the next one starts.
-- A fresh subagent runs each round. Its brief quotes the run plan word for word and names the
-  watcher. It hands off a summary in the per-round report format below and stops.
+- A fresh subagent runs each round, reports its job IDs, never waits on a job, hands off a
+  summary in the per-round report format below and stops.
 - The final report names the rounds chosen and why.
 
 ## Work folder
 
-One folder per run. Clean it as the run goes: delete temp files and superseded logs once a
-round is verified. Anything kept long term gets a short `README.md` saying what each part
-holds, which run made it and how.
+Clean the folder as the run goes: delete temp files and superseded logs once a round is
+verified. Anything kept long term gets a short `README.md` saying what each part holds, which
+run made it and how.
 
 ## Per-round report
 
