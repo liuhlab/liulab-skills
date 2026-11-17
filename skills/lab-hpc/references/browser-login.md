@@ -1,13 +1,11 @@
 # A browser login for a tool on a node
 
-Some tools log in through a browser, such as rclone's Google login, which the data runs of
-November 2026 redid daily. The tool listens on a port on the node, and the login page sends the
-user's browser back to `127.0.0.1:<port>`. An ssh tunnel carries that request from the browser's
-machine to the node.
+Some tools log in through a browser, such as rclone's Google login. The tool listens on a port
+on the node, and the login page sends the user's browser back to `127.0.0.1:<port>`. An ssh
+tunnel carries that request from the browser's machine to the node.
 
 The agent holds the tunnel. Asking the user to hold an `ssh -L` open in another terminal costs
-them a step, and a command they run with the `!` prefix cannot hold one. This recipe worked 3
-times:
+them a step, and a command they run with the `!` prefix cannot hold one.
 
 1. Hold the tunnel in the background (the shell tool's background mode), to the node the tool
    runs on. The port is the one the tool listens on, 53682 for rclone:

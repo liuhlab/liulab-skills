@@ -53,16 +53,17 @@ requirements in implementer briefs, with the planned units and how each is verif
    with [`explain-the-number`](../principles/explain-the-number.md). If one step dominates,
    ask whether the run needs it before making it faster. Use those measurements to choose
    what to parallelize. Keep fast steps simple. Report the full-run estimate to the user and
-   scale within the plan; only an estimate past a plan limit goes back for a revised plan.
+   scale within the plan.
 9. Before starting long work, compare expected workers and threads with allocated CPUs,
    memory and current free capacity from Slurm. A pass taking more than a few minutes on
    one core in a multicore allocation needs a measured justification or a revised plan.
    Budget workers times threads per worker, memory per worker and shared I/O. Consider
    parallel code within a job and independent jobs across eligible nodes or partitions,
    within scheduler limits. Choose a partition using resumability, capacity and cost from
-   the cluster's Slurm reference. Fan out separate units as jobs or an array, with
-   concurrency bounded by those budgets. If I/O or another measured limit favors serial
-   work, record that reason and size the allocation accordingly.
+   the cluster's Slurm reference. Free capacity requires an allocation before use. Fan out
+   separate units as jobs or an array, with concurrency bounded by those budgets. Check each
+   unit as it finishes. If I/O or another measured limit favors serial work, record that
+   reason and size the allocation accordingly.
 10. Scale up in rounds sized to the question. See [Rounds](#rounds).
 11. Check each new job in its first minutes: state, node, the first output lines and the rate
     against the pilot's. Then the main session watches it in the background with `lab-hpc`'s
@@ -101,8 +102,8 @@ is an example, not a default.
 
 - Each round skips the items already done, and checks speed, errors and load against the
   last round before the next one starts.
-- A fresh subagent runs each round, reports its job IDs, never waits on a job, hands off a
-  summary in the per-round report format below and stops.
+- A fresh subagent runs each round, reports its job IDs, hands off a summary in the per-round
+  report format below and stops.
 - The final report names the rounds chosen and why.
 
 ## Work folder

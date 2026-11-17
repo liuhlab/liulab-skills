@@ -54,6 +54,8 @@ server work.
 - `watch-job.sh`: `-r` returns once the job runs and names its node; growth checks need `-g`,
   so a log that goes quiet no longer ends the watch; an ssh failure (exit 4) is now told
   apart from a job no Slurm command knows (exit 5).
+- Each new `lab-hpc` fact sits on one page, the others point to it, and the new pages give
+  guidance and a command for a live value rather than counts and timings from past runs.
 
 ## 2026.11.15 — 2026-11-17
 
