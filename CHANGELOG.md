@@ -45,6 +45,15 @@ server work.
   in its script, stop cleanly below a free-space floor, keep the Mac awake on a headless
   night, fetch a large file once, and tell the user which jobs keep running unwatched. The
   lab sets up no failure alert: once the session ends, watching the job is the user's.
+- `lab-hpc`: find the node you hold with one read-only `squeue --me` on the login node, a
+  third allowed use of it, and never by sweeping node aliases. `personal.md` records the
+  standing job's name, not its node. New pages give one way to start a process detached
+  over ssh, stop it by its process group (never `pkill -f`), send a script instead of
+  nested quotes, handle the Mac shell's missing `timeout` and `rm -i`, and hold the tunnel
+  for a tool's browser login on a node.
+- `watch-job.sh`: `-r` returns once the job runs and names its node; growth checks need `-g`,
+  so a log that goes quiet no longer ends the watch; an ssh failure (exit 4) is now told
+  apart from a job no Slurm command knows (exit 5).
 
 ## 2026.11.15 — 2026-11-17
 

@@ -12,8 +12,8 @@ The whole cluster sits behind a **VPN** (the atrust app) that the user manages b
 
 ## Hosts and reaching a compute node (verified 2026-09-04)
 
-- **Login:** `ircbc`. A doorway. Two reasons to be here (`SKILL.md`): submitting your first job, and the three things compute nodes lack —
-  internet, `git` and a route to arc ("Bulk copies from arc", 2026-11-08).
+- **Login:** `ircbc`. A doorway. Three reasons to be here (`SKILL.md`): submitting your first job, one `squeue -u $USER` to find the node
+  you hold, and the three things compute nodes lack — internet, `git` and a route to arc ("Bulk copies from arc", 2026-11-08).
 - **Compute:** `cpu01`…`cpu08`, ProxyJumping through `ircbc`.
 - **Transfer:** `ircbc-transfer` — separate shared lab account, direct internet, local disk of its own, but it does **not mount `/share`**,
   so it cannot see lab code or the image store. Fetch there and copy over; never compute there. It does have `git` and `rsync`.

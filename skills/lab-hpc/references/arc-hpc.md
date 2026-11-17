@@ -26,8 +26,9 @@ cgroup, setting `$SLURM_JOB_ID` alone (`SLURM_JOB_NAME` and `SLURM_NODELIST` sta
   machine, so they undercount it. Size work from what you asked Slurm for (`scontrol show job
   $SLURM_JOB_ID`), never from `nproc`. Nodes are shared with other users' jobs.
 - **A node you hold no job on refuses you** quickly, exit 255, stderr `Access denied by
-  pam_slurm_adopt: you have no active jobs on this node` — so sweeping the aliases for your
-  foothold is cheap. But exit 255 also means `Host key verification failed`: a minority of aliases
+  pam_slurm_adopt: you have no active jobs on this node`. Still, don't sweep the aliases for your
+  foothold: each probe connects through the login host, so one `squeue --me` there costs less
+  (`SKILL.md`). Exit 255 also means `Host key verification failed`: a minority of aliases
   are missing from `known_hosts`, and the effective `StrictHostKeyChecking ask` would hang an agent
   on a prompt. Probe with `-o BatchMode=yes` (fails cleanly) or `-o StrictHostKeyChecking=accept-new`.
 - **Expect transient noise.** A `Connection timed out during banner exchange`, and a bogus
