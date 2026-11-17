@@ -16,6 +16,12 @@ draft. **Only the
 unit tests and layer 1 run in CI** — the other two are local-only, for the reasons
 below.
 
+The two time limits, 2 s for each test and 45 s for the unit tests (`timeout` and
+`suite_budget` in `pyproject.toml`), are to hold on a warm 4-core Intel machine. GitHub's
+`macos-15-intel` runner is the benchmark: after one warm-up run of the tests, `pixi run
+check` should pass there. The first run on a newly provisioned machine is slower than every
+run after it, and is not held to the limits.
+
 A unit test that puts a stub program on PATH gets it from `program` in
 `tests/conftest.py`: a link to one copy for the whole run. A Mac checks each new program
 the first time it runs, one at a time for the whole machine, so a stub written by every
@@ -92,17 +98,24 @@ dialog, is checked by hand and written in the pull request.
 
 ## Unit tests — the upstream sync: `tests/upstream_sync/`
 
-Free, seconds, in the same `pixi run test`. Tests `scripts/upstream_sync.py`, the
-script behind the maintainer's monthly merge of upstream skills. Each test builds a
-small upstream and a lab tree as git repos in a temporary directory, runs the
-script at its command line, and reads what a person would: the files it wrote, the
-report it printed and its exit status. There is one case each for a clean merge, a
-conflict, a deletion with and without a fork, a rename, a new skill, a forked skill
-left alone, a lost pin, the moved pin and a fork. Then the reports a clean merge
-hides: stale words, in a lab edit and on any lab page, the defaults page among them;
-dropped edits, at the merge and again in `recheck` after a resolution; what upstream
-did to a forked skill's original; the pstack section; and which eval cases to rerun.
-Nothing reaches the network, and git reads none of your own settings.
+Free, seconds, in the same `pixi run test`. Tests `scripts/upstream_sync.py`, the script
+behind the maintainer's monthly merge of upstream skills. Each test builds a small
+upstream and a lab tree as git repos in a temporary directory, runs the script, and
+reads what a person would: the files it wrote, the report it printed and its exit
+status. The script runs inside the test's process, to save the start of a new Python;
+one refusal test runs it at its command line. There is one case each for a clean merge,
+a conflict, a deletion with and without a fork, a rename, a new skill, a forked skill
+left alone, a lost pin, the moved pin and a fork. Then the reports a clean merge hides:
+stale words, in a lab edit and on any lab page, the defaults page among them; dropped
+edits, at the merge and again in `recheck` after a resolution; what upstream did to a
+forked skill's original; the pstack section; and which eval cases to rerun. Nothing
+reaches the network, and git reads none of your own settings.
+
+A test's cost here is mostly the git processes it starts, so the fixture starts as few as
+it can. Every repo is a copy of one empty repo made once per run, a commit is two git calls and
+starts no `git maintenance`, and the lab tree is copied from upstream with one `git archive`.
+The script reads every object of a repo through one `git cat-file --batch`. On a Mac whose
+`git` is the Xcode launcher, the tests call git directly, past the launcher.
 
 ## Unit tests — the setup script: `tests/lab_setup/`
 

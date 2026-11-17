@@ -5,6 +5,23 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.13 — 2026-11-17
+
+### Changed
+
+- The upstream-sync tests start far fewer processes, so each stays under the 2 s limit on an
+  Intel Mac. The sync now runs inside the test's process, the fixtures need fewer
+  git calls per commit and none to start a repo, and on a Mac they call git past the Xcode
+  launcher.
+- `scripts/upstream_sync.py` reads every git object of a repo through one `git cat-file
+  --batch` process instead of one process per object, so the monthly sync starts fewer
+  processes too. Its output is unchanged.
+- The test that runs `tests/eval.sh` with a login in the environment is now two tests, one
+  per login variable, each running it once.
+- `tests/README.md` records where the time limits hold: on a warm 4-core Intel machine,
+  with GitHub's `macos-15-intel` runner as the benchmark, and not on the first run on a new
+  machine.
+
 ## 2026.11.12 — 2026-11-17
 
 ### Fixed

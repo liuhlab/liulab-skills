@@ -1,25 +1,36 @@
 """Fixture git repos for the upstream sync: an upstream with a history, and a lab tree.
 
 The sync reads an upstream only through a clone and writes only the lab tree, so a test builds
-both here and runs `scripts/upstream_sync.py` against them. The upstream keeps its skills in
-buckets under `skills/` and lists them in `.claude-plugin/plugin.json`, as mattpocock/skills
-does. The lab tree holds a flat copy of each adopted skill at the pin, the pin itself, the
-attribution record and the two gate lists that exempt upstream text, as this repo does.
+both here and runs `scripts/upstream_sync.py` against them. It runs in the test's process, as a
+module loaded once, to save starting a Python per run; one test runs it at its command line.
+The upstream keeps its skills in buckets under `skills/` and lists them in
+`.claude-plugin/plugin.json`, as mattpocock/skills does. The lab tree holds a flat copy of each
+adopted skill at the pin, the pin itself, the attribution record and the two gate lists that
+exempt upstream text, as this repo does.
 
 git reads no config but the test's own. A maintainer's global `commit.gpgsign`, hooks or
 default branch would otherwise decide whether a fixture builds, and the real home directory
 is never touched.
+
+A test's cost is mostly the git processes it starts, so the fixture starts as few as it can.
+Every repo is a copy of one empty repo made once per run, a commit is two git calls, and no
+commit starts `git maintenance`.
 """
 
 from __future__ import annotations
 
+import contextlib
+import importlib.util
+import io
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tarfile
 from collections.abc import Callable
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -28,6 +39,22 @@ SCRIPT = REPO / "scripts" / "upstream_sync.py"
 UPSTREAM = "mattpocock"
 PIN = f"upstream/{UPSTREAM}/pin.json"
 ATTRIBUTION = "upstream/attribution.json"
+#: The empty repo every fixture repo starts as a copy of: set once per run by `empty_repo`.
+_EMPTY: Path | None = None
+
+
+def _load_sync() -> ModuleType:
+    """Load the sync script as a module, registered in `sys.modules` as its dataclasses need."""
+    spec = importlib.util.spec_from_file_location("upstream_sync", SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+SYNC = _load_sync()
 
 
 def numbered(name: str) -> list[str]:
@@ -46,28 +73,18 @@ class Tree:
     """A git repo on disk that a test writes, commits and reads by repo-relative path."""
 
     def __init__(self, root: Path, env: dict[str, str]) -> None:
-        """Create the directory and an empty repo on `main`."""
+        """Create the directory and an empty repo on `main`, copied from `empty_repo`'s."""
+        assert _EMPTY is not None, "the empty_repo fixture has not run"
         self.root = root
         self.env = env
         root.mkdir(parents=True)
-        self.git("init", "-q", "-b", "main")
+        shutil.copytree(_EMPTY, root / ".git")
 
     def git(self, *args: str) -> str:
         """Run git in this repo and return its stripped stdout."""
         return subprocess.run(
             ["git", *args], cwd=self.root, env=self.env, capture_output=True, text=True, check=True
         ).stdout.strip()
-
-    def show(self, commit: str, rel: str) -> str:
-        """Return the text at `rel` in `commit`, exactly as committed."""
-        return subprocess.run(
-            ["git", "show", f"{commit}:{rel}"],
-            cwd=self.root,
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout
 
     def write(self, rel: str, text: str) -> None:
         """Write `text` at `rel`, creating directories on the way."""
@@ -92,10 +109,30 @@ class Tree:
             path.unlink()
 
     def commit(self, message: str = "fixture") -> str:
-        """Commit everything and return the full commit."""
+        """Commit everything and return the full commit, read from the branch's ref file."""
         self.git("add", "-A")
         self.git("commit", "-q", "--allow-empty", "-m", message)
-        return self.git("rev-parse", "HEAD")
+        head = (self.root / ".git/HEAD").read_text().strip()
+        ref = self.root / ".git" / head.removeprefix("ref: ")
+        if not head.startswith("ref: "):
+            return head
+        return ref.read_text().strip() if ref.is_file() else self.git("rev-parse", "HEAD")
+
+    def archive(self, commit: str) -> dict[str, bytes]:
+        """Return every file in `commit`, by path, in one git call."""
+        tar = subprocess.run(
+            ["git", "archive", "--format=tar", commit],
+            cwd=self.root,
+            env=self.env,
+            capture_output=True,
+            check=True,
+        ).stdout
+        with tarfile.open(fileobj=io.BytesIO(tar)) as archive:
+            return {
+                member.name: archive.extractfile(member).read()  # type: ignore[union-attr]
+                for member in archive.getmembers()
+                if member.isfile()
+            }
 
     def json(self, rel: str) -> dict:
         """Return the JSON object at `rel`."""
@@ -131,16 +168,41 @@ class Upstream(Tree):
 class Lab(Tree):
     """The lab tree, holding adopted skills flat under `skills/<name>/`."""
 
-    def sync(self, *args: str) -> subprocess.CompletedProcess[str]:
-        """Run the sync script against this tree with `args` and return what it did."""
-        return subprocess.run(
-            [sys.executable, str(SCRIPT), *args, "--lab", str(self.root)],
-            cwd=self.root,
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+    def sync(self, *args: str, cli: bool = False) -> subprocess.CompletedProcess[str]:
+        """Run the sync against this tree with `args` and return what it did.
+
+        It runs in this process: `main` with the fixture's environment, this tree as the working
+        directory and its output captured, all restored afterwards. `cli` runs the script at its
+        command line instead, as a maintainer does.
+        """
+        argv = [*args, "--lab", str(self.root)]
+        if cli:
+            return subprocess.run(
+                [sys.executable, str(SCRIPT), *argv],
+                cwd=self.root,
+                env=self.env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        out, err = io.StringIO(), io.StringIO()
+        saved = dict(os.environ)
+        try:
+            os.environ.clear()
+            os.environ.update(self.env)
+            with (
+                contextlib.chdir(self.root),
+                contextlib.redirect_stdout(out),
+                contextlib.redirect_stderr(err),
+            ):
+                try:
+                    status = SYNC.main(argv)
+                except SystemExit as e:
+                    status = e.code if isinstance(e.code, int) else int(e.code is not None)
+        finally:
+            os.environ.clear()
+            os.environ.update(saved)
+        return subprocess.CompletedProcess(argv, status, out.getvalue(), err.getvalue())
 
     def merge(
         self, clone: Upstream | None = None, **others: Upstream
@@ -199,16 +261,59 @@ def follow_by_review(lab: Lab, name: str, base: str, items: dict[str, str]) -> N
     lab.commit(f"follow {name}")
 
 
+def _no_git_config() -> dict[str, str]:
+    """Return this process's environment with no `GIT_*` variable, and git reading no config."""
+    clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    clean.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+    return clean
+
+
+@pytest.fixture(scope="session", autouse=True)
+def empty_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Make the empty repo on `main` that every fixture repo copies, once per run.
+
+    It has no hooks or other template files, and `maintenance.auto` off, so that a commit
+    starts no second git process to maintain the repo.
+    """
+    global _EMPTY
+    root = tmp_path_factory.mktemp("empty-repo")
+    subprocess.run(
+        ["git", "init", "-q", "-b", "main", "--template=", str(root)],
+        env=_no_git_config(),
+        capture_output=True,
+        check=True,
+    )
+    with (root / ".git" / "config").open("a", encoding="utf-8") as config:
+        config.write("[maintenance]\n\tauto = false\n")
+    _EMPTY = root / ".git"
+    return _EMPTY
+
+
+@pytest.fixture(scope="session")
+def git_path() -> str:
+    """Return PATH with git's own folder first, when that folder holds the git program.
+
+    On a Mac whose `git` is the Xcode launcher `/usr/bin/git`, every call goes through `xcrun`
+    before it reaches git. Where `git --exec-path` names no folder holding a `git`, PATH stays
+    as it is.
+    """
+    path = os.environ.get("PATH", "")
+    run = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, check=False)
+    own = Path(run.stdout.strip())
+    if run.returncode == 0 and own.is_absolute() and os.access(own / "git", os.X_OK):
+        return f"{own}{os.pathsep}{path}"
+    return path
+
+
 @pytest.fixture
-def env(tmp_path: Path) -> dict[str, str]:
+def env(tmp_path: Path, git_path: str) -> dict[str, str]:
     """Return an environment where git reads only the fixture's identity, under a fake home."""
     home = tmp_path / "home"
     home.mkdir()
-    clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    clean = _no_git_config()
     clean.update(
+        PATH=git_path,
         HOME=str(home),
-        GIT_CONFIG_GLOBAL=os.devnull,
-        GIT_CONFIG_NOSYSTEM="1",
         GIT_AUTHOR_NAME="Fixture",
         GIT_AUTHOR_EMAIL="fixture@example.invalid",
         GIT_COMMITTER_NAME="Fixture",
@@ -242,10 +347,12 @@ def make_lab(tmp_path: Path, env: dict[str, str]) -> MakeLab:
     ) -> Lab:
         forked = forked or {}
         lab = Lab(tmp_path / "lab", env)
+        files = upstream.archive(base)
         for name, bucket in {**tracked, **forked}.items():
             prefix = f"skills/{bucket}/{name}/"
-            for rel in upstream.git("ls-tree", "-r", "--name-only", base, prefix).splitlines():
-                lab.write(f"skills/{name}/{rel.removeprefix(prefix)}", upstream.show(base, rel))
+            for rel, data in files.items():
+                if rel.startswith(prefix):
+                    lab.write(f"skills/{name}/{rel.removeprefix(prefix)}", data.decode("utf-8"))
         pin = {
             "repo": "https://example.invalid/fixture-skills",
             "commit": base,

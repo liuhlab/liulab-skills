@@ -103,6 +103,80 @@ def _git(cwd: Path, *args: str, check: bool = True) -> subprocess.CompletedProce
     return run
 
 
+class _Objects:
+    """One `git cat-file --batch` for a repo, which reads every object the run asks it for.
+
+    A skill has many files and the merge reads each at three ends, so one git process per
+    object read would start git many times over.
+    """
+
+    def __init__(self, root: Path) -> None:
+        self.root = root
+        self._git: subprocess.Popen[bytes] | None = None
+
+    def read(self, name: str) -> tuple[str, bytes] | None:
+        """Return the type and content of object `name`, such as `<commit>:<path>`, or None."""
+        if "\n" in name:
+            raise RefusalError(f"cannot read an object named with a line break: {name!r}")
+        if self._git is None:
+            self._git = subprocess.Popen(
+                ["git", "cat-file", "--batch"],
+                cwd=self.root,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            )
+        assert self._git.stdin is not None
+        assert self._git.stdout is not None
+        self._git.stdin.write(name.encode() + b"\n")
+        self._git.stdin.flush()
+        header = self._git.stdout.readline().decode(errors="replace")
+        if not header:
+            raise RefusalError(f"`git cat-file --batch` stopped in {self.root}")
+        # Found: `<object> <type> <size>`. Not found: `<name> missing`, or `<name> ambiguous`.
+        fields = header.split()
+        if len(fields) != 3 or not fields[2].isdigit():
+            return None
+        size = int(fields[2])
+        data = self._git.stdout.read(size + 1)
+        if len(data) != size + 1 or not data.endswith(b"\n"):
+            raise RefusalError(f"`git cat-file --batch` cut `{name}` short in {self.root}")
+        return fields[1], data[:-1]
+
+    def close(self) -> None:
+        """End the process, if one was started."""
+        if self._git is not None:
+            assert self._git.stdin is not None
+            assert self._git.stdout is not None
+            self._git.stdin.close()
+            self._git.stdout.close()
+            self._git.wait()
+            self._git = None
+
+
+#: The object reader of each repo the run has read, closed when the command ends.
+_OBJECTS: dict[Path, _Objects] = {}
+
+
+def _object(root: Path, name: str) -> tuple[str, bytes] | None:
+    """Read object `name` in the repo at `root` through that repo's one `git cat-file`."""
+    if root not in _OBJECTS:
+        _OBJECTS[root] = _Objects(root)
+    return _OBJECTS[root].read(name)
+
+
+def _blob(root: Path, sha: str) -> bytes:
+    found = _object(root, sha)
+    if found is None or found[0] != "blob":
+        raise RefusalError(f"no blob {sha} in {root}")
+    return found[1]
+
+
+def _close_objects() -> None:
+    while _OBJECTS:
+        _OBJECTS.popitem()[1].close()
+
+
 def _ls_tree(root: Path, ref: str, prefix: str) -> dict[str, tuple[str, str]]:
     """Every file under `prefix` at `ref` in the repo at `root`, as path -> (mode, blob)."""
     out = _git(root, "ls-tree", "-r", "-z", ref, "--", prefix).stdout.decode()
@@ -138,9 +212,7 @@ class Clone:
 
     def has(self, commit: str) -> bool:
         """Whether `commit` is a commit in this clone."""
-        return (
-            _git(self.root, "cat-file", "-e", f"{commit}^{{commit}}", check=False).returncode == 0
-        )
+        return _object(self.root, f"{commit}^{{commit}}") is not None
 
     def tip(self) -> str:
         """Return the full commit at `HEAD`, which a fresh clone puts at upstream's tip."""
@@ -153,17 +225,17 @@ class Clone:
     def blob(self, sha: str) -> bytes:
         """Return the content of one blob, read once: most files are the same at both ends."""
         if sha not in self._blobs:
-            self._blobs[sha] = _git(self.root, "cat-file", "blob", sha).stdout
+            self._blobs[sha] = _blob(self.root, sha)
         return self._blobs[sha]
 
     def text(self, commit: str, path: str) -> str | None:
         """Return the file at `path` in `commit`, or None when there is none."""
-        run = _git(self.root, "show", f"{commit}:{path}", check=False)
-        return run.stdout.decode(errors="replace") if run.returncode == 0 else None
+        found = _object(self.root, f"{commit}:{path}")
+        return found[1].decode(errors="replace") if found and found[0] == "blob" else None
 
     def exists(self, commit: str, path: str) -> bool:
         """Whether `commit` has a file or directory at `path`."""
-        return _git(self.root, "cat-file", "-e", f"{commit}:{path}", check=False).returncode == 0
+        return _object(self.root, f"{commit}:{path}") is not None
 
     def diffstat(self, old: str, new: str, paths: list[str]) -> tuple[int, int] | None:
         """Return the lines added and removed under `paths`, or None when nothing changed."""
@@ -356,15 +428,13 @@ class Lab:
 
     def pin_at(self, ref: str, upstream: str) -> dict[str, Any] | None:
         """Return upstream's pin as committed at `ref`, or None when there was none."""
-        run = _git(self.root, "show", f"{ref}:upstream/{upstream}/pin.json", check=False)
-        return json.loads(run.stdout) if run.returncode == 0 else None
+        found = _object(self.root, f"{ref}:upstream/{upstream}/pin.json")
+        return json.loads(found[1]) if found and found[0] == "blob" else None
 
     def files_at(self, ref: str, path: str) -> Files:
         """Return the files under `path` as committed at `ref`, keyed by path inside it."""
         return {
-            rel.removeprefix(path + "/"): Blob(
-                mode, _git(self.root, "cat-file", "blob", sha).stdout
-            )
+            rel.removeprefix(path + "/"): Blob(mode, _blob(self.root, sha))
             for rel, (mode, sha) in _ls_tree(self.root, ref, path).items()
             if mode != "120000"
         }
@@ -1135,6 +1205,8 @@ def main(argv: list[str] | None = None) -> int:
     except RefusalError as e:
         print(f"upstream_sync: refused, nothing written: {e}", file=sys.stderr)
         return 2
+    finally:
+        _close_objects()
 
 
 if __name__ == "__main__":

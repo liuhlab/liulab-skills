@@ -310,21 +310,21 @@ def test_missing_claude_login_launches_nothing(tmp_path: Path, tree: Path) -> No
         assert not calls.exists()
 
 
-def test_environment_login_runs_without_linking_a_stale_file(tmp_path: Path, tree: Path) -> None:
+@pytest.mark.parametrize("name", LOGIN_VARIABLES)
+def test_environment_login_runs_without_linking_a_stale_file(
+    tmp_path: Path, tree: Path, name: str
+) -> None:
     """A login in the environment runs the case, and the agent never sees the expired file."""
-    for number, name in enumerate(LOGIN_VARIABLES):
-        root = tmp_path / str(number)
-        root.mkdir()
-        env, calls = stub_agent(root)
-        env[name] = STAND_IN
-        env["LAB_EVAL_PLATFORM"] = "darwin"
-        login_file(root, oauth_login(-3600))
-        result = execute(tree, env, agent="claude")
-        assert result.returncode == 0, result.stdout + result.stderr
-        assert "EVAL PASS" in result.stdout
-        seen = Path(f"{calls}.login").read_text().split()
-        assert seen == ["absent"] * 3
-        assert STAND_IN not in next(root.glob("lab-agent-eval-*/evidence.json")).read_text()
+    env, calls = stub_agent(tmp_path)
+    env[name] = STAND_IN
+    env["LAB_EVAL_PLATFORM"] = "darwin"
+    login_file(tmp_path, oauth_login(-3600))
+    result = execute(tree, env, agent="claude")
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "EVAL PASS" in result.stdout
+    seen = Path(f"{calls}.login").read_text().split()
+    assert seen == ["absent"] * 3
+    assert STAND_IN not in next(tmp_path.glob("lab-agent-eval-*/evidence.json")).read_text()
 
 
 def test_fresh_claude_login_is_linked_for_the_run_only(tmp_path: Path, tree: Path) -> None:

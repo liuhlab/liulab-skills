@@ -37,12 +37,16 @@ def test_forking_moves_a_skill_from_the_name_map_to_an_attribution_record(
 
 
 def test_forking_an_untracked_skill_is_refused(upstream: Upstream, make_lab: MakeLab) -> None:
-    """Only a skill a merge pin maps can be forked; anything else changes nothing."""
+    """Only a skill a merge pin maps can be forked; anything else changes nothing.
+
+    This test runs the script at its command line, as a maintainer does, and the others run it
+    in the test's process: here the exit status is the process's own.
+    """
     upstream.add("grilling", bucket="productivity")
     base = upstream.commit()
     lab = make_lab(upstream, base, tracked={"grilling": "productivity"})
 
-    run = lab.sync("fork", "lab-hpc")
+    run = lab.sync("fork", "lab-hpc", cli=True)
 
     assert run.returncode == 2
     assert "not a tracked skill" in run.stderr
