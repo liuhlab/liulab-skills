@@ -5,6 +5,14 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.14 — 2026-11-17
+
+### Fixed
+
+- The lab defaults say to mark a draft pull request ready only once GitHub shows the last
+  push as its head. Marked sooner, the ready run tests the commit before the push, and the
+  push's own run was skipped as a draft, so the head commit goes untested.
+
 ## 2026.11.13 — 2026-11-17
 
 ### Changed

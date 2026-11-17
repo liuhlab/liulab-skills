@@ -43,7 +43,8 @@ test is marked `slow` and runs on demand. A repo's `timeout` and `suite_budget` 
 `pyproject.toml` override both numbers. Private repos share 2,000 GitHub Actions minutes a
 month, and each job bills rounded up to a whole minute. So open a pull request as a draft,
 and mark it ready (`gh pr ready`) once its local gate passes. A repo whose CI skips drafts
-then runs it once, before merge.
+then runs it once, before merge. Mark it ready only once `gh pr view --json headRefOid`
+shows your last push. Marked sooner, CI tests the commit before it and skips the new one.
 
 ## Always on
 
