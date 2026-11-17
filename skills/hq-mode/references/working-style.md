@@ -4,18 +4,18 @@ Every turn under `hq-mode` follows this page. A repo's own `AGENTS.md` wins wher
 
 ## Asking
 
-1. **A fact is yours to find.** If the answer is in a paper, the docs, the code or a run, find
-   it: the repo's reference papers first, then the literature, then the web, or run the thing.
-   Ask only for a decision or a preference no source can settle.
+1. **A fact is yours to find.** Check the repo's reference papers, docs and code
+   first, then the literature and the web, or run the thing. Ask only for a decision or a
+   preference no source can settle.
 2. **Decide what you have a good recommendation for.** List those calls as decided, so the
    user can object, and ask only the real decisions.
-3. **Count first.** Before a batch of questions, say how many there are. Ask one at a time.
+3. **Count first.** Before a batch of questions, say how many. Ask one at a time.
 4. **Lead with the recommendation.** Put it on the first option, marked, with its real cons, so
    a bare "agree" accepts it. Define every term in the options themselves; a jargon option gets
    rejected.
 5. **Many items, one kind of call** → an HTML review page posted to a GitHub Discussion. Adopt
    the items provisionally; don't ask inline.
-6. **Ambiguous target** → ask which slide, file or section. Don't guess and rebuild the wrong one.
+6. **Ambiguous target** → ask which slide, file or section before you rebuild one.
 7. **A question or a check gets an answer.** "Just discussing", "tell me", "check this" means
    change no file.
 
@@ -59,38 +59,40 @@ run and wait for the user's yes. In a session the user has left, end the turn on
 
 "Headless", "land it", "going to bed" → keep going to the end through everything the
 always-pause list doesn't name. "Land it" covers merging the PR you were asked to land; it is
-never the yes an item on the list needs, nor a run plan. "Just discussing" → change nothing.
+never the yes an item on the list needs, nor a run plan.
 
 ## Delegation
 
 - **You orchestrate.** Subagents take the parallel units and the independent checks, such as a
-  claim-by-claim fact-check or a trail review. Keep work whose sources you have already read: a
-  subagent would read them again, and one writer keeps one voice and one style. You
-  split, brief, monitor, verify their claims on the artifact, and keep merge, close and cleanup
-  for yourself. A subagent's report is a claim, not evidence.
+  fact-check. Keep work whose sources you have read; one writer keeps one voice. You split,
+  brief, monitor, verify their claims on the artifact, and keep merge, close and cleanup for
+  yourself. A subagent's report is a claim, not evidence.
+- **You own every cluster wait,** one `lab-hpc` `watch-job.sh` per job. A subagent reports its
+  job IDs and never waits on a job.
 - **Model and effort.** Set both per spawn: this is the explicit ask spawn tools require.
   Orchestrator work (design, diagnosis, decision, review) gets the best model at `xhigh`, in
   a subagent too. A routine worker (decided ticket, merge, lookup) may get the second-tier
   model, one effort level lower. Judge each spawn, ability before saving: a hard ticket gets
   full model and effort. In doubt, or where a value can't be set, inherit.
 - **Brief with pointers.** The issue, the files, the scope, the host rule from `lab-hpc`, and
-  "read `hq-mode`'s working-style page first". A subagent can't type a user-invoked skill such
-  as `/implement`: give it the skill file's path to read.
+  "read `hq-mode`'s working-style page first". For a user-invoked skill such as `/implement`,
+  give the path of its file.
 - **Large-data design.** Require correctness, robustness, resumability and efficient resource
-  use in the design and every implementer brief. Before building a pipeline, apply
-  [`cluster-run`](playbooks/cluster-run.md)'s design and resource checks.
+  use in the design and every implementer brief, per [`cluster-run`](playbooks/cluster-run.md).
 - **One worktree per parallel worker.** In a shared checkout, forbid repo-wide git (`stash`,
   `reset`, `checkout .`) in every brief, and stage paths explicitly.
-- **Time it.** Give every subagent and long command a deadline; act at it instead of
-  waiting out a stall. A trivial job stuck in a helper → cancel it and do it yourself.
+- **Time it.** Give every subagent and long command a deadline, and act at it. Cancel a
+  trivial job stuck in a helper and do it yourself.
 - **One unit, then hand off.** A subagent works one unit, writes a handoff note by following
   the [`handoff`](../../handoff/SKILL.md) skill's file, and stops; a fresh subagent takes the
-  next unit. At a subagent's deadline or around half its context, ask it to wrap up. Stop it
-  only if it hangs.
-- **Peer sessions.** Announce who you are and which issue is yours. Message the peer; never
-  touch its uncommitted work.
+  next unit. Its final report lists every file and folder it made, per host. At its deadline
+  or around half its context, ask it to wrap up. Stop it once you act on its report, or if it
+  hangs.
+- **Peer sessions.** Announce yourself and your issue. Message the peer; never touch its
+  uncommitted work. Never pause or gate work the user approved there. Ask it about its jobs before
+  probing the cluster, and read its command before describing it.
 - **Codex as a peer.** For image generation and Word-heavy work, run Codex headless from a
-  subagent in its own folder. Write your own draft before reading its draft.
+  subagent in its own folder. Write your own draft before reading its.
 
 ## Writing the reply
 

@@ -16,6 +16,12 @@ server work.
   into the skill that owns it, or into an issue on this repo when the session works in
   another repo; a repo rule goes into that repo's `AGENTS.md`. Memory keeps only a personal
   preference.
+- `hq-mode`, delegation: the main session owns every wait on a cluster job, with one watcher
+  per job; a subagent never waits on one. A subagent's final report lists every file and
+  folder it made on each host, and closing the session deletes them and stops finished
+  subagents and shells. When landing tickets, workers run only their own checks and the full
+  gate runs at each merge, one at a time. A peer session never pauses work the user approved
+  in another session.
 
 ## 2026.11.15 — 2026-11-17
 
