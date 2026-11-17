@@ -9,10 +9,12 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
 ### Fixed
 
-- `pixi run test` now starts one test worker per physical core, not one per logical CPU. On a
-  Mac with hyperthreading, two workers shared each core, every test ran at about half speed,
-  and tests near 1 s went over the 2 s limit. The test environment now includes `psutil`,
-  which pytest-xdist needs to count physical cores.
+- `pixi run test` now starts one test worker per physical core, not one per logical CPU. On an
+  Intel Mac with hyperthreading, two workers shared each core, every test ran at about half
+  speed, and tests near 1 s went over the 2 s limit. The test environment now includes
+  `psutil`, which pytest-xdist needs to count physical cores. GitHub's Linux runner has two
+  cores with two threads each, so CI now runs two workers instead of four: its test run
+  takes about 23 s of its 45 s limit, up from about 19 s.
 
 ## 2026.11.11 — 2026-11-16
 
