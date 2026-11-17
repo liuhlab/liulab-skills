@@ -17,10 +17,10 @@ unit tests and layer 1 run in CI** — the other two are local-only, for the rea
 below.
 
 The two time limits, 2 s for each test and 45 s for the unit tests (`timeout` and
-`suite_budget` in `pyproject.toml`), hold on a warm 4-core Intel machine. GitHub's
+`suite_budget` in `pyproject.toml`), are to hold on a warm 4-core Intel machine. GitHub's
 `macos-15-intel` runner is the benchmark: after one warm-up run of the tests, `pixi run
-check` passes there. The first run on a newly provisioned machine is slower than every run
-after it, and is not held to the limits.
+check` should pass there. The first run on a newly provisioned machine is slower than every
+run after it, and is not held to the limits.
 
 A unit test that puts a stub program on PATH gets it from `program` in
 `tests/conftest.py`: a link to one copy for the whole run. A Mac checks each new program
