@@ -2,16 +2,17 @@
 
 The sync reads an upstream only through a clone and writes only the lab tree, so a test builds
 both here and runs `scripts/upstream_sync.py` against them. It runs in the test's process, as a
-module loaded once, to save starting a Python per run; one test runs it at its command line. The upstream keeps its skills in
-buckets under `skills/` and lists them in `.claude-plugin/plugin.json`, as mattpocock/skills
-does. The lab tree holds a flat copy of each adopted skill at the pin, the pin itself, the
-attribution record and the two gate lists that exempt upstream text, as this repo does.
+module loaded once, to save starting a Python per run; one test runs it at its command line.
+The upstream keeps its skills in buckets under `skills/` and lists them in
+`.claude-plugin/plugin.json`, as mattpocock/skills does. The lab tree holds a flat copy of each
+adopted skill at the pin, the pin itself, the attribution record and the two gate lists that
+exempt upstream text, as this repo does.
 
 git reads no config but the test's own. A maintainer's global `commit.gpgsign`, hooks or
 default branch would otherwise decide whether a fixture builds, and the real home directory
 is never touched.
 
-Nearly all of a test's time is starting git, so the fixture starts it as rarely as it can.
+A test's cost is mostly the git processes it starts, so the fixture starts as few as it can.
 Every repo is a copy of one empty repo made once per run, a commit is two git calls, and no
 commit starts `git maintenance`.
 """
@@ -85,17 +86,6 @@ class Tree:
             ["git", *args], cwd=self.root, env=self.env, capture_output=True, text=True, check=True
         ).stdout.strip()
 
-    def show(self, commit: str, rel: str) -> str:
-        """Return the text at `rel` in `commit`, exactly as committed."""
-        return subprocess.run(
-            ["git", "show", f"{commit}:{rel}"],
-            cwd=self.root,
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout
-
     def write(self, rel: str, text: str) -> None:
         """Write `text` at `rel`, creating directories on the way."""
         path = self.root / rel
@@ -123,8 +113,10 @@ class Tree:
         self.git("add", "-A")
         self.git("commit", "-q", "--allow-empty", "-m", message)
         head = (self.root / ".git/HEAD").read_text().strip()
-        ref = head.removeprefix("ref: ")
-        return (self.root / ".git" / ref).read_text().strip() if ref != head else head
+        ref = self.root / ".git" / head.removeprefix("ref: ")
+        if not head.startswith("ref: "):
+            return head
+        return ref.read_text().strip() if ref.is_file() else self.git("rev-parse", "HEAD")
 
     def archive(self, commit: str) -> dict[str, bytes]:
         """Return every file in `commit`, by path, in one git call."""
@@ -195,9 +187,9 @@ class Lab(Tree):
             )
         out, err = io.StringIO(), io.StringIO()
         saved = dict(os.environ)
-        os.environ.clear()
-        os.environ.update(self.env)
         try:
+            os.environ.clear()
+            os.environ.update(self.env)
             with (
                 contextlib.chdir(self.root),
                 contextlib.redirect_stdout(out),
@@ -269,6 +261,13 @@ def follow_by_review(lab: Lab, name: str, base: str, items: dict[str, str]) -> N
     lab.commit(f"follow {name}")
 
 
+def _no_git_config() -> dict[str, str]:
+    """Return this process's environment with no `GIT_*` variable, and git reading no config."""
+    clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    clean.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+    return clean
+
+
 @pytest.fixture(scope="session", autouse=True)
 def empty_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Make the empty repo on `main` that every fixture repo copies, once per run.
@@ -278,11 +277,9 @@ def empty_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """
     global _EMPTY
     root = tmp_path_factory.mktemp("empty-repo")
-    clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
-    clean.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
     subprocess.run(
         ["git", "init", "-q", "-b", "main", "--template=", str(root)],
-        env=clean,
+        env=_no_git_config(),
         capture_output=True,
         check=True,
     )
@@ -297,8 +294,8 @@ def git_path() -> str:
     """Return PATH with git's own folder first, when that folder holds the git program.
 
     On a Mac whose `git` is the Xcode launcher `/usr/bin/git`, every call goes through `xcrun`
-    before it reaches git, and costs about three times as much. Where `git --exec-path` names
-    no folder holding a `git`, PATH stays as it is.
+    before it reaches git. Where `git --exec-path` names no folder holding a `git`, PATH stays
+    as it is.
     """
     path = os.environ.get("PATH", "")
     run = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, check=False)
@@ -313,12 +310,10 @@ def env(tmp_path: Path, git_path: str) -> dict[str, str]:
     """Return an environment where git reads only the fixture's identity, under a fake home."""
     home = tmp_path / "home"
     home.mkdir()
-    clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    clean = _no_git_config()
     clean.update(
         PATH=git_path,
         HOME=str(home),
-        GIT_CONFIG_GLOBAL=os.devnull,
-        GIT_CONFIG_NOSYSTEM="1",
         GIT_AUTHOR_NAME="Fixture",
         GIT_AUTHOR_EMAIL="fixture@example.invalid",
         GIT_COMMITTER_NAME="Fixture",

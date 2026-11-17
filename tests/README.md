@@ -98,21 +98,21 @@ dialog, is checked by hand and written in the pull request.
 
 ## Unit tests — the upstream sync: `tests/upstream_sync/`
 
-Free, seconds, in the same `pixi run test`. Tests `scripts/upstream_sync.py`, the
-script behind the maintainer's monthly merge of upstream skills. Each test builds a
-small upstream and a lab tree as git repos in a temporary directory, runs the
-script, and reads what a person would: the files it wrote, the
-report it printed and its exit status. The script runs inside the test's process, to save
-the start of a new Python; one refusal test runs it at its command line. There is one case each for a clean merge, a
-conflict, a deletion with and without a fork, a rename, a new skill, a forked skill
-left alone, a lost pin, the moved pin and a fork. Then the reports a clean merge
-hides: stale words, in a lab edit and on any lab page, the defaults page among them;
-dropped edits, at the merge and again in `recheck` after a resolution; what upstream
-did to a forked skill's original; the pstack section; and which eval cases to rerun.
-Nothing reaches the network, and git reads none of your own settings.
+Free, seconds, in the same `pixi run test`. Tests `scripts/upstream_sync.py`, the script
+behind the maintainer's monthly merge of upstream skills. Each test builds a small
+upstream and a lab tree as git repos in a temporary directory, runs the script, and
+reads what a person would: the files it wrote, the report it printed and its exit
+status. The script runs inside the test's process, to save the start of a new Python;
+one refusal test runs it at its command line. There is one case each for a clean merge,
+a conflict, a deletion with and without a fork, a rename, a new skill, a forked skill
+left alone, a lost pin, the moved pin and a fork. Then the reports a clean merge hides:
+stale words, in a lab edit and on any lab page, the defaults page among them; dropped
+edits, at the merge and again in `recheck` after a resolution; what upstream did to a
+forked skill's original; the pstack section; and which eval cases to rerun. Nothing
+reaches the network, and git reads none of your own settings.
 
-Nearly all of these tests' time is starting git, so the fixture starts it as rarely as it
-can. Every repo is a copy of one empty repo made once per run, a commit is two git calls and
+A test's cost here is mostly the git processes it starts, so the fixture starts as few as
+it can. Every repo is a copy of one empty repo made once per run, a commit is two git calls and
 starts no `git maintenance`, and the lab tree is copied from upstream with one `git archive`.
 The script reads every object of a repo through one `git cat-file --batch`. On a Mac whose
 `git` is the Xcode launcher, the tests call git directly, past the launcher.

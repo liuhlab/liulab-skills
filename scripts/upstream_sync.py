@@ -106,8 +106,8 @@ def _git(cwd: Path, *args: str, check: bool = True) -> subprocess.CompletedProce
 class _Objects:
     """One `git cat-file --batch` for a repo, which reads every object the run asks it for.
 
-    One process per object read was most of the sync's git starts. A skill has many files, and
-    the merge reads each at three ends.
+    A skill has many files and the merge reads each at three ends, so one git process per
+    object read would start git many times over.
     """
 
     def __init__(self, root: Path) -> None:
@@ -116,6 +116,8 @@ class _Objects:
 
     def read(self, name: str) -> tuple[str, bytes] | None:
         """Return the type and content of object `name`, such as `<commit>:<path>`, or None."""
+        if "\n" in name:
+            raise RefusalError(f"cannot read an object named with a line break: {name!r}")
         if self._git is None:
             self._git = subprocess.Popen(
                 ["git", "cat-file", "--batch"],
@@ -135,7 +137,10 @@ class _Objects:
         fields = header.split()
         if len(fields) != 3 or not fields[2].isdigit():
             return None
-        data = self._git.stdout.read(int(fields[2]) + 1)
+        size = int(fields[2])
+        data = self._git.stdout.read(size + 1)
+        if len(data) != size + 1 or not data.endswith(b"\n"):
+            raise RefusalError(f"`git cat-file --batch` cut `{name}` short in {self.root}")
         return fields[1], data[:-1]
 
     def close(self) -> None:
@@ -144,8 +149,8 @@ class _Objects:
             assert self._git.stdin is not None
             assert self._git.stdout is not None
             self._git.stdin.close()
-            self._git.wait()
             self._git.stdout.close()
+            self._git.wait()
             self._git = None
 
 
@@ -163,7 +168,7 @@ def _object(root: Path, name: str) -> tuple[str, bytes] | None:
 def _blob(root: Path, sha: str) -> bytes:
     found = _object(root, sha)
     if found is None or found[0] != "blob":
-        raise RefusalError(f"`git cat-file blob {sha}` failed in {root}: not a blob")
+        raise RefusalError(f"no blob {sha} in {root}")
     return found[1]
 
 

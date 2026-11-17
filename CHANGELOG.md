@@ -9,8 +9,8 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
 ### Changed
 
-- The upstream-sync tests start far fewer processes, so each stays well under the 2 s limit
-  on a slow Intel Mac. The sync now runs inside the test's process, the fixtures need fewer
+- The upstream-sync tests start far fewer processes, so each stays under the 2 s limit on an
+  Intel Mac. The sync now runs inside the test's process, the fixtures need fewer
   git calls per commit and none to start a repo, and on a Mac they call git past the Xcode
   launcher.
 - `scripts/upstream_sync.py` reads every git object of a repo through one `git cat-file
