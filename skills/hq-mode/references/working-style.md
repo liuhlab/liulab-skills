@@ -4,9 +4,9 @@ Every turn under `hq-mode` follows this page. A repo's own `AGENTS.md` wins wher
 
 ## Asking
 
-1. **A fact is yours to find.** Check the repo's reference papers, docs and code
-   first, then the literature and the web, or run the thing. Ask only for a decision or a
-   preference no source can settle.
+1. **A fact is yours to find.** Check the repo's reference papers, docs and code first, then
+   the literature, then the web, or run the thing. Ask only for a decision or a preference no
+   source can settle.
 2. **Decide what you have a good recommendation for.** List those calls as decided, so the
    user can object, and ask only the real decisions.
 3. **Count first.** Before a batch of questions, say how many. Ask one at a time.
@@ -39,12 +39,11 @@ run and wait for the user's yes. In a session the user has left, end the turn on
 - `sbatch`, `srun`, `scancel` outside an approved **run plan** (`lab-hpc`). The user approves
   it once, before the pilot and sized for the full run: the work folder, the partitions, the
   most CPU, memory and wall time per job, the most jobs at once, and the target measure with
-  its acceptable range. Show the exact scripts in the reply when you propose it. Inside it,
-  you and your subagents submit, and cancel the plan's own jobs, unasked. A job or pilot
-  estimate past any limit needs a revised plan; cancelling a job the plan did not start needs
-  a yes. Post the plan on the run's issue, or in the work folder's README if there is none,
-  and quote it word for word in every subagent brief. It ends with the run. No plan: every
-  job, a pilot's included, waits for a yes.
+  its acceptable range. Inside it, you and your subagents submit, and cancel the plan's own
+  jobs, unasked. A job or pilot estimate past any limit needs a revised plan; cancelling a job
+  the plan did not start needs a yes. Post the plan on the run's issue, or in the work
+  folder's README if there is none, and quote it word for word in every subagent brief. It
+  ends with the run. No plan: every job, a pilot's included, waits for a yes.
 - Any Edison spend: user-invoked only (`lab-edison`).
 - Writes or deletes in the shared package store or the shared lab data root.
 - Force-push to a shared branch; deleting data, or a branch with unmerged work.
@@ -78,7 +77,8 @@ never the yes an item on the list needs, nor a run plan.
   "read `hq-mode`'s working-style page first". For a user-invoked skill such as `/implement`,
   give the path of its file.
 - **Large-data design.** Require correctness, robustness, resumability and efficient resource
-  use in the design and every implementer brief, per [`cluster-run`](playbooks/cluster-run.md).
+  use in the design and every implementer brief. Before building a pipeline, apply
+  [`cluster-run`](playbooks/cluster-run.md)'s design and resource checks.
 - **One worktree per parallel worker.** In a shared checkout, forbid repo-wide git (`stash`,
   `reset`, `checkout .`) in every brief, and stage paths explicitly.
 - **Time it.** Give every subagent and long command a deadline, and act at it. Cancel a
@@ -89,8 +89,8 @@ never the yes an item on the list needs, nor a run plan.
   or around half its context, ask it to wrap up. Stop it once you act on its report, or if it
   hangs.
 - **Peer sessions.** Announce yourself and your issue. Message the peer; never touch its
-  uncommitted work. Never pause or gate work the user approved there. Ask it about its jobs before
-  probing the cluster, and read its command before describing it.
+  uncommitted work. Never pause or gate work the user approved in another session. Ask the peer
+  about its jobs before probing the cluster, and read its command before describing it.
 - **Codex as a peer.** For image generation and Word-heavy work, run Codex headless from a
   subagent in its own folder. Write your own draft before reading its.
 

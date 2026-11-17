@@ -47,10 +47,10 @@ to HTTPS. Also present: `git`, `python3`, `nvidia-smi`, `rsync`, `tmux`, `screen
 
 - **`module` does not exist on arc** — no Lmod, no environment-modules; `/etc/profile.d` holds plain
   per-app scripts. Any `module load` line is simply wrong here; that is ircbc's habit, not arc's.
-- **Call `pixi` by its full path, `$HOME/.pixi/bin/pixi`.** A login shell does not find it.
-  `bash -lc "pixi …"` failed about 21 times in the data runs of November 2026, and only the full
-  path worked. `bash scripts/check-hpc-config.sh --live --node <alias>` checks the path on the node you
-  hold and prints the fix when it fails.
+- **Call `pixi` by its full path, `$HOME/.pixi/bin/pixi`.** A login shell does not find it, so
+  `bash -lc "pixi …"` fails where the full path works.
+  `bash scripts/check-hpc-config.sh --live --node <alias>` checks the path on the node you hold
+  and prints the fix when it fails.
 - **`uv`, `conda` and `mamba` need a login shell.** They live under the user's home, so
   `ssh <node> 'command -v uv'` says not found while `ssh <node> 'bash -lc "command -v uv"'` finds
   it. Wrap remote commands in `bash -lc "…"` or use absolute paths — a bare `command -v` probe lies.
@@ -66,5 +66,5 @@ there is no `/local` or `/localscratch`. Lab code lives in
 local → GitHub → `git pull` on the node.
 
 **`/scratch` holds the lab's data folders, and jobs write there** (seen 2026-11). It is a pool
-shared with other tenants, and it filled twice in one week of November 2026, and two jobs died.
+shared with other tenants. It fills up, and a job that writes to a full `/scratch` dies.
 Run `df -h /scratch` before a large write, as for `/large_storage`.

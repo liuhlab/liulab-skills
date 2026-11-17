@@ -13,10 +13,9 @@ node. Find the node live, with one read-only call on the login node:
 ssh arc 'squeue --me -h -t R -o "%i %j %N"'    # job id, job name, node
 ```
 
-On ircbc, use `squeue -u $USER`, since Slurm 18.08 has no `--me`. Once you hold a node, run
-`squeue` there instead. Never sweep node aliases: every alias connects through the login host,
-so a sweep of 29 aliases cost the login node more than one `squeue`. Put the node name in every
-brief, so no subagent looks for it again.
+On ircbc, use `squeue -u $USER` (`ircbc-slurm.md`). Once you hold a node, run `squeue` there
+instead. Never sweep node aliases (`arc-hpc.md` says why). Put the node name in every brief,
+so no subagent looks for it again.
 
 For a job you just submitted, `bash scripts/watch-job.sh -r <alias> <jobid>` returns once the job
 runs and prints its node.
@@ -27,9 +26,8 @@ runs and prints its node.
 ssh <node> 'cd <dir> && setsid nohup <cmd> > <log> 2>&1 < /dev/null & echo $!'
 ```
 
-- `< /dev/null` lets ssh return at once. Without it, `nohup <cmd> > <log> 2>&1 &` held the
-  session open until the tool's 120 s limit, 4 times. The process kept ssh's input open
-  (inferred).
+- `< /dev/null` lets ssh return at once. Without it, `nohup <cmd> > <log> 2>&1 &` holds the
+  session open until the tool's time limit.
 - `setsid` gives the process a session of its own, so the printed PID is also its process
   group ID. Record it in your notes or on the run's issue.
 - Start a multi-step command as a script (below), not as a nested `bash -c '…'`.
@@ -41,19 +39,19 @@ ssh <node> 'kill -TERM -- -<pgid>; timeout 60 tail --pid=<pid> -f /dev/null; pgr
 ```
 
 - Kill the process group, not the PID, so the children die too. Killing Snakemake by its PID
-  left a child step running. If `pgrep` still lists processes after the wait, send
+  leaves a child step running. If `pgrep` still lists processes after the wait, send
   `kill -KILL -- -<pgid>`. A step that Snakemake sent to Slurm is a job: `scancel` it under the
   run plan.
 - Never `pkill -f <pattern>`. The remote shell's own command line holds the pattern, so
-  `pkill -f` killed the ssh session 3 times. A `pgrep -f` wait loop matches itself the same way.
-- Never a broad `pkill -x <name>`. Nodes are shared, and one `pkill -x zstd` hit a node a peer
-  session was using. Kill only the process groups you started.
+  `pkill -f` kills the ssh session. A `pgrep -f` wait loop matches itself the same way.
+- Never a broad `pkill -x <name>`. Nodes are shared, so it can kill a peer session's
+  processes. Kill only the process groups you started.
 - `tail --pid` waits for one PID without matching any pattern, and `timeout` caps the wait. Both
   are on the node, not on the Mac.
 
 ## Run a script, not nested quotes
 
-Inline scripts in `ssh <node> '…'` broke on nested quotes. Write the script to a local file in
+Inline scripts in `ssh <node> '…'` break on nested quotes. Write the script to a local file in
 your scratch folder, then send it:
 
 ```bash
@@ -67,8 +65,8 @@ git; this is for one-off helper scripts.
 
 ## Wait without sleeping
 
-A `sleep` in a shell call blocks the session. The harness blocked 22 of them, and a `sleep` moved
-onto the server (`ssh <node> 'sleep 1800; …'`) died when its connection reset. Watch a job with
+A `sleep` in a shell call blocks the session, and the harness may refuse it. A `sleep` moved
+onto the server (`ssh <node> 'sleep 1800; …'`) dies when its connection resets. Watch a job with
 `scripts/watch-job.sh` in the background:
 
 - `-r` returns once the job runs, and the last line names its node.
@@ -81,15 +79,15 @@ onto the server (`ssh <node> 'sleep 1800; …'`) died when its connection reset.
 - Point it at a node another job holds, such as the standing job's. On arc a node refuses
   you once your last job there ends (`arc-hpc.md`), so a watcher on the job's own node ends on
   NO SSH, not on DONE.
-- Run one watcher per job, from the main session. A subagent reports its job IDs and never
-  waits on a job. Up to 5 watchers once ran on one job.
+- Who runs the watchers, and how many:
+  [`hq-mode`'s working style](../../hq-mode/references/working-style.md#delegation).
 
 ## The Mac's shell
 
 - **The local shell is zsh.** Quote every URL (`?` and `*` are globs). An unquoted `$var` is not
   split into words, so use an array. End a probe that may find nothing with `|| true`, so an
   empty result doesn't hide real errors.
-- **macOS has no `timeout`** (28 failures). Bound ssh with `-o ConnectTimeout=10`, and put
-  `timeout` inside the remote command, where the node has it.
+- **macOS has no `timeout`.** Bound ssh with `-o ConnectTimeout=10`, and put `timeout` inside
+  the remote command, where the node has it.
 - **`rm` and `cp` may be aliases for `rm -i` and `cp -i`,** which wait for an answer until the
   tool's limit. Call `command rm` and `command cp`.

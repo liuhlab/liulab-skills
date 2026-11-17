@@ -34,7 +34,8 @@ Before designing a large-data pipeline or starting a long data job, read and app
 
 - **The Mac shell is zsh,** with no `timeout` and maybe `rm -i`: see `remote-processes.md`.
 - **Run project code through pixi,** not the system `python3`; on arc by its full path,
-  `$HOME/.pixi/bin/pixi`, since `bash -lc` does not find it.
+  `$HOME/.pixi/bin/pixi`, since `bash -lc` does not find it. Other tools in your arc home
+  (uv, conda, mamba) need a login shell (`arc-hpc.md`).
 
 ## Work on a compute node, not the login node
 
@@ -50,10 +51,8 @@ Only **three uses** justify a login node:
 
 ## SOP — take a foothold, then keep it
 
-1. **Find your node live.** `personal.md` names the standing job, not its node, which changes
-   on every resubmit. Unless your brief names the node, run
-   `ssh arc 'squeue --me -h -t R -o "%i %j %N"'` once; never sweep node aliases. Name the node
-   in every brief.
+1. **Find your node live.** Unless your brief names it, use the `squeue` in
+   `remote-processes.md`; never sweep node aliases. Name the node in every brief.
 2. **Land and stay.** Put each probe's commands into one ssh call: every call is a connection
    through the login node. If ssh hangs after a network drop, clear the stale shared connection
    with `ssh -O exit <alias>`, then retry once.

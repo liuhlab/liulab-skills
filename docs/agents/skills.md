@@ -54,8 +54,10 @@ upstream name and is recorded in `upstream/`. Lint admits no other bare name
 The core skill. Its preflight, `scripts/check-hpc-config.sh`, refuses an HPC request on an
 unconfigured machine. Each cluster fact lives in one place: hosts, network, toolchain and
 storage in `arc-hpc.md` or `ircbc-hpc.md`; partitions, choosing one and submitting in
-`arc-slurm.md` or `ircbc-slurm.md`. The two clusters differ sharply, so read a cluster's
-reference pages before you write a command for it.
+`arc-slurm.md` or `ircbc-slurm.md`. The everyday recipes that hold on both clusters live in
+`remote-processes.md` (processes, waits and the Mac shell) and `browser-login.md` (a tool's
+browser login on a node). The two clusters differ sharply, so read a cluster's reference pages
+before you write a command for it.
 
 ### `lab-jupyter` and `lab-containers`
 
