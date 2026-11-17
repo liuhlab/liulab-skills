@@ -614,8 +614,7 @@ wj_case "out of memory (only sacct answers, past its default column width)" 1 2 
   "RUNNING - - 0" "- - OUT_OF_MEMORY 0"
 wj_case "cancelled by a user id (only sacct answers)" 1 2 \
   "RUNNING - - 0" "- - CANCELLED_by_1234 0"
-wj_case "no growth (-n 2)" 3 4 \
-  "RUNNING - - 10" "RUNNING - - 20" "RUNNING - - 20" "RUNNING - - 20"
+# NO GROWTH, the -r wait and the ssh outcomes: tests/test_watch_job.py.
 rm -rf "$wj_dir"
 
 echo "== edison preflight self-test =="

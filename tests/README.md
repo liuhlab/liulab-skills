@@ -160,6 +160,15 @@ asks the node you hold to run `$HOME/.pixi/bin/pixi`. These run the script again
 stub pixi. They check that the script reports pixi's version when it runs, and prints the
 fix when it does not. Nothing reaches a host.
 
+## Unit tests — the job watcher: `tests/test_watch_job.py`
+
+Free, seconds, in the same `pixi run test`. `lab-hpc`'s `watch-job.sh` checks a Slurm job
+over ssh. These run it against a stub `ssh` first on PATH. Each call plays the next step of a
+scenario: the link fails, or the node's command runs here against stub Slurm commands. They
+check that `-r` stops once the job runs and names its node, that a failed ssh call never reads
+as the job's end, and that a file that stops growing ends the watch only under `-g`. The older
+cases, how a job ends, are in `tests/lint.sh`. Nothing reaches a host.
+
 ## Unit tests — the eval plan fold: `tests/test_eval_plans.py`
 
 Free, seconds, in the same `pixi run test`. A plan-mode eval session may print only
