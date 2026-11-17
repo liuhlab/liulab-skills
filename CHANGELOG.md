@@ -5,6 +5,18 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.15 — 2026-11-17
+
+### Fixed
+
+- The deck preflight test no longer times out on a fresh machine. It runs `fc-list` against a
+  fontconfig file of its own that names one empty font folder, so it neither scans the
+  machine's fonts nor builds a cold font cache.
+- The deck render tests draw their pictures at 160 px instead of 1,600 px, so each stays
+  well under the 2 s limit on a slow machine. `lab-deck` itself still renders at 1,600 px.
+- `tests/README.md` records both rules: give a test that reads fontconfig a config of its
+  own, and judge the time limits on a machine where `main`'s own warm suite passes.
+
 ## 2026.11.14 — 2026-11-17
 
 ### Fixed

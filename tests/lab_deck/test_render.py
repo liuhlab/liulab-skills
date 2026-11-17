@@ -24,18 +24,24 @@ from tests.lab_deck.test_deck import built
 
 STAND_IN = Path(__file__).with_name("stand_in_soffice.py")
 PNG = b"\x89PNG\r\n\x1a\n"
+SMALL_WIDTH = 160
 THREE = {"title": PLAIN, "staged": STAGED, "signal": BOTH}
 
 
 @pytest.fixture(autouse=True)
 def soffice(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Put the stand-in where `lab-deck` looks for LibreOffice."""
+    """Put the stand-in where `lab-deck` looks for LibreOffice, and draw small pictures.
+
+    No test reads a picture's size, so Poppler draws each page at a tenth of the width the
+    product uses. The product's own width, `render.WIDTH`, is untouched outside a test.
+    """
     stand_in = program(
         tmp_path,
         "soffice",
         f'#!/bin/sh\nexec {shlex.quote(sys.executable)} {shlex.quote(str(STAND_IN))} "$@"\n',
     )
     monkeypatch.setenv(render.SOFFICE, str(stand_in))
+    monkeypatch.setattr(render, "WIDTH", SMALL_WIDTH)
     return stand_in
 
 
@@ -309,9 +315,24 @@ def test_preflight_says_how_to_get_each_missing_one(monkeypatch: pytest.MonkeyPa
 
 
 def test_preflight_reads_the_font_from_the_theme_and_exits_1_when_it_is_missing(
-    folder: Path,
+    folder: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """The font checked is the deck folder's own."""
+    """The font checked is the deck folder's own.
+
+    `fc-list` reads a fontconfig file of the test's own, naming one empty font folder. On
+    the machine's config it scans every font folder, and builds the font cache first when
+    it is cold, as it is on a fresh CI machine.
+    """
+    fonts = tmp_path / "fonts"
+    fonts.mkdir()
+    config = tmp_path / "fonts.conf"
+    config.write_text(
+        '<?xml version="1.0"?>\n<fontconfig>\n'
+        f"  <dir>{fonts}</dir>\n  <cachedir>{tmp_path / 'fontcache'}</cachedir>\n"
+        "</fontconfig>\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("FONTCONFIG_FILE", str(config))
     (folder / "theme.toml").write_text('font = "No Such Font 4821"\n', encoding="utf-8")
 
     done = lab_deck("preflight", folder)
