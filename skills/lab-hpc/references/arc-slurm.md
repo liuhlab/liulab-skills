@@ -8,11 +8,19 @@ Which partition to ask for, and how to submit. Hosts, network, toolchain and sto
 Slurm is modern (**25.x**), and the whole client — `squeue`, `sbatch`, `salloc`, `scancel`, `sinfo`,
 `sacct`, `scontrol`, `sstat`, `srun` — is in `/usr/bin` on the compute nodes and works there, so
 managing the queue is never a reason to ssh to the login node. `sbatch --test-only` runs there too,
-reporting when a job *would* start without submitting — a safe dry run.
+reporting when a job *would* start without submitting — a safe dry run. It ignores group CPU caps, so
+a job it says starts now can still pend on `QOSGrpCpuLimit` (seen 2026-11).
 
 If `sacct` reports `Problem talking to the database`, the accounting database is down or slow. That
 is expected: fall back to `squeue -u $USER` for live jobs and `scontrol show job <jobid>` for one
 job's state, rather than retrying `sacct`.
+
+**The cluster's clock is Pacific time** (seen 2026-11). Work out a queue wait from Slurm's own
+`SubmitTime` and `StartTime` (`scontrol show job <jobid>`), never against the Mac's clock.
+
+**MaxRSS counts page cache** (seen 2026-11), so `sacct` and `sstat` can report far more memory
+than a job uses. For real use, read `memory.stat` in the job's cgroup on the node. Its
+anonymous-memory line (`anon` under cgroup v2) leaves the cache out.
 
 ## Partitions (verified 2026-07-04)
 
@@ -23,7 +31,7 @@ Lab members submit under account `zhoulab` (QOS `normal`), so you rarely need `-
 | Partition | Wall limit | Purpose / limits |
 | --- | --- | --- |
 | `cpu` (default) | 5 d | Interactive CPU. QOS `cpu_interact`: ≤ 64 CPUs, **≤ 2 running jobs per user**, ≤ 4 GB per CPU. |
-| `cpu_batch` | 14 d | CPU batch. QOS `cpu_batch`: ≤ 20 running / 200 queued per user. |
+| `cpu_batch` | 14 d | CPU batch. QOS `cpu_batch`: ≤ 20 running / 200 queued per user; ≤ 144 CPUs per job, on one node, so `--exclusive` is rejected; the lab's shared CPU cap is below the table. |
 | `gpu` | 1 d | Interactive GPU; ≤ 32 CPUs per node per job; ≤ 10 GB per CPU. |
 | `gpu_batch` | 14 d | GPU batch. |
 | `*_high_mem` | 14 d | The same tiers on the ~2 TB nodes. |
@@ -38,6 +46,16 @@ work far sooner than the contended shared queues; confirm with `sbatch --test-on
 projected start time. Jobs there are preemptible, so a foothold can vanish mid-task — re-submit and
 land again rather than drifting back to the login node.
 Requeue-tolerant fan-outs: `preemptible` (GPU) or `cpu_preemptible`; smoke tests `quick_preemptible`.
+
+**The lab's 288-CPU cap on `cpu_batch` counts every running lab job, the idle held job too**
+(seen 2026-11). A job that would pass it pends on `QOSGrpCpuLimit` until enough lab jobs end,
+and `sbatch --test-only` does not warn you. Before a large `cpu_batch` job, add up the CPUs the
+lab's running jobs hold (`squeue -A zhoulab -t R -h -o %C`) and size the job to what is left.
+
+**`MaxMemPerCPU=4096` on `zhoulab_gpu_priority` turns memory into CPUs.** Ask for more than 4 GB
+per CPU and Slurm raises the CPU count to match (seen 2026-11). A tool that sizes its threads
+from the CPU count then starts more of them, and can pass its memory limit, as a DuckDB reader
+did. Ask for at most 4 GB per CPU, or set the thread count yourself.
 
 Before long data work, apply the [`cluster-run` resource checks](../../hq-mode/references/playbooks/cluster-run.md).
 Compare eligible partitions with `sinfo` and inspect the held allocation with `scontrol show job`.
@@ -61,7 +79,7 @@ sbatch --partition=quick_preemptible --time=00:05:00 --wrap=hostname  # cheap sm
 squeue --me                                            # then scancel <jobid> if still queued
 mkdir -p sbatch                                        # the log paths below need it
 sbatch --job-name=reserve --partition=zhoulab_gpu_priority --time=5-00:00:00 --cpus-per-task=24 \
-  --mem-per-cpu=6G --gpus=1 --output=sbatch/gpu.%j.output.log --error=sbatch/gpu.%j.error.log \
+  --mem-per-cpu=4G --gpus=1 --output=sbatch/gpu.%j.output.log --error=sbatch/gpu.%j.error.log \
   --wrap 'sleep infinity'
 ```
 

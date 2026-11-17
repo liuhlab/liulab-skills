@@ -81,7 +81,7 @@ class Machine:
 
 
 #: What a step found or did, the report's first column. Only `failed` makes the run exit 1.
-Status = Literal["ok", "changed", "would change", "skipped", "failed", "clash"]
+Status = Literal["ok", "changed", "would change", "skipped", "failed", "clash", "stale"]
 
 
 @dataclass(frozen=True)
@@ -122,6 +122,51 @@ def claude(machine: Machine) -> list[Line]:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(settings, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return [Line("changed", step, f"turned on auto-update for {MARKETPLACE} in {shown}")]
+
+
+def release(text: object) -> tuple[int, ...] | None:
+    """Read a CalVer release such as `2026.11.15` as numbers, or None if it is not one."""
+    if not isinstance(text, str) or not re.fullmatch(r"\d+(\.\d+)*", text):
+        return None
+    return tuple(int(part) for part in text.split("."))
+
+
+def plugin(machine: Machine) -> list[Line]:
+    """Report a Claude Code install of `lab@liulab` older than the clone's release. Changes nothing.
+
+    A clone that moved on while the install stayed behind means Claude Code fetched a release
+    and never loaded it, so every session there runs the old rules. Local files only: the
+    preflight that repeats this line runs it on every cluster session, with no network.
+    """
+    step = "plugin"
+    manifest = machine.clone / ".claude-plugin" / "plugin.json"
+    record = machine.home / ".claude" / "plugins" / "installed_plugins.json"
+    try:
+        cloned = json.loads(manifest.read_text(encoding="utf-8")).get("version")
+        found = json.loads(record.read_text(encoding="utf-8")) if record.exists() else {}
+        entries = found.get("plugins", {}).get(PLUGIN) or []
+    except OSError:
+        return [Line("skipped", step, f"could not read {machine.show(manifest)}")]
+    except (ValueError, AttributeError) as error:  # an error here names no path
+        return [Line("skipped", step, f"could not compare releases ({error})")]
+    # Version 1 of the record held one entry per plugin, version 2 a list of them, one per scope.
+    entries = [
+        e for e in ([entries] if isinstance(entries, dict) else entries) if isinstance(e, dict)
+    ]
+    if not entries:
+        return [Line("skipped", step, f"{PLUGIN} is not installed in Claude Code")]
+    user = [e for e in entries if e.get("scope") == "user"] or entries
+    installed = min((str(e.get("version")) for e in user), key=lambda v: release(v) or ())
+    have, newest = release(installed), release(cloned)
+    if have is None or newest is None:
+        return [Line("skipped", step, f"cannot compare releases {installed!r} and {cloned!r}")]
+    if have < newest:
+        detail = (
+            f"{PLUGIN} {installed} is older than the marketplace clone's {cloned}; run"
+            f" claude plugin update {PLUGIN}, then restart Claude Code"
+        )
+        return [Line("stale", step, detail)]
+    return [Line("ok", step, f"{PLUGIN} {installed} is the marketplace clone's release or newer")]
 
 
 def read_toml(path: Path) -> dict[str, object]:
@@ -437,6 +482,7 @@ def clashes(machine: Machine) -> list[Line]:
 # line here; `--only` and the report pick it up from this table.
 STEPS: dict[str, Callable[[Machine], list[Line]]] = {
     "claude": claude,
+    "plugin": plugin,
     "codex": codex,
     "kimi": kimi,
     "defaults": defaults,

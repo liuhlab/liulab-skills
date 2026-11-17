@@ -8,10 +8,14 @@
    rule, "read `hq-mode`'s working-style page", and the paths of `tdd` and `code-review` to
    follow. Each commits its own work, comments and closes its ticket when it lands.
    The brief also says: one plain command per call, run from the worktree root; longer logic
-   goes in a script file run as one command.
+   goes in a script file run as one command. It runs only the checks and tests its change
+   touches, never the full gate. Its final report lists every file and folder it made, per
+   host.
 3. Decide cross-cutting choices centrally before the fan-out (names, caps, record formats).
 4. Run independent tickets in parallel; serialise only on shared files.
-5. Verify each subagent's claim yourself: run the gate, read the diff, check the artifact.
+5. Verify each subagent's claim yourself: read the diff, check the artifact, and run the full
+   gate as you merge it, one merge at a time. Parallel gates on one machine slow each other
+   past their time budget and fail tests that pass alone.
 6. Collect into one PR unless the tickets are independent enough for one each. Merge only when
    the user has asked you to land it; otherwise the PR waits for a review.
 7. Then **close-the-session**.

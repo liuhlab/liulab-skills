@@ -5,6 +5,60 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.16 — 2026-11-17
+
+Lessons from the retro of the lab's data-store runs: heavy jobs, whole-store passes and
+server work.
+
+### Changed
+
+- `hq-mode`: a user's correction goes where every session reads it. A lab-wide rule goes
+  into the skill that owns it, or into an issue on this repo when the session works in
+  another repo; a repo rule goes into that repo's `AGENTS.md`. Memory keeps only a personal
+  preference.
+- `hq-mode`, delegation: the main session owns every wait on a cluster job, with one watcher
+  per job; a subagent never waits on one. A subagent's final report lists every file and
+  folder it made on each host, and closing the session deletes them and stops finished
+  subagents and shells. When landing tickets, workers run only their own checks and the full
+  gate runs at each merge, one at a time. A peer session never pauses work the user approved
+  in another session.
+- Checks, copies, rebuilds and scans are sized to what changed, not to the store. A pass over
+  the whole store, a full copy or mirror, or an extra full build needs the user's yes with
+  its cost stated, and spec or ticket text is not that yes (`hq-mode`'s verification page
+  and cluster-run playbook). In a pilot, a step that dominates the time is questioned before
+  it is made faster.
+- `to-spec` and `to-tickets`: every acceptance check states its expected cost, a whole-store
+  check is marked as needing the user's yes, and a multi-day soak run is a follow-up ticket
+  that blocks nothing.
+- `lab-hpc`, arc: call `pixi` by its full path, since a login shell does not find it;
+  `/scratch` holds the lab's data and is a shared pool that fills; `cpu_batch` takes at most
+  144 CPUs per job on one node, under a 288-CPU cap the lab group shares, which
+  `sbatch --test-only` ignores; asking `zhoulab_gpu_priority` for more than 4 GB per CPU
+  raises the CPU count; the cluster runs on Pacific time; and MaxRSS counts page cache.
+  `check-hpc-config.sh --live --node <alias>` checks that pixi runs on the held node.
+- `lab-hpc`'s preflight warns when auto-update is off for the lab marketplace or the
+  installed lab plugin is older than the marketplace copy, so a machine left on old rules
+  says so. `/lab-setup --dry-run` reports the same as a new `stale` status. The check reads
+  local files only and never changes the preflight's exit code.
+- `hq-mode`: a new page for a job that outlives the session, linked from the cluster-run
+  playbook. Read the log of each unattended step's first run, set every variable a job needs
+  in its script, stop cleanly below a free-space floor, keep the Mac awake on a headless
+  night, fetch a large file once, and tell the user which jobs keep running unwatched. The
+  lab sets up no failure alert: once the session ends, watching the job is the user's.
+- `lab-hpc`: find the node you hold with one read-only `squeue --me` on the login node, a
+  third allowed use of it, and never by sweeping node aliases. `personal.md` records the
+  standing job's name, not its node. New pages give one way to start a process detached
+  over ssh, stop it by its process group (never `pkill -f`), send a script instead of
+  nested quotes, handle the Mac shell's missing `timeout` and `rm -i`, and hold the tunnel
+  for a tool's browser login on a node.
+- `watch-job.sh`: `-r` returns once the job runs and names its node; growth checks need `-g`,
+  so a log that goes quiet no longer ends the watch; an ssh failure (exit 4) is now told
+  apart from a job no Slurm command knows (exit 5).
+- Each new `lab-hpc` fact sits on one page, the others point to it, and the new pages give
+  guidance and a command for a live value rather than counts and timings from past runs.
+- `docs/agents/writing.md`: on a page at its word cap, make room by cutting repetition or
+  moving a section out, never by weakening a rule nobody asked to change.
+
 ## 2026.11.15 — 2026-11-17
 
 ### Fixed

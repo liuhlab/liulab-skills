@@ -144,6 +144,9 @@ not write, the clash report against planted skills, the refusal without a
 marketplace clone, and that a second run leaves every file byte-identical. One
 test points the fake clone at this repo and follows the block to the defaults
 page and on to every seed page it names, so an upstream rename fails here.
+They also pin the stale-plugin report: an install older than the clone's release,
+compared as numbers, and the warning `lab-hpc`'s preflight prints from it without
+changing its exit.
 
 ## Unit tests — lab side pages: `tests/test_side_pages.py`
 
@@ -151,6 +154,23 @@ Free, seconds, in the same `pixi run test`. A lab edit too long for an upstream
 file sits beside it as `<topic>.lab.md`. These run vale and markdownlint with the
 repo's own configuration on a copy of one adopted skill's folder, and check that
 the upstream page keeps its exemption while the side page meets the lab's rules.
+
+## Unit tests — the HPC preflight's node check: `tests/test_check_hpc_config.py`
+
+Free, seconds, in the same `pixi run test`. `check-hpc-config.sh --live --node <alias>`
+asks the node you hold to run `$HOME/.pixi/bin/pixi`. These run the script against a stub
+`ssh` first on PATH, which runs the node's command here, in a fake home with or without a
+stub pixi. They check that the script reports pixi's version when it runs, and prints the
+fix when it does not. Nothing reaches a host.
+
+## Unit tests — the job watcher: `tests/test_watch_job.py`
+
+Free, seconds, in the same `pixi run test`. `lab-hpc`'s `watch-job.sh` checks a Slurm job
+over ssh. These run it against a stub `ssh` first on PATH. Each call plays the next step of a
+scenario: the link fails, or the node's command runs here against stub Slurm commands. They
+check that `-r` stops once the job runs and names its node, that a failed ssh call never reads
+as the job's end, and that a file that stops growing ends the watch only under `-g`. The older
+cases, how a job ends, are in `tests/lint.sh`. Nothing reaches a host.
 
 ## Unit tests — the eval plan fold: `tests/test_eval_plans.py`
 

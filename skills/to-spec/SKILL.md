@@ -64,6 +64,8 @@ A list of testing decisions that were made. Include:
 - A description of what makes a good test (only test external behavior, not implementation details)
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
+- The expected cost of each acceptance check (wall time, records read, bytes sent). Mark a check over a whole store, a full copy or an extra full build as needing the user's yes before it runs
+- A multi-day soak run as a follow-up ticket, which never blocks the PR or closing the spec
 
 ## Out of Scope
 

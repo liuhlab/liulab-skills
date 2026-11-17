@@ -26,8 +26,9 @@ cgroup, setting `$SLURM_JOB_ID` alone (`SLURM_JOB_NAME` and `SLURM_NODELIST` sta
   machine, so they undercount it. Size work from what you asked Slurm for (`scontrol show job
   $SLURM_JOB_ID`), never from `nproc`. Nodes are shared with other users' jobs.
 - **A node you hold no job on refuses you** quickly, exit 255, stderr `Access denied by
-  pam_slurm_adopt: you have no active jobs on this node` — so sweeping the aliases for your
-  foothold is cheap. But exit 255 also means `Host key verification failed`: a minority of aliases
+  pam_slurm_adopt: you have no active jobs on this node`. Still, don't sweep the aliases for your
+  foothold: each probe connects through the login host, so one `squeue --me` there costs less
+  (`SKILL.md`). Exit 255 also means `Host key verification failed`: a minority of aliases
   are missing from `known_hosts`, and the effective `StrictHostKeyChecking ask` would hang an agent
   on a prompt. Probe with `-o BatchMode=yes` (fails cleanly) or `-o StrictHostKeyChecking=accept-new`.
 - **Expect transient noise.** A `Connection timed out during banner exchange`, and a bogus
@@ -46,8 +47,12 @@ to HTTPS. Also present: `git`, `python3`, `nvidia-smi`, `rsync`, `tmux`, `screen
 
 - **`module` does not exist on arc** — no Lmod, no environment-modules; `/etc/profile.d` holds plain
   per-app scripts. Any `module load` line is simply wrong here; that is ircbc's habit, not arc's.
-- **`pixi`, `uv`, `conda` and `mamba` need a login shell.** They live under the user's home, so
-  `ssh <node> 'command -v pixi'` says not found while `ssh <node> 'bash -lc "command -v uv"'` finds
+- **Call `pixi` by its full path, `$HOME/.pixi/bin/pixi`.** A login shell does not find it, so
+  `bash -lc "pixi …"` fails where the full path works.
+  `bash scripts/check-hpc-config.sh --live --node <alias>` checks the path on the node you hold
+  and prints the fix when it fails.
+- **`uv`, `conda` and `mamba` need a login shell.** They live under the user's home, so
+  `ssh <node> 'command -v uv'` says not found while `ssh <node> 'bash -lc "command -v uv"'` finds
   it. Wrap remote commands in `bash -lc "…"` or use absolute paths — a bare `command -v` probe lies.
 
 ## Storage (verified 2026-09-04)
@@ -56,6 +61,10 @@ to HTTPS. Also present: `git`, `python3`, `nvidia-smi`, `rsync`, `tmux`, `screen
 compute nodes, so there is nothing to stage between them. `$HOME` is the small one; `/large_storage`
 is the big shared one and it does fill up — `df -h` the target before writing large outputs, and
 never assume the headroom is there. `/tmp` is node-local ext4 and writable, as is `/dev/shm`;
-`/scratch` exists but is not writable, and there is no `/local` or `/localscratch`. Lab code lives in
+there is no `/local` or `/localscratch`. Lab code lives in
 `/large_storage/zhoulab/<user>/pkg`, one directory per repo, names matching the local ones, synced
 local → GitHub → `git pull` on the node.
+
+**`/scratch` holds the lab's data folders, and jobs write there** (seen 2026-11). It is a pool
+shared with other tenants. It fills up, and a job that writes to a full `/scratch` dies.
+Run `df -h /scratch` before a large write, as for `/large_storage`.
