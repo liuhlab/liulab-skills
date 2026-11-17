@@ -5,6 +5,18 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.16 — 2026-11-17
+
+Lessons from the retro of the lab's data-store runs: heavy jobs, whole-store passes and
+server work.
+
+### Changed
+
+- `hq-mode`: a user's correction goes where every session reads it. A lab-wide rule goes
+  into the skill that owns it, or into an issue on this repo when the session works in
+  another repo; a repo rule goes into that repo's `AGENTS.md`. Memory keeps only a personal
+  preference.
+
 ## 2026.11.15 — 2026-11-17
 
 ### Fixed
