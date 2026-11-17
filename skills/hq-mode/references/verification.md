@@ -37,6 +37,25 @@ what each proves. That list is the repo's map of what can be checked.
   budget (the lab defaults' Tooling). `tdd` carries the two anti-patterns: over-testing, and
   slow in the fast loop.
 
+## Size the work to the change
+
+Size every check, copy, rebuild and scan to what changed, not to the store. This one rule
+covers every form of whole-store work, including a form not named here. Don't record a
+new form as one more special case in a memory note.
+
+- **Ask before a whole-store pass.** Reading every record, a full copy or mirror, and a full
+  build beyond the one the task needs each need the user's yes. Ask with the expected cost
+  (wall time, files opened, bytes read or sent) and why a smaller pass can't answer. In a
+  session the user has left, do the smaller pass and end on that question.
+- **A check** reads the new or changed records and a sample of the rest (below).
+- **A copy** sends only the new or changed files, from a list the work already has. It never
+  walks every file at both ends to find a few new ones.
+- **A build** runs in full once, after the design is settled. Prove a rebuild equivalent on a
+  sample, not with a second full run. A design change can make a planned rebuild useless:
+  check before you start it.
+- **Spec and ticket text is not the yes.** An acceptance line that names a whole-store check
+  goes into a brief with its cost, and runs only after the user's yes.
+
 ## A check over many records
 
 A check that opens every record of a large store is never the default. A sample read in
@@ -47,8 +66,8 @@ full often tests more than a full pass that only glances at each record.
    counts, sizes. Then one directory listing against the table: every listed file on disk,
    no strays, sizes match. Then a random sample of records, each read in full and compared
    by checksum. A fault in the shared write code shows up in a sample.
-3. **A full pass needs the user's yes,** and a stated repair or format change to justify it.
-   In a session the user has left, run the sampled check and end on that question.
+3. **A full pass needs the user's yes,** as [above](#size-the-work-to-the-change), and a
+   stated repair or format change to justify it.
 4. **State the expected cost before the check runs,** in the brief or the reply, and time a
    few iterations before the loop runs at full scale.
 5. **Probe a long check in its first minutes,** like any job: CPU time, bytes read, the

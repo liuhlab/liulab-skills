@@ -22,6 +22,14 @@ server work.
   subagents and shells. When landing tickets, workers run only their own checks and the full
   gate runs at each merge, one at a time. A peer session never pauses work the user approved
   in another session.
+- Checks, copies, rebuilds and scans are sized to what changed, not to the store. A pass over
+  the whole store, a full copy or mirror, or an extra full build needs the user's yes with
+  its cost stated, and spec or ticket text is not that yes (`hq-mode`'s verification page
+  and cluster-run playbook). In a pilot, a step that dominates the time is questioned before
+  it is made faster.
+- `to-spec` and `to-tickets`: every acceptance check states its expected cost, a whole-store
+  check is marked as needing the user's yes, and a multi-day soak run is a follow-up ticket
+  that blocks nothing.
 
 ## 2026.11.15 — 2026-11-17
 
