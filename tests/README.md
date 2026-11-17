@@ -27,6 +27,20 @@ A unit test that puts a stub program on PATH gets it from `program` in
 the first time it runs, one at a time for the whole machine, so a stub written by every
 test made the tests queue past the 2 s limit.
 
+A test that runs `fc-list`, or anything else that reads fontconfig, gives it a config of its
+own: it sets `FONTCONFIG_FILE` to a file in its temporary folder that names one empty font
+folder and a cache folder. On the machine's config, `fc-list` scans every font folder the
+environment names, and builds the font cache first when the cache is cold. A cold cache
+costs about a second, and every fresh CI machine has one. `tests/lab_deck/test_render.py`
+shows it.
+
+A render test draws small pictures: its fixture sets `lab_deck.render.WIDTH` to 160 px with
+`monkeypatch`, because no test reads a picture's size. `lab-deck` itself keeps 1,600 px.
+
+Intel machines of one CPU model differ in speed by about 1.5 times. Judge the limits on a
+machine where `main`'s own warm suite passes the budget, not on one that fails it with no
+change.
+
 ## Unit tests — the Edison spend path: `tests/edison_cli/`
 
 Free, seconds. `pixi run test`, which `check` runs after `check-static`. Tests the **code**:
