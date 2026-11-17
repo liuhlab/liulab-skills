@@ -144,6 +144,9 @@ not write, the clash report against planted skills, the refusal without a
 marketplace clone, and that a second run leaves every file byte-identical. One
 test points the fake clone at this repo and follows the block to the defaults
 page and on to every seed page it names, so an upstream rename fails here.
+They also pin the stale-plugin report: an install older than the clone's release,
+compared as numbers, and the warning `lab-hpc`'s preflight prints from it without
+changing its exit.
 
 ## Unit tests — lab side pages: `tests/test_side_pages.py`
 

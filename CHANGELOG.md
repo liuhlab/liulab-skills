@@ -36,6 +36,10 @@ server work.
   `sbatch --test-only` ignores; asking `zhoulab_gpu_priority` for more than 4 GB per CPU
   raises the CPU count; the cluster runs on Pacific time; and MaxRSS counts page cache.
   `check-hpc-config.sh --live --node <alias>` checks that pixi runs on the held node.
+- `lab-hpc`'s preflight warns when auto-update is off for the lab marketplace or the
+  installed lab plugin is older than the marketplace copy, so a machine left on old rules
+  says so. `/lab-setup --dry-run` reports the same as a new `stale` status. The check reads
+  local files only and never changes the preflight's exit code.
 
 ## 2026.11.15 — 2026-11-17
 
