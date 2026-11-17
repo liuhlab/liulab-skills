@@ -30,6 +30,12 @@ server work.
 - `to-spec` and `to-tickets`: every acceptance check states its expected cost, a whole-store
   check is marked as needing the user's yes, and a multi-day soak run is a follow-up ticket
   that blocks nothing.
+- `lab-hpc`, arc: call `pixi` by its full path, since a login shell does not find it;
+  `/scratch` holds the lab's data and is a shared pool that fills; `cpu_batch` takes at most
+  144 CPUs per job on one node, under a 288-CPU cap the lab group shares, which
+  `sbatch --test-only` ignores; asking `zhoulab_gpu_priority` for more than 4 GB per CPU
+  raises the CPU count; the cluster runs on Pacific time; and MaxRSS counts page cache.
+  `check-hpc-config.sh --live --node <alias>` checks that pixi runs on the held node.
 
 ## 2026.11.15 — 2026-11-17
 

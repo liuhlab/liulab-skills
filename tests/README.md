@@ -152,6 +152,14 @@ file sits beside it as `<topic>.lab.md`. These run vale and markdownlint with th
 repo's own configuration on a copy of one adopted skill's folder, and check that
 the upstream page keeps its exemption while the side page meets the lab's rules.
 
+## Unit tests — the HPC preflight's node check: `tests/test_check_hpc_config.py`
+
+Free, seconds, in the same `pixi run test`. `check-hpc-config.sh --live --node <alias>`
+asks the node you hold to run `$HOME/.pixi/bin/pixi`. These run the script against a stub
+`ssh` first on PATH, which runs the node's command here, in a fake home with or without a
+stub pixi. They check that the script reports pixi's version when it runs, and prints the
+fix when it does not. Nothing reaches a host.
+
 ## Unit tests — the eval plan fold: `tests/test_eval_plans.py`
 
 Free, seconds, in the same `pixi run test`. A plan-mode eval session may print only
