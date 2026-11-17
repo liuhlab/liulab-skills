@@ -12,11 +12,14 @@ requirements in implementer briefs, with the planned units and how each is verif
   [`make-operations-idempotent`](../principles/make-operations-idempotent.md) for atomic
   outputs, validated completion and safe reuse after interruption or changed inputs.
 - Derive indexes or intermediate data once, then reuse them for selections and downstream
-  builds. Avoid a full snapshot scan on every rerun. Stream large inputs and bound chunk
-  sizes and buffers so each worker fits its memory budget.
+  builds. Stream large inputs and bound chunk sizes and buffers so each worker fits its
+  memory budget.
 - Split at valid record boundaries. Check whether the format and compression permit
   independent reads before splitting byte ranges. Consider parallel parsing or
   decompression where the measured cost warrants it, without requiring a framework.
+- Size every pass to the change: a rerun, check or copy touches only new or changed units,
+  and a whole-store pass needs the user's yes
+  ([verification](../verification.md#size-the-work-to-the-change)).
 
 ## Plan and run
 
@@ -26,9 +29,9 @@ requirements in implementer briefs, with the planned units and how each is verif
 3. Agree the target before building anything: the measure that counts (items fetched per
    hour, wall time to the full set, cost per sample) and its acceptable range. Ask the user
    when no source settles it.
-4. Ask for one work folder for the run, suggesting one under the project's output root.
-   Every script, log, temp file and output of the run lives there, never in the home
-   directory or the reference data root. See [Work folder](#work-folder).
+4. Ask for one [work folder](#work-folder) for the run, suggesting one under the project's
+   output root. Every script, log, temp file and output of the run lives there, never in the
+   home directory or the reference data root.
 5. Check for prepared inputs: registered genomes and indexes, the shared data root, the lab's
    data packages. Don't re-download what is there.
 6. Write the sbatch scripts: one unit as a pilot (see [Pilot design](#pilot-design)), then
@@ -47,28 +50,26 @@ requirements in implementer briefs, with the planned units and how each is verif
    and "going to bed" change nothing: prepare everything else, then end the turn on the
    question.
 8. Run the pilot. Time each phase, observe CPU use and I/O, and identify the dominant cost
-   with [`explain-the-number`](../principles/explain-the-number.md). Use those measurements
-   to choose what to parallelize. Keep fast steps simple. Report the full-run estimate to
-   the user and scale within the plan; only an estimate past a plan limit goes back for a
-   revised plan.
+   with [`explain-the-number`](../principles/explain-the-number.md). If one step dominates,
+   ask whether the run needs it before making it faster. Use those measurements to choose
+   what to parallelize. Keep fast steps simple. Report the full-run estimate to the user and
+   scale within the plan; only an estimate past a plan limit goes back for a revised plan.
 9. Before starting long work, compare expected workers and threads with allocated CPUs,
    memory and current free capacity from Slurm. A pass taking more than a few minutes on
    one core in a multicore allocation needs a measured justification or a revised plan.
    Budget workers times threads per worker, memory per worker and shared I/O. Consider
    parallel code within a job and independent jobs across eligible nodes or partitions,
    within scheduler limits. Choose a partition using resumability, capacity and cost from
-   the cluster's Slurm reference. Free capacity requires an allocation before use.
-   Fan out separate units as jobs or an array, with concurrency bounded by those budgets.
-   Check each unit as it finishes. If I/O or another measured limit favors serial work,
-   record that reason and size the allocation accordingly.
+   the cluster's Slurm reference. Fan out separate units as jobs or an array, with
+   concurrency bounded by those budgets. If I/O or another measured limit favors serial
+   work, record that reason and size the allocation accordingly.
 10. Scale up in rounds sized to the question. See [Rounds](#rounds).
 11. Check each new job in its first minutes: state, node, the first output lines and the rate
     against the pilot's. Run `lab-hpc`'s `scripts/watch-job.sh` in the background to watch it
     after that. A job slower than the pilot predicts gets its cause found at once, before it
     burns its time budget.
 12. On a misbehaving job, name the symptom and propose the workaround (exclude a node, resubmit
-    one unit), and wait for a yes unless the plan covers it. Cancelling a job the plan did
-    not start needs a yes.
+    one unit), and wait for a yes unless the plan covers it.
 13. Verify outputs, not exit codes: sizes, counts, a
     [sampled check](../verification.md#a-check-over-many-records) against the pilot.
 
@@ -105,9 +106,9 @@ is an example, not a default.
 
 ## Work folder
 
-One folder per run, agreed at the start and stated in the run plan. Clean it as the run goes:
-delete temp files and superseded logs once a round is verified. Anything kept long term gets
-a short `README.md` saying what each part holds, which run made it and how.
+One folder per run. Clean it as the run goes: delete temp files and superseded logs once a
+round is verified. Anything kept long term gets a short `README.md` saying what each part
+holds, which run made it and how.
 
 ## Per-round report
 

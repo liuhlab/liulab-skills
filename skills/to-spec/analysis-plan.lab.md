@@ -30,7 +30,9 @@ The figures and tables the analysis produces, and what each one shows.
 ## Validation and controls
 
 How a result is checked: positive and negative controls, a known truth or held-out
-benchmark, checks on counts and ranges, and the fixture the work reruns on.
+benchmark, checks on counts and ranges, and the fixture the work reruns on. Each check
+states its expected cost, and a check over a whole store is marked as needing the user's
+yes before it runs.
 
 ## Out of scope
 
