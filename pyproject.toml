@@ -133,6 +133,9 @@ pytest = "*"
 # Runs the tests on every core. Each test works in its own temporary folder, so they share
 # nothing; the deck-build tests start Node and are most of the time the suite takes.
 pytest-xdist = "*"
+# Makes `-n auto` count physical cores, not logical CPUs. Without it, a hyperthreaded Mac runs
+# two workers per core, each at about half speed, and tests near 1 s cross the 2 s limit.
+psutil = "*"
 # Reads `timeout` in `[tool.pytest.ini_options]`. From PyPI beside pytest, for the reason above.
 pytest-timeout = "*"
 
