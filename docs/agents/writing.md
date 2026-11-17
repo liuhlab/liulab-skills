@@ -56,6 +56,11 @@ The caps are dials with tight defaults. Raising one is a one-line diff in `style
 do it deliberately, and say why in the commit message. Do not raise a cap because a
 document ran long; that is the cap working.
 
+**Make room by cutting repetition, never a rule.** On a page at its cap, cut a sentence another
+sentence on that page or a linked page already says, or move a section to a page of its own.
+Never shorten a rule you were not asked to change into a weaker one, and name every cut in the
+commit message.
+
 ## 3. Human-facing prose avoids jargon and stays readable
 
 `README.md`, `CHANGELOG.md` and every `docs/` page a person browses: no terms from the lab

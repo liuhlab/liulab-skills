@@ -56,6 +56,8 @@ server work.
   apart from a job no Slurm command knows (exit 5).
 - Each new `lab-hpc` fact sits on one page, the others point to it, and the new pages give
   guidance and a command for a live value rather than counts and timings from past runs.
+- `docs/agents/writing.md`: on a page at its word cap, make room by cutting repetition or
+  moving a section out, never by weakening a rule nobody asked to change.
 
 ## 2026.11.15 — 2026-11-17
 
