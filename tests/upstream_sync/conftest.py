@@ -292,13 +292,30 @@ def empty_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
     return _EMPTY
 
 
+@pytest.fixture(scope="session")
+def git_path() -> str:
+    """Return PATH with git's own folder first, when that folder holds the git program.
+
+    On a Mac whose `git` is the Xcode launcher `/usr/bin/git`, every call goes through `xcrun`
+    before it reaches git, and costs about three times as much. Where `git --exec-path` names
+    no folder holding a `git`, PATH stays as it is.
+    """
+    path = os.environ.get("PATH", "")
+    run = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, check=False)
+    own = Path(run.stdout.strip())
+    if run.returncode == 0 and own.is_absolute() and os.access(own / "git", os.X_OK):
+        return f"{own}{os.pathsep}{path}"
+    return path
+
+
 @pytest.fixture
-def env(tmp_path: Path) -> dict[str, str]:
+def env(tmp_path: Path, git_path: str) -> dict[str, str]:
     """Return an environment where git reads only the fixture's identity, under a fake home."""
     home = tmp_path / "home"
     home.mkdir()
     clean = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
     clean.update(
+        PATH=git_path,
         HOME=str(home),
         GIT_CONFIG_GLOBAL=os.devnull,
         GIT_CONFIG_NOSYSTEM="1",
