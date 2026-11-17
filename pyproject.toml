@@ -136,6 +136,15 @@ pytest-xdist = "*"
 # Reads `timeout` in `[tool.pytest.ini_options]`. From PyPI beside pytest, for the reason above.
 pytest-timeout = "*"
 
+# Intel Macs only. With psutil, `-n auto` starts one worker per physical core; without it,
+# pytest-xdist counts logical CPUs, and on an Intel Mac with hyperthreading two workers share
+# each core and tests slow past the time limit. An Apple Silicon Mac has one thread per core,
+# so it needs no psutil. Linux is better without it: pytest-xdist then counts the CPUs the
+# process may use, which respects a Slurm job's limit, and CI's runner keeps its four workers
+# rather than dropping to two. From PyPI beside pytest-xdist, which reads it.
+[tool.pixi.target.osx-64.pypi-dependencies]
+psutil = "*"
+
 # The docs builder, in a feature of its own so that `pixi run check` never installs it.
 #
 # Exact, and bumped in a commit of its own: at `0.0.x` nothing promises the next patch is

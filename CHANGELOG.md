@@ -5,6 +5,16 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.12 — 2026-11-17
+
+### Fixed
+
+- On an Intel Mac, `pixi run test` now starts one test worker per physical core, not one per
+  logical CPU. With hyperthreading, two workers shared each core, every test ran at about half
+  speed, and tests near 1 s went over the 2 s limit. The Intel Mac test environment now
+  includes `psutil`, which pytest-xdist needs to count physical cores. Apple Silicon Macs,
+  Linux and CI start the same number of workers as before.
+
 ## 2026.11.11 — 2026-11-16
 
 ### Changed
