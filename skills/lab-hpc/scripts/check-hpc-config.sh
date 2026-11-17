@@ -5,8 +5,9 @@
 # ssh config (`ssh -G`; honors Include). Contains no hostnames, usernames,
 # or keys — it only verifies that the user has configured their own.
 #
-# Usage: check-hpc-config.sh [--live] [-F <ssh_config>]
+# Usage: check-hpc-config.sh [--live [--node <alias>]] [-F <ssh_config>]
 #   --live   additionally try a BatchMode connection to each login alias
+#   --node   with --live, check that pixi runs on the compute node you hold
 #   -F file  use an alternate ssh config (for testing this script)
 #
 # Output: one line per cluster: "<cluster>: CONFIGURED" or
@@ -14,20 +15,25 @@
 #         only "config dir: OLD LOCATION" and the move, if ~/.claude/compute
 #         still exists. An "ssh: ADVISORY" line names compute-node aliases
 #         without connection reuse (ControlMaster); it never changes the exit.
+#         With --node, "node <alias>: PIXI OK", "PIXI FAIL" and its fix, or
+#         "UNREACHABLE"; these never change the exit either.
 # Exit:   0 if at least one cluster is fully configured, 1 otherwise.
 
 set -u
 
 LIVE=false
 SSHCFG=""
+NODE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --live) LIVE=true ;;
+    --node) shift; NODE="${1:-}" ;;
     -F) shift; SSHCFG="$1" ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
   shift
 done
+if [ -n "$NODE" ] && ! $LIVE; then echo "--node needs --live" >&2; exit 2; fi
 
 # The per-user directory moved when the plugin was renamed from lab-compute
 # to lab. While the old one exists, refuse and print the move — never perform
@@ -119,6 +125,23 @@ for a in "${arc_nodes[@]}" "${ircbc_nodes[@]}"; do
 done
 if [ ${#no_reuse[@]} -gt 0 ]; then
   echo "ssh: ADVISORY (no connection reuse for: ${no_reuse[*]} — add the README's ControlMaster stanza)"
+fi
+
+# A login shell on an arc node may not find pixi, so the skill calls it by its
+# full path. Check that path on the node held now; report only.
+if [ -n "$NODE" ]; then
+  # shellcheck disable=SC2016 # $HOME expands on the node
+  out=$(sshg -o BatchMode=yes -o ConnectTimeout=8 "$NODE" '"$HOME/.pixi/bin/pixi" --version' 2>/dev/null)
+  rc=$?
+  if [ $rc -eq 0 ]; then
+    echo "node $NODE: PIXI OK ($out)"
+  elif [ $rc -eq 255 ]; then
+    echo "node $NODE: UNREACHABLE (do you hold a job there?)"
+  else
+    echo "node $NODE: PIXI FAIL (\$HOME/.pixi/bin/pixi does not run there)"
+    # shellcheck disable=SC2016 # the fix names $HOME literally
+    echo '  fix: install pixi on the node (curl -fsSL https://pixi.sh/install.sh | bash), then call $HOME/.pixi/bin/pixi by its full path'
+  fi
 fi
 
 exit $ok

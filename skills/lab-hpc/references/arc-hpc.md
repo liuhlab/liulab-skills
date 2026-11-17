@@ -46,8 +46,12 @@ to HTTPS. Also present: `git`, `python3`, `nvidia-smi`, `rsync`, `tmux`, `screen
 
 - **`module` does not exist on arc** — no Lmod, no environment-modules; `/etc/profile.d` holds plain
   per-app scripts. Any `module load` line is simply wrong here; that is ircbc's habit, not arc's.
-- **`pixi`, `uv`, `conda` and `mamba` need a login shell.** They live under the user's home, so
-  `ssh <node> 'command -v pixi'` says not found while `ssh <node> 'bash -lc "command -v uv"'` finds
+- **Call `pixi` by its full path, `$HOME/.pixi/bin/pixi`.** A login shell does not find it.
+  `bash -lc "pixi …"` failed about 21 times in the data runs of November 2026, and only the full
+  path worked. `bash scripts/check-hpc-config.sh --live --node <alias>` checks the path on the node you
+  hold and prints the fix when it fails.
+- **`uv`, `conda` and `mamba` need a login shell.** They live under the user's home, so
+  `ssh <node> 'command -v uv'` says not found while `ssh <node> 'bash -lc "command -v uv"'` finds
   it. Wrap remote commands in `bash -lc "…"` or use absolute paths — a bare `command -v` probe lies.
 
 ## Storage (verified 2026-09-04)
@@ -56,6 +60,10 @@ to HTTPS. Also present: `git`, `python3`, `nvidia-smi`, `rsync`, `tmux`, `screen
 compute nodes, so there is nothing to stage between them. `$HOME` is the small one; `/large_storage`
 is the big shared one and it does fill up — `df -h` the target before writing large outputs, and
 never assume the headroom is there. `/tmp` is node-local ext4 and writable, as is `/dev/shm`;
-`/scratch` exists but is not writable, and there is no `/local` or `/localscratch`. Lab code lives in
+there is no `/local` or `/localscratch`. Lab code lives in
 `/large_storage/zhoulab/<user>/pkg`, one directory per repo, names matching the local ones, synced
 local → GitHub → `git pull` on the node.
+
+**`/scratch` holds the lab's data folders, and jobs write there** (seen 2026-11). It is a pool
+shared with other tenants, and it filled twice in one week of November 2026, and two jobs died.
+Run `df -h /scratch` before a large write, as for `/large_storage`.
