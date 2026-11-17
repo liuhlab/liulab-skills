@@ -14,6 +14,8 @@
 #         only "config dir: OLD LOCATION" and the move, if ~/.claude/compute
 #         still exists. An "ssh: ADVISORY" line names compute-node aliases
 #         without connection reuse (ControlMaster); it never changes the exit.
+#         Nor does a "lab plugin: WARNING" line: auto-update off, or an installed
+#         lab plugin older than the marketplace clone (/lab-setup's check).
 # Exit:   0 if at least one cluster is fully configured, 1 otherwise.
 
 set -u
@@ -119,6 +121,30 @@ for a in "${arc_nodes[@]}" "${ircbc_nodes[@]}"; do
 done
 if [ ${#no_reuse[@]} -gt 0 ]; then
   echo "ssh: ADVISORY (no connection reuse for: ${no_reuse[*]} — add the README's ControlMaster stanza)"
+fi
+
+# Warn-only, never changes the exit code: a lab plugin that stopped updating runs old rules.
+# /lab-setup's script holds the check (its claude and plugin steps) and reads local files only.
+lab_setup="$(dirname "$0")/../../lab-setup/scripts/lab_setup.py"
+if [ -d "$HOME/.claude/plugins/marketplaces/liulab" ] && [ -f "$lab_setup" ]; then
+  py=""
+  for p in python3 python3.14 python3.13 python3.12 python3.11; do
+    if command -v "$p" >/dev/null 2>&1 &&
+      "$p" -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; then
+      py=$p; break
+    fi
+  done
+  if [ -z "$py" ]; then
+    echo "lab plugin: NOT CHECKED (no Python 3.11 or newer on PATH)"
+  else
+    "$py" "$lab_setup" --home "$HOME" --dry-run --only claude --only plugin 2>/dev/null |
+      while IFS= read -r line; do
+        case "$line" in # the report's columns: status, 13 wide; step, 12 wide; detail
+          "would change"*) echo "lab plugin: WARNING (auto-update is off; /lab-setup will ${line:25})" ;;
+          stale*|failed*) echo "lab plugin: WARNING (${line:25})" ;;
+        esac
+      done
+  fi
 fi
 
 exit $ok
