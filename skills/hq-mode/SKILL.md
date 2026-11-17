@@ -42,7 +42,7 @@ grill, spec or research session: the user types the next step.
 | Slides, a deck or a talk | `lab-presentation`, through the talk playbook |
 | A number you measured or will report | The explain-the-number principle; for a timing, `references/benchmark-checklist.md` |
 | Work the user steps away from | The checks it rests on, per `references/verification.md`; a decision trail per `references/show-me-your-work.md` |
-| A correction from the user | Write it at once where every session reads it. A lab-wide rule goes into the skill that owns it, or into an issue on `liuhlab/liulab-skills` when the session works in another repo. A repo rule goes into that repo's `AGENTS.md` or agent docs. Memory keeps only a personal preference. Then ask what would stop it recurring |
+| A correction from the user | Write it at once where every session reads it. A lab-wide rule goes into the skill that owns it, or into an issue on `liuhlab/liulab-skills` when the session works in another repo. A repo rule goes into that repo's `AGENTS.md` or agent docs. A correction goes into memory only when it is a personal preference. Then ask what would stop it recurring |
 | The end of any playbook | The close-the-session playbook |
 
 ## Principles

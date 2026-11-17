@@ -5,6 +5,14 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.17 — 2026-11-17
+
+### Fixed
+
+- `hq-mode`: the rule for a user's correction no longer reads as if all memory must go. A
+  correction goes into memory only when it is a personal preference; memory still keeps facts
+  about the machine and context on current work.
+
 ## 2026.11.16 — 2026-11-17
 
 Lessons from the retro of the lab's data-store runs: heavy jobs, whole-store passes and
