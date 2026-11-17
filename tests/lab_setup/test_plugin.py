@@ -42,24 +42,6 @@ def releases(machine: FakeMachine, installed: str, cloned: str) -> None:
     path.write_text(json.dumps(record))
 
 
-def test_an_installed_plugin_older_than_the_clone_is_reported_stale(
-    machine: FakeMachine,
-) -> None:
-    """Releases compare as numbers: 2026.9.40 is older than 2026.11.2, though not as text."""
-    releases(machine, installed="2026.9.40", cloned="2026.11.2")
-    before = machine.snapshot()
-
-    result = machine.run("--dry-run", "--only", "plugin")
-
-    (line,) = result.stdout.splitlines()
-    assert line.startswith("stale")
-    assert "2026.9.40" in line
-    assert "2026.11.2" in line
-    assert "claude plugin update lab@liulab" in line
-    assert machine.snapshot() == before
-    assert result.returncode == 0, result.stdout + result.stderr
-
-
 def preflight(machine: FakeMachine) -> subprocess.CompletedProcess[str]:
     """Run `lab-hpc`'s preflight on the fake home with no ssh config, a 3.11+ `python3` first."""
     program(machine.stubs, "python3", f'#!/bin/sh\nexec "{sys.executable}" "$@"\n')
@@ -75,17 +57,23 @@ def preflight(machine: FakeMachine) -> subprocess.CompletedProcess[str]:
 def test_the_hpc_preflight_warns_of_a_plugin_that_stopped_updating_and_still_answers(
     machine: FakeMachine,
 ) -> None:
-    """Auto-update off and an old install: two warnings, and the exit the clusters decide."""
-    releases(machine, installed="2026.10.31", cloned="2026.11.15")
+    """Auto-update off and an old install: two warnings, each with the step's whole detail.
+
+    Releases compare as numbers: 2026.9.40 is older than 2026.11.2, though not as text.
+    """
+    releases(machine, installed="2026.9.40", cloned="2026.11.2")
     before = machine.snapshot()
 
     result = preflight(machine)
 
     warnings = [line for line in result.stdout.splitlines() if line.startswith("lab plugin:")]
     assert len(warnings) == 2, result.stdout
-    assert "auto-update" in warnings[0]
-    assert "/lab-setup" in warnings[0]
-    assert "2026.10.31" in warnings[1]
+    assert warnings[0].startswith(
+        "lab plugin: WARNING (auto-update is off; /lab-setup will turn on auto-update for "
+    ), warnings[0]
+    assert warnings[1].startswith(
+        "lab plugin: WARNING (lab@liulab 2026.9.40 is older than the marketplace clone's 2026.11.2;"
+    ), warnings[1]
     assert "claude plugin update lab@liulab" in warnings[1]
     assert "arc_hpc: NOT CONFIGURED" in result.stdout
     assert result.returncode == 1
@@ -97,7 +85,8 @@ def test_the_hpc_preflight_says_nothing_of_a_plugin_that_is_up_to_date(
 ) -> None:
     """Auto-update on and the install at the clone's release: no line about the plugin."""
     releases(machine, installed="2026.11.15", cloned="2026.11.15")
-    machine.run("--only", "claude")
+    settings = {"extraKnownMarketplaces": {"liulab": {"autoUpdate": True}}}
+    (machine.home / ".claude" / "settings.json").write_text(json.dumps(settings))
 
     result = preflight(machine)
 

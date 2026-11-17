@@ -160,12 +160,27 @@ if [ -d "$HOME/.claude/plugins/marketplaces/liulab" ] && [ -f "$lab_setup" ]; th
   if [ -z "$py" ]; then
     echo "lab plugin: NOT CHECKED (no Python 3.11 or newer on PATH)"
   else
+    # A report line is "<status> <step> <detail>", padded to columns. Strip the known status
+    # word and step name, not a column offset, so a wider column cannot cut the detail.
     "$py" "$lab_setup" --home "$HOME" --dry-run --only claude --only plugin 2>/dev/null |
       while IFS= read -r line; do
-        case "$line" in # the report's columns: status, 13 wide; step, 12 wide; detail
-          "would change"*) echo "lab plugin: WARNING (auto-update is off; /lab-setup will ${line:25})" ;;
-          stale*|failed*) echo "lab plugin: WARNING (${line:25})" ;;
-        esac
+        for status in "would change" stale failed ""; do
+          case "$line" in "$status "*) break ;; esac
+        done
+        [ -n "$status" ] || continue
+        rest=${line#"$status"}
+        rest=${rest#"${rest%%[! ]*}"}
+        for step in claude plugin ""; do
+          case "$rest" in "$step "*) break ;; esac
+        done
+        [ -n "$step" ] || continue
+        rest=${rest#"$step"}
+        rest=${rest#"${rest%%[! ]*}"}
+        if [ "$status" = "would change" ]; then
+          echo "lab plugin: WARNING (auto-update is off; /lab-setup will $rest)"
+        else
+          echo "lab plugin: WARNING ($rest)"
+        fi
       done
   fi
 fi
