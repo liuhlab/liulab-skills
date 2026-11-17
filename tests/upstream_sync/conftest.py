@@ -1,7 +1,8 @@
 """Fixture git repos for the upstream sync: an upstream with a history, and a lab tree.
 
 The sync reads an upstream only through a clone and writes only the lab tree, so a test builds
-both here and runs `scripts/upstream_sync.py` against them. The upstream keeps its skills in
+both here and runs `scripts/upstream_sync.py` against them. It runs in the test's process, as a
+module loaded once, to save starting a Python per run; one test runs it at its command line. The upstream keeps its skills in
 buckets under `skills/` and lists them in `.claude-plugin/plugin.json`, as mattpocock/skills
 does. The lab tree holds a flat copy of each adopted skill at the pin, the pin itself, the
 attribution record and the two gate lists that exempt upstream text, as this repo does.
@@ -17,6 +18,8 @@ commit starts `git maintenance`.
 
 from __future__ import annotations
 
+import contextlib
+import importlib.util
 import io
 import json
 import os
@@ -26,6 +29,7 @@ import sys
 import tarfile
 from collections.abc import Callable
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -36,6 +40,20 @@ PIN = f"upstream/{UPSTREAM}/pin.json"
 ATTRIBUTION = "upstream/attribution.json"
 #: The empty repo every fixture repo starts as a copy of: set once per run by `empty_repo`.
 _EMPTY: Path | None = None
+
+
+def _load_sync() -> ModuleType:
+    """Load the sync script as a module, registered in `sys.modules` as its dataclasses need."""
+    spec = importlib.util.spec_from_file_location("upstream_sync", SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+SYNC = _load_sync()
 
 
 def numbered(name: str) -> list[str]:
@@ -158,16 +176,41 @@ class Upstream(Tree):
 class Lab(Tree):
     """The lab tree, holding adopted skills flat under `skills/<name>/`."""
 
-    def sync(self, *args: str) -> subprocess.CompletedProcess[str]:
-        """Run the sync script against this tree with `args` and return what it did."""
-        return subprocess.run(
-            [sys.executable, str(SCRIPT), *args, "--lab", str(self.root)],
-            cwd=self.root,
-            env=self.env,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+    def sync(self, *args: str, cli: bool = False) -> subprocess.CompletedProcess[str]:
+        """Run the sync against this tree with `args` and return what it did.
+
+        It runs in this process: `main` with the fixture's environment, this tree as the working
+        directory and its output captured, all restored afterwards. `cli` runs the script at its
+        command line instead, as a maintainer does.
+        """
+        argv = [*args, "--lab", str(self.root)]
+        if cli:
+            return subprocess.run(
+                [sys.executable, str(SCRIPT), *argv],
+                cwd=self.root,
+                env=self.env,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        out, err = io.StringIO(), io.StringIO()
+        saved = dict(os.environ)
+        os.environ.clear()
+        os.environ.update(self.env)
+        try:
+            with (
+                contextlib.chdir(self.root),
+                contextlib.redirect_stdout(out),
+                contextlib.redirect_stderr(err),
+            ):
+                try:
+                    status = SYNC.main(argv)
+                except SystemExit as e:
+                    status = e.code if isinstance(e.code, int) else int(e.code is not None)
+        finally:
+            os.environ.clear()
+            os.environ.update(saved)
+        return subprocess.CompletedProcess(argv, status, out.getvalue(), err.getvalue())
 
     def merge(
         self, clone: Upstream | None = None, **others: Upstream
