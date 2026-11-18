@@ -46,7 +46,7 @@ day=1440 # minutes
 # read, which halves its time. It is the slowest step.
 snap=$(mktemp -d)
 trap 'rm -rf "$snap"' EXIT
-ps -A -o pid=,ppid=,command= >"$snap/ps" &
+ps -ww -A -o pid=,ppid=,command= >"$snap/ps" & # -ww: Linux ps cuts a piped line at 80 columns
 ps_job=$!
 lsof_job=
 if command -v lsof >/dev/null; then
