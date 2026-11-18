@@ -57,8 +57,7 @@ run and wait for the user's yes. In a session the user has left, end the turn on
 ### Session overrides
 
 "Headless", "land it", "going to bed" → keep going to the end through everything the
-always-pause list doesn't name. "Land it" covers merging the PR you were asked to land, and
-nothing on that list.
+always-pause list doesn't name.
 
 ## Delegation
 
@@ -79,15 +78,16 @@ nothing on that list.
 - **Large-data design.** Require correctness, robustness, resumability and efficient resource
   use in the design and every implementer brief. Before building a pipeline, apply
   [`cluster-run`](playbooks/cluster-run.md)'s design and resource checks.
-- **One worktree per parallel worker.** In a shared checkout, forbid repo-wide git (`stash`,
-  `reset`, `checkout .`) in every brief, and stage paths explicitly.
+- **One worktree per parallel worker,** under `<repo>/.claude/worktrees/`. Remove it and its
+  branch in the step that merges, closes or triages its work. In a shared checkout, forbid
+  repo-wide git (`stash`, `reset`, `checkout .`) in every brief, and stage paths explicitly.
 - **Time it.** Give every subagent and long command a deadline, and act at it. Cancel a
   trivial job stuck in a helper and do it yourself.
 - **One unit, then hand off.** A subagent works one unit, writes a handoff note by following
   the [`handoff`](../../handoff/SKILL.md) skill's file, and stops; a fresh subagent takes the
-  next unit. Its final report lists every file and folder it made, per host. At its deadline
-  or around half its context, ask it to wrap up. Stop it once you act on its report, or if it
-  hangs.
+  next unit. Its final report lists every file and folder it made, per host, and every process
+  it left running. At its deadline or around half its context, ask it to wrap up. Stop it once
+  you act on its report, or if it hangs.
 - **Peer sessions.** Announce yourself and your issue. Message the peer; never touch its
   uncommitted work. Never pause or gate work the user approved in another session. Ask the peer
   about its jobs before probing the cluster, and read its command before describing it.
@@ -114,8 +114,7 @@ nothing on that list.
 
 - Draft into a new file or the terminal, never into the user's source document. Real `.docx`
   changes go in as tracked changes.
-- Change only what the instruction names. Add, cut and restyle nothing else, and list every
-  change you made.
+- List every change you made.
 - Commit the user's file before editing it. Port their hand edits into the build source and
   never revert them.
 - In their own notes, write the decision only, no rationale.
