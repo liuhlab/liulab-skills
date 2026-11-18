@@ -32,6 +32,7 @@ Communication to and from subagents should be sparse. Communicate primarily thro
    - merges the integration branch tip into its own branch before reporting done
 
 5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
+   Once that merge lands, the merger subagent removes the ticket's worktree and deletes its branch, local and remote, so a worktree lasts only as long as its ticket.
 
 6. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets. This allows for maximum concurrency.
 

@@ -5,6 +5,30 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.18 — 2026-11-18
+
+Agents now clean up their worktrees as each one lands, not only at the end of a session. One
+session ended three minutes after it made six worktrees in `~/src`, and they stayed for nearly
+two days. A spec still in progress held nine merged worktrees, 14 GB in all.
+
+### Added
+
+- `hq-mode`: `scripts/stale-worktrees.sh` finds what agent sessions left in the folder that
+  holds your clones. That covers worktrees whose work has landed, empty folders, and processes
+  that still run from a folder that is gone. With `--remove` it removes only the worktrees
+  that hold no work and have sat for a day, and their branches. It never stops a process.
+
+### Changed
+
+- `hq-mode`: a worker's worktree goes in the same step that merges its branch, closes its pull
+  request or posts its triage. A worktree for another repo goes under that repo's
+  `.claude/worktrees/`, not beside the clone. A subagent's final report lists the processes
+  it left running.
+- `hq-mode`, closing a session: run the sweep, so a session that died before its own close
+  leaves nothing behind.
+- `implement-spec`: the merger removes each ticket's worktree and branch once its merge
+  lands, instead of waiting for the whole spec.
+
 ## 2026.11.16 — 2026-11-17
 
 Lessons from the retro of the lab's data-store runs: heavy jobs, whole-store passes and
