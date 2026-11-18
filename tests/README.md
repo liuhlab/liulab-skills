@@ -172,6 +172,17 @@ check that `-r` stops once the job runs and names its node, that a failed ssh ca
 as the job's end, and that a file that stops growing ends the watch only under `-g`. The older
 cases, how a job ends, are in `tests/lint.sh`. Nothing reaches a host.
 
+## Unit tests — the worktree sweep: `tests/test_stale_worktrees.py`
+
+Free, seconds, in the same `pixi run test`. `hq-mode`'s `stale-worktrees.sh` finds what agent
+sessions left in the folder that holds the clones, and with `--remove` removes the worktrees
+that hold no work. These build that folder with a bare `origin`, one clone and its worktrees,
+and put a stub `gh` first on PATH. They check that a landed worktree goes with its branch, and
+an empty folder too. A worktree with files, a lock, unlanded commits or a process in it stays,
+and so does one checked out within a day.
+A squash merge counts only when GitHub merged that exact commit. A process running from a
+deleted folder is reported and left running. Nothing reaches GitHub.
+
 ## Unit tests — the eval plan fold: `tests/test_eval_plans.py`
 
 Free, seconds, in the same `pixi run test`. A plan-mode eval session may print only
