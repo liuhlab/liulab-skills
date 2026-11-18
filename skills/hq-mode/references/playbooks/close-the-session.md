@@ -19,6 +19,7 @@
 5. Fix what you found in this session that found it. File a new issue only for large work or a
    decision the user must make, sized and linked to its parent.
 6. Write each lesson where it lasts, as `hq-mode`'s row for a correction from the user says:
-   memory holds only a personal preference.
+   a rule goes into a skill or `AGENTS.md`, and into memory only when it is a personal
+   preference. Memory still keeps facts about the machine and context on current work.
 
 **Reply:** "Anything left?" answered yes or no first, then what the user still has to do.

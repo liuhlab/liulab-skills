@@ -5,6 +5,14 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.19 — 2026-11-18
+
+### Fixed
+
+- `hq-mode`: the rule for a user's correction no longer reads as if all memory must go. A
+  correction goes into memory only when it is a personal preference; memory still keeps facts
+  about the machine and context on current work.
+
 ## 2026.11.18 — 2026-11-18
 
 Agents now clean up their worktrees as each one lands, not only at the end of a session. One
