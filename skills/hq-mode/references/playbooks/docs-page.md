@@ -35,15 +35,15 @@ Wrap it exactly so:
 </figure>
 ```
 
-The `<figure>` carries no `markdown` attribute, and the snippet path runs from the repo root.
+The `<figure>` carries no `markdown` attribute. The snippet path runs from the repo root,
+pymdownx's default `base_path`; a repo that sets its own `base_path` writes paths from there.
 A bare snippet line, or a `markdown` attribute, lets Markdown split the SVG into paragraphs at
 blank lines and turn `*a*` in a label into italics.
 
 Draw to these rules:
 
-- **A `viewBox`, and no `width` or `height`.** The site's stylesheet sets the width. On-screen
-  text is its font size times the column width over the `viewBox` width, and the column is
-  about 700 px at 1280: a wider `viewBox` needs larger text.
+- **A `viewBox`, and no `width` or `height`.** The site's stylesheet sets the width, so a
+  wider `viewBox` draws its text smaller ([measuring](#measuring-text)).
 - **Colour from `currentColor` and the site's tokens only,** through classes such as
   `class="d-store"`. Each token means one thing, such as one domain, on every figure of the
   page. Text and arrowhead markers take `fill="currentColor"`: SVG text is black by default,
@@ -61,7 +61,7 @@ A repo's first SVG diagram adds all three in the same pull request:
 - `pymdownx.snippets` under `markdown_extensions`, with `check_paths: true`. Without it a
   wrong path builds green under `--strict` and leaves an empty figure.
 - A stylesheet listed in `extra_css`, such as `docs/stylesheets/diagrams.css`, with one token
-  per meaning for each scheme and the full-width rule. Without that rule the figure shrinks
+  per meaning, `--d-<meaning>`, for each scheme, and the full-width rule. Without that rule the figure shrinks
   to its caption's width.
 
   ```css
@@ -81,11 +81,14 @@ A diagram's smallest text is its font size times its on-screen scale. For the SV
 run this in the browser console on the built page; it gives each figure's smallest text in px:
 
 ```js
-[...document.querySelectorAll('.md-content figure svg')].map(s => Math.min(
-  ...[...s.querySelectorAll('text')].map(t =>
-    parseFloat(getComputedStyle(t).fontSize) * t.getScreenCTM().a)).toFixed(1))
+[...document.querySelectorAll('.md-content figure.diagram > svg')].map(s => Math.min(
+  ...[...s.querySelectorAll('text, tspan')].map(t => { const m = t.getScreenCTM();
+    return parseFloat(getComputedStyle(t).fontSize) * Math.hypot(m.a, m.b) })).toFixed(1))
 ```
 
 The Material theme draws each Mermaid diagram inside a closed shadow root that a page script
-cannot read. Take its smallest label's computed font size from the browser's element
-inspector, times the `<svg>`'s rendered width over its `viewBox` width.
+cannot read. Take the same two numbers from the browser's element inspector: the smallest
+label's computed font size, and the scale, the `<svg>`'s rendered width over its `viewBox`
+width.
+
+Checked on zensical 0.0.57 with the Material theme and pymdown-extensions 11.0, 2026-11-20.
