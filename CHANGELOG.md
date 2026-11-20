@@ -5,6 +5,22 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.20 — 2026-11-20
+
+### Changed
+
+- `hq-mode`, docs-page playbook: a diagram's format now follows its job. A small
+  one-direction flow of up to about 8 nodes stays Mermaid. An overview, a flow with several
+  lanes, a state machine with notes, or a diagram whose colours or places mean something is
+  drawn by hand in SVG. Each SVG is its own file in the docs folder, pulled into the page
+  when the site builds, and coloured by the site's light and dark themes. The playbook lists
+  the drawing rules and the site setup a repo adds with its first SVG diagram. An SVG
+  diagram already drawn for another page is reused with the site's colours, unless the site
+  needs a different shape.
+- `hq-mode`, docs-page playbook: the check now measures text: on the built page, in a
+  1280 px window and in both themes, each diagram's smallest text is 11 px or more. A
+  diagram that fails changes its format or layout and keeps all of its content.
+
 ## 2026.11.19 — 2026-11-18
 
 ### Fixed
