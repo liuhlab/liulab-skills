@@ -56,16 +56,20 @@ Draw to these rules:
 
 ### Site setup
 
-A repo's first SVG diagram adds all three in the same pull request:
+SVG diagrams need three pieces. Check the repo for each, and add only the missing ones in the
+diagram's pull request. A repo made from the lab template has all three, so its first diagram
+adds only the tokens for its own meanings.
 
 - `pymdownx.snippets` under `markdown_extensions`, with `check_paths: true`. Without it a
   wrong path builds green under `--strict` and leaves an empty figure.
 - A stylesheet listed in `extra_css`, such as `docs/stylesheets/diagrams.css`, with one token
-  per meaning, `--d-<meaning>`, for each scheme, and the full-width rule. Without that rule the figure shrinks
-  to its caption's width.
+  per meaning, `--d-<meaning>`, for each scheme, and the full-width rule. Without that rule
+  the figure shrinks to its caption's width. Reuse a token the stylesheet already defines;
+  add one, in both schemes, only for a new meaning. The light tokens also sit on `:root`,
+  because a site with no `palette:` sets no scheme attribute.
 
   ```css
-  [data-md-color-scheme="default"] { --d-store: #0b7285; }
+  :root, [data-md-color-scheme="default"] { --d-store: #0b7285; }
   [data-md-color-scheme="slate"] { --d-store: #66d9e8; }
   .md-typeset figure.diagram,
   .md-typeset figure.diagram svg { width: 100%; }
@@ -91,4 +95,4 @@ cannot read. Take the same two numbers from the browser's element inspector: the
 label's computed font size, and the scale, the `<svg>`'s rendered width over its `viewBox`
 width.
 
-Checked on zensical 0.0.57 with the Material theme and pymdown-extensions 11.0, 2026-11-20.
+Checked on zensical 0.0.57 with the Material theme and pymdown-extensions 13.1.2, 2026-11-22.

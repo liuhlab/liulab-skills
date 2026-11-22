@@ -5,6 +5,17 @@ and add an entry here in the same commit. Versioning is CalVer
 `YYYY.M.PATCH` (month unpadded; patch counts releases within the month) —
 adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 
+## 2026.11.21 — 2026-11-22
+
+### Fixed
+
+- `hq-mode`, docs-page playbook: the example stylesheet now sets the light diagram colours
+  for the whole page too. A site with no colour palette never says which theme it shows, so
+  the old example left its shapes black or without an outline there. The site setup now says to check
+  for each of the three pieces and add only the missing ones. A repo made from the lab
+  template already has all three, so its first diagram adds only its own colours, and reuses
+  a colour the stylesheet already defines.
+
 ## 2026.11.20 — 2026-11-20
 
 ### Changed
