@@ -12,9 +12,9 @@ adopted at `2026.7.0`; earlier `0.x` releases predate the switch.
 - `to-spec` and `to-tickets` no longer ask for a multi-day soak run as a follow-up ticket.
   Only waiting closed such a ticket, so it sat open with nothing to do, and it checked
   nothing that a run on real inputs had not already checked. In one lab repo, one feature
-  got two of them, and both were closed as not planned. A follow-up that a check's result
-  settles, such as a default set from the cost it measured, now goes in the ticket that runs
-  the check.
+  got two of them, and both were closed as not planned. `to-tickets` now keeps a follow-up
+  that a check's result settles, such as choosing a default from the cost the check
+  measured, in that check's ticket.
 
 ## 2026.11.21 — 2026-11-22
 
