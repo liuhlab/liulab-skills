@@ -110,6 +110,6 @@ The seam, and the number of new tests.
 
 </issue-template>
 
-In either form, each acceptance criterion that runs a check states its expected cost, and a whole-store check carries the mark *needs the user's yes*. A multi-day soak run is a follow-up ticket of its own, which never blocks the PR or closing the spec.
+In either form, each acceptance criterion that runs a check states its expected cost, and a whole-store check carries the mark *needs the user's yes*. A follow-up that a check's result settles, such as a default set from the cost it measured, goes in the ticket that runs the check.
 
 In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
