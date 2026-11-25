@@ -47,7 +47,7 @@ Present the proposed breakdown as a numbered list. For each ticket, show:
 - **Blocked by**: which other tickets (if any) must complete first
 - **What it delivers**: the end-to-end behaviour this ticket makes work
 - **Tests**: the seam the new tests go through, and how many: usually one per acceptance criterion. An implementer with no user to ask takes this as its cap.
-- **Cost**: each acceptance check's expected cost (wall time, records read, bytes sent). A check over a whole store, a full copy or an extra full build is marked as needing the user's yes before it runs; approving the breakdown is not that yes.
+- **Cost**: each acceptance check's expected cost (wall time, records read, bytes sent). A check over a whole store, a full copy or an extra full build is marked as needing the user's yes before it runs; approving the breakdown is not that yes. A follow-up that a check's result settles, such as choosing a default from the cost the check measured, goes in that check's ticket, not a ticket of its own.
 
 Ask the user:
 
@@ -110,6 +110,6 @@ The seam, and the number of new tests.
 
 </issue-template>
 
-In either form, each acceptance criterion that runs a check states its expected cost, and a whole-store check carries the mark *needs the user's yes*. A multi-day soak run is a follow-up ticket of its own, which never blocks the PR or closing the spec.
+In either form, each acceptance criterion that runs a check states its expected cost, and a whole-store check carries the mark *needs the user's yes*.
 
 In either form, avoid specific file paths or code snippets: they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it and note briefly that it came from a prototype. Trim to the decision-rich parts, not a working demo, just the important bits.
